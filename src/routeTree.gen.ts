@@ -16,6 +16,22 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedAppWatchlistRouteImport } from './routes/_authenticated/app.watchlist'
+import { Route as AuthenticatedAppVideosRouteImport } from './routes/_authenticated/app.videos'
+import { Route as AuthenticatedAppSupportRouteImport } from './routes/_authenticated/app.support'
+import { Route as AuthenticatedAppSubscriptionRouteImport } from './routes/_authenticated/app.subscription'
+import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
+import { Route as AuthenticatedAppPdfsRouteImport } from './routes/_authenticated/app.pdfs'
+import { Route as AuthenticatedAppLibraryRouteImport } from './routes/_authenticated/app.library'
+import { Route as AuthenticatedAppFavoritesRouteImport } from './routes/_authenticated/app.favorites'
+import { Route as AuthenticatedAppDownloadsRouteImport } from './routes/_authenticated/app.downloads'
+import { Route as AuthenticatedAppCommunityRouteImport } from './routes/_authenticated/app.community'
+import { Route as AuthenticatedAppAudiosRouteImport } from './routes/_authenticated/app.audios'
+import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authenticated/app.agenda'
+import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
+import { Route as AuthenticatedAppAdminIndexRouteImport } from './routes/_authenticated/app.admin.index'
+import { Route as AuthenticatedAppAdminMembersRouteImport } from './routes/_authenticated/app.admin.members'
+import { Route as AuthenticatedAppAdminContentRouteImport } from './routes/_authenticated/app.admin.content'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -51,6 +67,95 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppWatchlistRoute =
+  AuthenticatedAppWatchlistRouteImport.update({
+    id: '/watchlist',
+    path: '/watchlist',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppVideosRoute = AuthenticatedAppVideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppSupportRoute = AuthenticatedAppSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppSubscriptionRoute =
+  AuthenticatedAppSubscriptionRouteImport.update({
+    id: '/subscription',
+    path: '/subscription',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppSettingsRoute =
+  AuthenticatedAppSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppPdfsRoute = AuthenticatedAppPdfsRouteImport.update({
+  id: '/pdfs',
+  path: '/pdfs',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppLibraryRoute = AuthenticatedAppLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppFavoritesRoute =
+  AuthenticatedAppFavoritesRouteImport.update({
+    id: '/favorites',
+    path: '/favorites',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppDownloadsRoute =
+  AuthenticatedAppDownloadsRouteImport.update({
+    id: '/downloads',
+    path: '/downloads',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppCommunityRoute =
+  AuthenticatedAppCommunityRouteImport.update({
+    id: '/community',
+    path: '/community',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppAudiosRoute = AuthenticatedAppAudiosRouteImport.update({
+  id: '/audios',
+  path: '/audios',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppAgendaRoute = AuthenticatedAppAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppAdminRoute = AuthenticatedAppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppAdminIndexRoute =
+  AuthenticatedAppAdminIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
+const AuthenticatedAppAdminMembersRoute =
+  AuthenticatedAppAdminMembersRouteImport.update({
+    id: '/members',
+    path: '/members',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
+const AuthenticatedAppAdminContentRoute =
+  AuthenticatedAppAdminContentRouteImport.update({
+    id: '/content',
+    path: '/content',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -58,14 +163,45 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/app/admin': typeof AuthenticatedAppAdminRouteWithChildren
+  '/app/agenda': typeof AuthenticatedAppAgendaRoute
+  '/app/audios': typeof AuthenticatedAppAudiosRoute
+  '/app/community': typeof AuthenticatedAppCommunityRoute
+  '/app/downloads': typeof AuthenticatedAppDownloadsRoute
+  '/app/favorites': typeof AuthenticatedAppFavoritesRoute
+  '/app/library': typeof AuthenticatedAppLibraryRoute
+  '/app/pdfs': typeof AuthenticatedAppPdfsRoute
+  '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/app/subscription': typeof AuthenticatedAppSubscriptionRoute
+  '/app/support': typeof AuthenticatedAppSupportRoute
+  '/app/videos': typeof AuthenticatedAppVideosRoute
+  '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/admin/content': typeof AuthenticatedAppAdminContentRoute
+  '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
+  '/app/admin/': typeof AuthenticatedAppAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/app/agenda': typeof AuthenticatedAppAgendaRoute
+  '/app/audios': typeof AuthenticatedAppAudiosRoute
+  '/app/community': typeof AuthenticatedAppCommunityRoute
+  '/app/downloads': typeof AuthenticatedAppDownloadsRoute
+  '/app/favorites': typeof AuthenticatedAppFavoritesRoute
+  '/app/library': typeof AuthenticatedAppLibraryRoute
+  '/app/pdfs': typeof AuthenticatedAppPdfsRoute
+  '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/app/subscription': typeof AuthenticatedAppSubscriptionRoute
+  '/app/support': typeof AuthenticatedAppSupportRoute
+  '/app/videos': typeof AuthenticatedAppVideosRoute
+  '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/admin/content': typeof AuthenticatedAppAdminContentRoute
+  '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
+  '/app/admin': typeof AuthenticatedAppAdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -75,13 +211,71 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/_authenticated/app/admin': typeof AuthenticatedAppAdminRouteWithChildren
+  '/_authenticated/app/agenda': typeof AuthenticatedAppAgendaRoute
+  '/_authenticated/app/audios': typeof AuthenticatedAppAudiosRoute
+  '/_authenticated/app/community': typeof AuthenticatedAppCommunityRoute
+  '/_authenticated/app/downloads': typeof AuthenticatedAppDownloadsRoute
+  '/_authenticated/app/favorites': typeof AuthenticatedAppFavoritesRoute
+  '/_authenticated/app/library': typeof AuthenticatedAppLibraryRoute
+  '/_authenticated/app/pdfs': typeof AuthenticatedAppPdfsRoute
+  '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/_authenticated/app/subscription': typeof AuthenticatedAppSubscriptionRoute
+  '/_authenticated/app/support': typeof AuthenticatedAppSupportRoute
+  '/_authenticated/app/videos': typeof AuthenticatedAppVideosRoute
+  '/_authenticated/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/admin/content': typeof AuthenticatedAppAdminContentRoute
+  '/_authenticated/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
+  '/_authenticated/app/admin/': typeof AuthenticatedAppAdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/reset-password' | '/signup' | '/app' | '/app/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/reset-password'
+    | '/signup'
+    | '/app'
+    | '/app/admin'
+    | '/app/agenda'
+    | '/app/audios'
+    | '/app/community'
+    | '/app/downloads'
+    | '/app/favorites'
+    | '/app/library'
+    | '/app/pdfs'
+    | '/app/settings'
+    | '/app/subscription'
+    | '/app/support'
+    | '/app/videos'
+    | '/app/watchlist'
+    | '/app/'
+    | '/app/admin/content'
+    | '/app/admin/members'
+    | '/app/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/reset-password' | '/signup' | '/app'
+  to:
+    | '/'
+    | '/login'
+    | '/reset-password'
+    | '/signup'
+    | '/app/agenda'
+    | '/app/audios'
+    | '/app/community'
+    | '/app/downloads'
+    | '/app/favorites'
+    | '/app/library'
+    | '/app/pdfs'
+    | '/app/settings'
+    | '/app/subscription'
+    | '/app/support'
+    | '/app/videos'
+    | '/app/watchlist'
+    | '/app'
+    | '/app/admin/content'
+    | '/app/admin/members'
+    | '/app/admin'
   id:
     | '__root__'
     | '/'
@@ -90,7 +284,23 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/_authenticated/app'
+    | '/_authenticated/app/admin'
+    | '/_authenticated/app/agenda'
+    | '/_authenticated/app/audios'
+    | '/_authenticated/app/community'
+    | '/_authenticated/app/downloads'
+    | '/_authenticated/app/favorites'
+    | '/_authenticated/app/library'
+    | '/_authenticated/app/pdfs'
+    | '/_authenticated/app/settings'
+    | '/_authenticated/app/subscription'
+    | '/_authenticated/app/support'
+    | '/_authenticated/app/videos'
+    | '/_authenticated/app/watchlist'
     | '/_authenticated/app/'
+    | '/_authenticated/app/admin/content'
+    | '/_authenticated/app/admin/members'
+    | '/_authenticated/app/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -152,14 +362,169 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/watchlist': {
+      id: '/_authenticated/app/watchlist'
+      path: '/watchlist'
+      fullPath: '/app/watchlist'
+      preLoaderRoute: typeof AuthenticatedAppWatchlistRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/videos': {
+      id: '/_authenticated/app/videos'
+      path: '/videos'
+      fullPath: '/app/videos'
+      preLoaderRoute: typeof AuthenticatedAppVideosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/support': {
+      id: '/_authenticated/app/support'
+      path: '/support'
+      fullPath: '/app/support'
+      preLoaderRoute: typeof AuthenticatedAppSupportRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/subscription': {
+      id: '/_authenticated/app/subscription'
+      path: '/subscription'
+      fullPath: '/app/subscription'
+      preLoaderRoute: typeof AuthenticatedAppSubscriptionRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/settings': {
+      id: '/_authenticated/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AuthenticatedAppSettingsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/pdfs': {
+      id: '/_authenticated/app/pdfs'
+      path: '/pdfs'
+      fullPath: '/app/pdfs'
+      preLoaderRoute: typeof AuthenticatedAppPdfsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/library': {
+      id: '/_authenticated/app/library'
+      path: '/library'
+      fullPath: '/app/library'
+      preLoaderRoute: typeof AuthenticatedAppLibraryRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/favorites': {
+      id: '/_authenticated/app/favorites'
+      path: '/favorites'
+      fullPath: '/app/favorites'
+      preLoaderRoute: typeof AuthenticatedAppFavoritesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/downloads': {
+      id: '/_authenticated/app/downloads'
+      path: '/downloads'
+      fullPath: '/app/downloads'
+      preLoaderRoute: typeof AuthenticatedAppDownloadsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/community': {
+      id: '/_authenticated/app/community'
+      path: '/community'
+      fullPath: '/app/community'
+      preLoaderRoute: typeof AuthenticatedAppCommunityRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/audios': {
+      id: '/_authenticated/app/audios'
+      path: '/audios'
+      fullPath: '/app/audios'
+      preLoaderRoute: typeof AuthenticatedAppAudiosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/agenda': {
+      id: '/_authenticated/app/agenda'
+      path: '/agenda'
+      fullPath: '/app/agenda'
+      preLoaderRoute: typeof AuthenticatedAppAgendaRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/admin': {
+      id: '/_authenticated/app/admin'
+      path: '/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AuthenticatedAppAdminRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/admin/': {
+      id: '/_authenticated/app/admin/'
+      path: '/'
+      fullPath: '/app/admin/'
+      preLoaderRoute: typeof AuthenticatedAppAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
+    '/_authenticated/app/admin/members': {
+      id: '/_authenticated/app/admin/members'
+      path: '/members'
+      fullPath: '/app/admin/members'
+      preLoaderRoute: typeof AuthenticatedAppAdminMembersRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
+    '/_authenticated/app/admin/content': {
+      id: '/_authenticated/app/admin/content'
+      path: '/content'
+      fullPath: '/app/admin/content'
+      preLoaderRoute: typeof AuthenticatedAppAdminContentRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
   }
 }
 
+interface AuthenticatedAppAdminRouteChildren {
+  AuthenticatedAppAdminContentRoute: typeof AuthenticatedAppAdminContentRoute
+  AuthenticatedAppAdminMembersRoute: typeof AuthenticatedAppAdminMembersRoute
+  AuthenticatedAppAdminIndexRoute: typeof AuthenticatedAppAdminIndexRoute
+}
+
+const AuthenticatedAppAdminRouteChildren: AuthenticatedAppAdminRouteChildren = {
+  AuthenticatedAppAdminContentRoute: AuthenticatedAppAdminContentRoute,
+  AuthenticatedAppAdminMembersRoute: AuthenticatedAppAdminMembersRoute,
+  AuthenticatedAppAdminIndexRoute: AuthenticatedAppAdminIndexRoute,
+}
+
+const AuthenticatedAppAdminRouteWithChildren =
+  AuthenticatedAppAdminRoute._addFileChildren(
+    AuthenticatedAppAdminRouteChildren,
+  )
+
 interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRouteWithChildren
+  AuthenticatedAppAgendaRoute: typeof AuthenticatedAppAgendaRoute
+  AuthenticatedAppAudiosRoute: typeof AuthenticatedAppAudiosRoute
+  AuthenticatedAppCommunityRoute: typeof AuthenticatedAppCommunityRoute
+  AuthenticatedAppDownloadsRoute: typeof AuthenticatedAppDownloadsRoute
+  AuthenticatedAppFavoritesRoute: typeof AuthenticatedAppFavoritesRoute
+  AuthenticatedAppLibraryRoute: typeof AuthenticatedAppLibraryRoute
+  AuthenticatedAppPdfsRoute: typeof AuthenticatedAppPdfsRoute
+  AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
+  AuthenticatedAppSubscriptionRoute: typeof AuthenticatedAppSubscriptionRoute
+  AuthenticatedAppSupportRoute: typeof AuthenticatedAppSupportRoute
+  AuthenticatedAppVideosRoute: typeof AuthenticatedAppVideosRoute
+  AuthenticatedAppWatchlistRoute: typeof AuthenticatedAppWatchlistRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppAdminRoute: AuthenticatedAppAdminRouteWithChildren,
+  AuthenticatedAppAgendaRoute: AuthenticatedAppAgendaRoute,
+  AuthenticatedAppAudiosRoute: AuthenticatedAppAudiosRoute,
+  AuthenticatedAppCommunityRoute: AuthenticatedAppCommunityRoute,
+  AuthenticatedAppDownloadsRoute: AuthenticatedAppDownloadsRoute,
+  AuthenticatedAppFavoritesRoute: AuthenticatedAppFavoritesRoute,
+  AuthenticatedAppLibraryRoute: AuthenticatedAppLibraryRoute,
+  AuthenticatedAppPdfsRoute: AuthenticatedAppPdfsRoute,
+  AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
+  AuthenticatedAppSubscriptionRoute: AuthenticatedAppSubscriptionRoute,
+  AuthenticatedAppSupportRoute: AuthenticatedAppSupportRoute,
+  AuthenticatedAppVideosRoute: AuthenticatedAppVideosRoute,
+  AuthenticatedAppWatchlistRoute: AuthenticatedAppWatchlistRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
