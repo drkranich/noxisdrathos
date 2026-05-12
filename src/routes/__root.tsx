@@ -9,8 +9,6 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { AuthProvider } from "@/lib/auth";
-import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -56,9 +54,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Um observatório privado sobre economia descentralizada, IA, automação e ativos digitais. Sinais para quem antecipa o futuro." },
       { name: "author", content: "Observatório" },
       { property: "og:title", content: "OBSERVATÓRIO — Inteligência para a nova economia" },
-      { property: "og:description", content: "Sinais e leituras sobre a economia que está sendo construída agora." },
+      { property: "og:description", content: "Um observatório privado sobre economia descentralizada, IA, automação e ativos digitais. Sinais para quem antecipa o futuro." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "OBSERVATÓRIO — Inteligência para a nova economia" },
+      { name: "twitter:description", content: "Um observatório privado sobre economia descentralizada, IA, automação e ativos digitais. Sinais para quem antecipa o futuro." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/715cd1c4-748b-4b89-a151-bcc064a5d449/id-preview-c5e1d8de--64e3ebc6-0ca6-453f-a426-40b1cdbe5229.lovable.app-1778620239809.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/715cd1c4-748b-4b89-a151-bcc064a5d449/id-preview-c5e1d8de--64e3ebc6-0ca6-453f-a426-40b1cdbe5229.lovable.app-1778620239809.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -86,10 +88,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Outlet />
-        <Toaster theme="dark" position="top-right" />
-      </AuthProvider>
+      <Outlet />
     </QueryClientProvider>
   );
 }
