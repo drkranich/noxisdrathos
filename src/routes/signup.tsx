@@ -1,0 +1,112 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState, type FormEvent } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { AuthLayout } from "@/components/auth/AuthLayout";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
+
+export const Route = createFileRoute("/signup")({
+  head: () => ({
+    meta: [
+      { title: "Solicitar acesso — Observatório" },
+      { name: "description", content: "Solicite entrada no círculo." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
+  component: SignupPage,
+});
+
+function SignupPage() {
+  const navigate = useNavigate();
+  const { session, loading } = useAuth();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!loading && session) navigate({ to: "/app" });
+  }, [loading, session, navigate]);
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/app`,
+        data: { display_name: name || email.split("@")[0] },
+      },
+    });
+    setSubmitting(false);
+    if (error) setError(error.message);
+  }
+
+  return (
+    <AuthLayout
+      eyebrow="acesso · solicitação"
+      title="Entrar no círculo."
+      subtitle="O observatório é privado e silencioso. Cada novo membro recebe acesso integral à biblioteca, vídeos e leituras restritas."
+    >
+      <h2 className="font-display text-2xl mb-6">criar acesso</h2>
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div>
+          <label className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+            nome
+          </label>
+          <Input
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="mt-2 bg-card border-border"
+          />
+        </div>
+        <div>
+          <label className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+            email
+          </label>
+          <Input
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="mt-2 bg-card border-border"
+          />
+        </div>
+        <div>
+          <label className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+            senha
+          </label>
+          <Input
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="mt-2 bg-card border-border"
+          />
+          <p className="mt-2 font-mono text-[10px] text-muted-foreground">mínimo 8 caracteres.</p>
+        </div>
+        {error ? (
+          <p className="font-mono text-[11px] text-destructive">{error}</p>
+        ) : null}
+        <Button type="submit" disabled={submitting} className="w-full mt-2">
+          {submitting ? "abrindo entrada…" : "solicitar acesso →"}
+        </Button>
+      </form>
+
+      <p className="mt-8 text-center font-mono text-[11px] text-muted-foreground">
+        já possui acesso?{" "}
+        <Link to="/login" className="text-foreground underline-offset-4 hover:underline">
+          entrar
+        </Link>
+      </p>
+    </AuthLayout>
+  );
+}
