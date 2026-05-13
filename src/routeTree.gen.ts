@@ -37,7 +37,9 @@ import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
 import { Route as AuthenticatedAppAdminIndexRouteImport } from './routes/_authenticated/app.admin.index'
 import { Route as AuthenticatedAppAdminMembersRouteImport } from './routes/_authenticated/app.admin.members'
-import { Route as AuthenticatedAppAdminContentRouteImport } from './routes/_authenticated/app.admin.content'
+import { Route as AuthenticatedAppAdminCategoriesRouteImport } from './routes/_authenticated/app.admin.categories'
+import { Route as AuthenticatedAppAdminContentIndexRouteImport } from './routes/_authenticated/app.admin.content.index'
+import { Route as AuthenticatedAppAdminContentIdRouteImport } from './routes/_authenticated/app.admin.content.$id'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -186,10 +188,22 @@ const AuthenticatedAppAdminMembersRoute =
     path: '/members',
     getParentRoute: () => AuthenticatedAppAdminRoute,
   } as any)
-const AuthenticatedAppAdminContentRoute =
-  AuthenticatedAppAdminContentRouteImport.update({
-    id: '/content',
-    path: '/content',
+const AuthenticatedAppAdminCategoriesRoute =
+  AuthenticatedAppAdminCategoriesRouteImport.update({
+    id: '/categories',
+    path: '/categories',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
+const AuthenticatedAppAdminContentIndexRoute =
+  AuthenticatedAppAdminContentIndexRouteImport.update({
+    id: '/content/',
+    path: '/content/',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
+const AuthenticatedAppAdminContentIdRoute =
+  AuthenticatedAppAdminContentIdRouteImport.update({
+    id: '/content/$id',
+    path: '/content/$id',
     getParentRoute: () => AuthenticatedAppAdminRoute,
   } as any)
 
@@ -219,9 +233,11 @@ export interface FileRoutesByFullPath {
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/app/': typeof AuthenticatedAppIndexRoute
-  '/app/admin/content': typeof AuthenticatedAppAdminContentRoute
+  '/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
   '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
   '/app/admin/': typeof AuthenticatedAppAdminIndexRoute
+  '/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
+  '/app/admin/content/': typeof AuthenticatedAppAdminContentIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -247,9 +263,11 @@ export interface FileRoutesByTo {
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/app': typeof AuthenticatedAppIndexRoute
-  '/app/admin/content': typeof AuthenticatedAppAdminContentRoute
+  '/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
   '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
   '/app/admin': typeof AuthenticatedAppAdminIndexRoute
+  '/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
+  '/app/admin/content': typeof AuthenticatedAppAdminContentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -279,9 +297,11 @@ export interface FileRoutesById {
   '/_authenticated/app/videos': typeof AuthenticatedAppVideosRoute
   '/_authenticated/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
-  '/_authenticated/app/admin/content': typeof AuthenticatedAppAdminContentRoute
+  '/_authenticated/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
   '/_authenticated/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
   '/_authenticated/app/admin/': typeof AuthenticatedAppAdminIndexRoute
+  '/_authenticated/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
+  '/_authenticated/app/admin/content/': typeof AuthenticatedAppAdminContentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -311,9 +331,11 @@ export interface FileRouteTypes {
     | '/app/videos'
     | '/app/watchlist'
     | '/app/'
-    | '/app/admin/content'
+    | '/app/admin/categories'
     | '/app/admin/members'
     | '/app/admin/'
+    | '/app/admin/content/$id'
+    | '/app/admin/content/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -339,9 +361,11 @@ export interface FileRouteTypes {
     | '/app/videos'
     | '/app/watchlist'
     | '/app'
-    | '/app/admin/content'
+    | '/app/admin/categories'
     | '/app/admin/members'
     | '/app/admin'
+    | '/app/admin/content/$id'
+    | '/app/admin/content'
   id:
     | '__root__'
     | '/'
@@ -370,9 +394,11 @@ export interface FileRouteTypes {
     | '/_authenticated/app/videos'
     | '/_authenticated/app/watchlist'
     | '/_authenticated/app/'
-    | '/_authenticated/app/admin/content'
+    | '/_authenticated/app/admin/categories'
     | '/_authenticated/app/admin/members'
     | '/_authenticated/app/admin/'
+    | '/_authenticated/app/admin/content/$id'
+    | '/_authenticated/app/admin/content/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -587,26 +613,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAdminMembersRouteImport
       parentRoute: typeof AuthenticatedAppAdminRoute
     }
-    '/_authenticated/app/admin/content': {
-      id: '/_authenticated/app/admin/content'
+    '/_authenticated/app/admin/categories': {
+      id: '/_authenticated/app/admin/categories'
+      path: '/categories'
+      fullPath: '/app/admin/categories'
+      preLoaderRoute: typeof AuthenticatedAppAdminCategoriesRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
+    '/_authenticated/app/admin/content/': {
+      id: '/_authenticated/app/admin/content/'
       path: '/content'
-      fullPath: '/app/admin/content'
-      preLoaderRoute: typeof AuthenticatedAppAdminContentRouteImport
+      fullPath: '/app/admin/content/'
+      preLoaderRoute: typeof AuthenticatedAppAdminContentIndexRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
+    '/_authenticated/app/admin/content/$id': {
+      id: '/_authenticated/app/admin/content/$id'
+      path: '/content/$id'
+      fullPath: '/app/admin/content/$id'
+      preLoaderRoute: typeof AuthenticatedAppAdminContentIdRouteImport
       parentRoute: typeof AuthenticatedAppAdminRoute
     }
   }
 }
 
 interface AuthenticatedAppAdminRouteChildren {
-  AuthenticatedAppAdminContentRoute: typeof AuthenticatedAppAdminContentRoute
+  AuthenticatedAppAdminCategoriesRoute: typeof AuthenticatedAppAdminCategoriesRoute
   AuthenticatedAppAdminMembersRoute: typeof AuthenticatedAppAdminMembersRoute
   AuthenticatedAppAdminIndexRoute: typeof AuthenticatedAppAdminIndexRoute
+  AuthenticatedAppAdminContentIdRoute: typeof AuthenticatedAppAdminContentIdRoute
+  AuthenticatedAppAdminContentIndexRoute: typeof AuthenticatedAppAdminContentIndexRoute
 }
 
 const AuthenticatedAppAdminRouteChildren: AuthenticatedAppAdminRouteChildren = {
-  AuthenticatedAppAdminContentRoute: AuthenticatedAppAdminContentRoute,
+  AuthenticatedAppAdminCategoriesRoute: AuthenticatedAppAdminCategoriesRoute,
   AuthenticatedAppAdminMembersRoute: AuthenticatedAppAdminMembersRoute,
   AuthenticatedAppAdminIndexRoute: AuthenticatedAppAdminIndexRoute,
+  AuthenticatedAppAdminContentIdRoute: AuthenticatedAppAdminContentIdRoute,
+  AuthenticatedAppAdminContentIndexRoute:
+    AuthenticatedAppAdminContentIndexRoute,
 }
 
 const AuthenticatedAppAdminRouteWithChildren =
@@ -679,3 +724,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
