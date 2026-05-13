@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -21,23 +22,40 @@ function useTime() {
 }
 
 function Nav() {
+  const { session } = useAuth();
+  const links: Array<{ to: "/manifesto" | "/explore" | "/research" | "/pricing" | "/faq"; label: string }> = [
+    { to: "/manifesto", label: "manifesto" },
+    { to: "/explore", label: "explorar" },
+    { to: "/research", label: "pesquisa" },
+    { to: "/pricing", label: "acesso" },
+    { to: "/faq", label: "faq" },
+  ];
   return (
-    <header className="fixed top-0 z-50 w-full">
+    <header className="fixed top-0 z-50 w-full backdrop-blur-xl bg-background/40">
       <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-5 md:px-10">
-        <a href="#" className="flex items-center gap-2.5">
+        <Link to="/" className="flex items-center gap-2.5">
           <span className="neon-dot animate-blink" />
           <span className="font-mono text-[11px] uppercase tracking-[0.32em]">observatório</span>
-        </a>
-        <nav className="hidden items-center gap-10 md:flex">
-          {["sinais", "ecossistema", "leituras", "faq"].map((s) => (
-            <a key={s} href={`#${s}`} className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground transition-colors hover:text-foreground">
-              {s}
-            </a>
+        </Link>
+        <nav className="hidden items-center gap-8 md:flex">
+          {links.map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {l.label}
+            </Link>
           ))}
         </nav>
-        <a href="#acesso" className="group relative font-mono text-[11px] uppercase tracking-[0.3em]">
-          <span className="border-b border-foreground/40 pb-1 transition-colors group-hover:border-[var(--neon)]">solicitar acesso</span>
-        </a>
+        <Link
+          to={session ? "/app" : "/signup"}
+          className="group relative font-mono text-[11px] uppercase tracking-[0.3em]"
+        >
+          <span className="border-b border-foreground/40 pb-1 transition-colors group-hover:border-[var(--neon)]">
+            {session ? "entrar no observatório" : "solicitar acesso"}
+          </span>
+        </Link>
       </div>
       <div className="hairline mx-6 md:mx-10" />
     </header>
