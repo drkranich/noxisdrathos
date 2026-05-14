@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
 import { SiteHeader, SiteFooter } from "./SiteHeader";
+import { AnnouncementBar } from "./AnnouncementBar";
 
 export function PublicShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
+      <AnnouncementBar />
       <SiteHeader />
       <main className="flex-1 pt-24">{children}</main>
       <SiteFooter />

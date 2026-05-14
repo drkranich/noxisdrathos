@@ -68,8 +68,16 @@ function ExplorePage() {
         ) : null}
 
         <div className="grid gap-px bg-border border border-border md:grid-cols-2 lg:grid-cols-3">
-          {list.map((it) => (
-            <article key={it.id} className="bg-background group">
+          {list.map((it) => {
+            const isReal = !usingTeasers && it.slug && it.slug !== "#";
+            const Wrapper = ({ children }: { children: React.ReactNode }) =>
+              isReal ? (
+                <Link to="/explore/$slug" params={{ slug: it.slug }} className="bg-background group block">{children}</Link>
+              ) : (
+                <Link to="/pricing" className="bg-background group block">{children}</Link>
+              );
+            return (
+            <Wrapper key={it.id}>
               <div className="aspect-[16/10] relative overflow-hidden bg-card">
                 {it.thumbnail_url ? (
                   <img src={it.thumbnail_url} alt="" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition" />
@@ -93,8 +101,9 @@ function ExplorePage() {
                   ))}
                 </div>
               </div>
-            </article>
-          ))}
+            </Wrapper>
+            );
+          })}
         </div>
 
         <div className="mt-16 border border-border p-10 md:p-14 grid md:grid-cols-[1fr_auto] gap-8 items-center">

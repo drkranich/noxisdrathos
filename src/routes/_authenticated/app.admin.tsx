@@ -33,6 +33,9 @@ function AdminLayout() {
     { to: "/app/admin/categories", label: "categorias" },
     { to: "/app/admin/members", label: "membros" },
     { to: "/app/admin/comments", label: "moderação" },
+    { to: "/app/admin/announcements", label: "anúncios" },
+    { to: "/app/admin/billing", label: "billing" },
+    { to: "/app/admin/logs", label: "logs" },
   ];
 
   return (
