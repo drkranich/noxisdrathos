@@ -101,8 +101,9 @@ function ExplorePage() {
                   ))}
                 </div>
               </div>
-            </article>
-          ))}
+            </Wrapper>
+            );
+          })}
         </div>
 
         <div className="mt-16 border border-border p-10 md:p-14 grid md:grid-cols-[1fr_auto] gap-8 items-center">
