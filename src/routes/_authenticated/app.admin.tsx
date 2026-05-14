@@ -30,7 +30,9 @@ function AdminLayout() {
   const tabs = [
     { to: "/app/admin", label: "dashboard", exact: true },
     { to: "/app/admin/content", label: "conteúdo" },
+    { to: "/app/admin/categories", label: "categorias" },
     { to: "/app/admin/members", label: "membros" },
+    { to: "/app/admin/comments", label: "moderação" },
   ];
 
   return (

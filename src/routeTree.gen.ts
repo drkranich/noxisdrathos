@@ -37,6 +37,7 @@ import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
 import { Route as AuthenticatedAppAdminIndexRouteImport } from './routes/_authenticated/app.admin.index'
 import { Route as AuthenticatedAppAdminMembersRouteImport } from './routes/_authenticated/app.admin.members'
+import { Route as AuthenticatedAppAdminCommentsRouteImport } from './routes/_authenticated/app.admin.comments'
 import { Route as AuthenticatedAppAdminCategoriesRouteImport } from './routes/_authenticated/app.admin.categories'
 import { Route as AuthenticatedAppAdminContentIndexRouteImport } from './routes/_authenticated/app.admin.content.index'
 import { Route as AuthenticatedAppAdminContentIdRouteImport } from './routes/_authenticated/app.admin.content.$id'
@@ -188,6 +189,12 @@ const AuthenticatedAppAdminMembersRoute =
     path: '/members',
     getParentRoute: () => AuthenticatedAppAdminRoute,
   } as any)
+const AuthenticatedAppAdminCommentsRoute =
+  AuthenticatedAppAdminCommentsRouteImport.update({
+    id: '/comments',
+    path: '/comments',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
 const AuthenticatedAppAdminCategoriesRoute =
   AuthenticatedAppAdminCategoriesRouteImport.update({
     id: '/categories',
@@ -234,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
+  '/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
   '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
   '/app/admin/': typeof AuthenticatedAppAdminIndexRoute
   '/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
@@ -264,6 +272,7 @@ export interface FileRoutesByTo {
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
+  '/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
   '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
   '/app/admin': typeof AuthenticatedAppAdminIndexRoute
   '/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
@@ -298,6 +307,7 @@ export interface FileRoutesById {
   '/_authenticated/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
+  '/_authenticated/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
   '/_authenticated/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
   '/_authenticated/app/admin/': typeof AuthenticatedAppAdminIndexRoute
   '/_authenticated/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
@@ -332,6 +342,7 @@ export interface FileRouteTypes {
     | '/app/watchlist'
     | '/app/'
     | '/app/admin/categories'
+    | '/app/admin/comments'
     | '/app/admin/members'
     | '/app/admin/'
     | '/app/admin/content/$id'
@@ -362,6 +373,7 @@ export interface FileRouteTypes {
     | '/app/watchlist'
     | '/app'
     | '/app/admin/categories'
+    | '/app/admin/comments'
     | '/app/admin/members'
     | '/app/admin'
     | '/app/admin/content/$id'
@@ -395,6 +407,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/watchlist'
     | '/_authenticated/app/'
     | '/_authenticated/app/admin/categories'
+    | '/_authenticated/app/admin/comments'
     | '/_authenticated/app/admin/members'
     | '/_authenticated/app/admin/'
     | '/_authenticated/app/admin/content/$id'
@@ -613,6 +626,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAdminMembersRouteImport
       parentRoute: typeof AuthenticatedAppAdminRoute
     }
+    '/_authenticated/app/admin/comments': {
+      id: '/_authenticated/app/admin/comments'
+      path: '/comments'
+      fullPath: '/app/admin/comments'
+      preLoaderRoute: typeof AuthenticatedAppAdminCommentsRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
     '/_authenticated/app/admin/categories': {
       id: '/_authenticated/app/admin/categories'
       path: '/categories'
@@ -639,6 +659,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAppAdminRouteChildren {
   AuthenticatedAppAdminCategoriesRoute: typeof AuthenticatedAppAdminCategoriesRoute
+  AuthenticatedAppAdminCommentsRoute: typeof AuthenticatedAppAdminCommentsRoute
   AuthenticatedAppAdminMembersRoute: typeof AuthenticatedAppAdminMembersRoute
   AuthenticatedAppAdminIndexRoute: typeof AuthenticatedAppAdminIndexRoute
   AuthenticatedAppAdminContentIdRoute: typeof AuthenticatedAppAdminContentIdRoute
@@ -647,6 +668,7 @@ interface AuthenticatedAppAdminRouteChildren {
 
 const AuthenticatedAppAdminRouteChildren: AuthenticatedAppAdminRouteChildren = {
   AuthenticatedAppAdminCategoriesRoute: AuthenticatedAppAdminCategoriesRoute,
+  AuthenticatedAppAdminCommentsRoute: AuthenticatedAppAdminCommentsRoute,
   AuthenticatedAppAdminMembersRoute: AuthenticatedAppAdminMembersRoute,
   AuthenticatedAppAdminIndexRoute: AuthenticatedAppAdminIndexRoute,
   AuthenticatedAppAdminContentIdRoute: AuthenticatedAppAdminContentIdRoute,
@@ -724,3 +746,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
