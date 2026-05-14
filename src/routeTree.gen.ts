@@ -20,6 +20,7 @@ import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ExploreSlugRouteImport } from './routes/explore.$slug'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppWatchlistRouteImport } from './routes/_authenticated/app.watchlist'
@@ -95,6 +96,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ExploreSlugRoute = ExploreSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ExploreRoute,
 } as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
@@ -217,7 +223,7 @@ const AuthenticatedAppAdminContentIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/explore': typeof ExploreRoute
+  '/explore': typeof ExploreRouteWithChildren
   '/faq': typeof FaqRoute
   '/login': typeof LoginRoute
   '/manifesto': typeof ManifestoRoute
@@ -226,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/explore/$slug': typeof ExploreSlugRoute
   '/app/admin': typeof AuthenticatedAppAdminRouteWithChildren
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/app/audios': typeof AuthenticatedAppAudiosRoute
@@ -250,7 +257,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/explore': typeof ExploreRoute
+  '/explore': typeof ExploreRouteWithChildren
   '/faq': typeof FaqRoute
   '/login': typeof LoginRoute
   '/manifesto': typeof ManifestoRoute
@@ -258,6 +265,7 @@ export interface FileRoutesByTo {
   '/research': typeof ResearchRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/explore/$slug': typeof ExploreSlugRoute
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/app/audios': typeof AuthenticatedAppAudiosRoute
   '/app/community': typeof AuthenticatedAppCommunityRoute
@@ -283,7 +291,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
-  '/explore': typeof ExploreRoute
+  '/explore': typeof ExploreRouteWithChildren
   '/faq': typeof FaqRoute
   '/login': typeof LoginRoute
   '/manifesto': typeof ManifestoRoute
@@ -292,6 +300,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/explore/$slug': typeof ExploreSlugRoute
   '/_authenticated/app/admin': typeof AuthenticatedAppAdminRouteWithChildren
   '/_authenticated/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/_authenticated/app/audios': typeof AuthenticatedAppAudiosRoute
@@ -327,6 +336,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/app'
+    | '/explore/$slug'
     | '/app/admin'
     | '/app/agenda'
     | '/app/audios'
@@ -359,6 +369,7 @@ export interface FileRouteTypes {
     | '/research'
     | '/reset-password'
     | '/signup'
+    | '/explore/$slug'
     | '/app/agenda'
     | '/app/audios'
     | '/app/community'
@@ -392,6 +403,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/_authenticated/app'
+    | '/explore/$slug'
     | '/_authenticated/app/admin'
     | '/_authenticated/app/agenda'
     | '/_authenticated/app/audios'
@@ -418,7 +430,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AboutRoute: typeof AboutRoute
-  ExploreRoute: typeof ExploreRoute
+  ExploreRoute: typeof ExploreRouteWithChildren
   FaqRoute: typeof FaqRoute
   LoginRoute: typeof LoginRoute
   ManifestoRoute: typeof ManifestoRoute
@@ -506,6 +518,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/explore/$slug': {
+      id: '/explore/$slug'
+      path: '/$slug'
+      fullPath: '/explore/$slug'
+      preLoaderRoute: typeof ExploreSlugRouteImport
+      parentRoute: typeof ExploreRoute
     }
     '/_authenticated/app': {
       id: '/_authenticated/app'
@@ -730,11 +749,22 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface ExploreRouteChildren {
+  ExploreSlugRoute: typeof ExploreSlugRoute
+}
+
+const ExploreRouteChildren: ExploreRouteChildren = {
+  ExploreSlugRoute: ExploreSlugRoute,
+}
+
+const ExploreRouteWithChildren =
+  ExploreRoute._addFileChildren(ExploreRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
-  ExploreRoute: ExploreRoute,
+  ExploreRoute: ExploreRouteWithChildren,
   FaqRoute: FaqRoute,
   LoginRoute: LoginRoute,
   ManifestoRoute: ManifestoRoute,
