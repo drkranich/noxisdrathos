@@ -38,8 +38,11 @@ import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
 import { Route as AuthenticatedAppAdminIndexRouteImport } from './routes/_authenticated/app.admin.index'
 import { Route as AuthenticatedAppAdminMembersRouteImport } from './routes/_authenticated/app.admin.members'
+import { Route as AuthenticatedAppAdminLogsRouteImport } from './routes/_authenticated/app.admin.logs'
 import { Route as AuthenticatedAppAdminCommentsRouteImport } from './routes/_authenticated/app.admin.comments'
 import { Route as AuthenticatedAppAdminCategoriesRouteImport } from './routes/_authenticated/app.admin.categories'
+import { Route as AuthenticatedAppAdminBillingRouteImport } from './routes/_authenticated/app.admin.billing'
+import { Route as AuthenticatedAppAdminAnnouncementsRouteImport } from './routes/_authenticated/app.admin.announcements'
 import { Route as AuthenticatedAppAdminContentIndexRouteImport } from './routes/_authenticated/app.admin.content.index'
 import { Route as AuthenticatedAppAdminContentIdRouteImport } from './routes/_authenticated/app.admin.content.$id'
 
@@ -195,6 +198,12 @@ const AuthenticatedAppAdminMembersRoute =
     path: '/members',
     getParentRoute: () => AuthenticatedAppAdminRoute,
   } as any)
+const AuthenticatedAppAdminLogsRoute =
+  AuthenticatedAppAdminLogsRouteImport.update({
+    id: '/logs',
+    path: '/logs',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
 const AuthenticatedAppAdminCommentsRoute =
   AuthenticatedAppAdminCommentsRouteImport.update({
     id: '/comments',
@@ -205,6 +214,18 @@ const AuthenticatedAppAdminCategoriesRoute =
   AuthenticatedAppAdminCategoriesRouteImport.update({
     id: '/categories',
     path: '/categories',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
+const AuthenticatedAppAdminBillingRoute =
+  AuthenticatedAppAdminBillingRouteImport.update({
+    id: '/billing',
+    path: '/billing',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
+const AuthenticatedAppAdminAnnouncementsRoute =
+  AuthenticatedAppAdminAnnouncementsRouteImport.update({
+    id: '/announcements',
+    path: '/announcements',
     getParentRoute: () => AuthenticatedAppAdminRoute,
   } as any)
 const AuthenticatedAppAdminContentIndexRoute =
@@ -247,8 +268,11 @@ export interface FileRoutesByFullPath {
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/admin/announcements': typeof AuthenticatedAppAdminAnnouncementsRoute
+  '/app/admin/billing': typeof AuthenticatedAppAdminBillingRoute
   '/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
   '/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
+  '/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
   '/app/admin/': typeof AuthenticatedAppAdminIndexRoute
   '/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
@@ -279,8 +303,11 @@ export interface FileRoutesByTo {
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/admin/announcements': typeof AuthenticatedAppAdminAnnouncementsRoute
+  '/app/admin/billing': typeof AuthenticatedAppAdminBillingRoute
   '/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
   '/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
+  '/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
   '/app/admin': typeof AuthenticatedAppAdminIndexRoute
   '/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
@@ -315,8 +342,11 @@ export interface FileRoutesById {
   '/_authenticated/app/videos': typeof AuthenticatedAppVideosRoute
   '/_authenticated/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/admin/announcements': typeof AuthenticatedAppAdminAnnouncementsRoute
+  '/_authenticated/app/admin/billing': typeof AuthenticatedAppAdminBillingRoute
   '/_authenticated/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
   '/_authenticated/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
+  '/_authenticated/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/_authenticated/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
   '/_authenticated/app/admin/': typeof AuthenticatedAppAdminIndexRoute
   '/_authenticated/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
@@ -351,8 +381,11 @@ export interface FileRouteTypes {
     | '/app/videos'
     | '/app/watchlist'
     | '/app/'
+    | '/app/admin/announcements'
+    | '/app/admin/billing'
     | '/app/admin/categories'
     | '/app/admin/comments'
+    | '/app/admin/logs'
     | '/app/admin/members'
     | '/app/admin/'
     | '/app/admin/content/$id'
@@ -383,8 +416,11 @@ export interface FileRouteTypes {
     | '/app/videos'
     | '/app/watchlist'
     | '/app'
+    | '/app/admin/announcements'
+    | '/app/admin/billing'
     | '/app/admin/categories'
     | '/app/admin/comments'
+    | '/app/admin/logs'
     | '/app/admin/members'
     | '/app/admin'
     | '/app/admin/content/$id'
@@ -418,8 +454,11 @@ export interface FileRouteTypes {
     | '/_authenticated/app/videos'
     | '/_authenticated/app/watchlist'
     | '/_authenticated/app/'
+    | '/_authenticated/app/admin/announcements'
+    | '/_authenticated/app/admin/billing'
     | '/_authenticated/app/admin/categories'
     | '/_authenticated/app/admin/comments'
+    | '/_authenticated/app/admin/logs'
     | '/_authenticated/app/admin/members'
     | '/_authenticated/app/admin/'
     | '/_authenticated/app/admin/content/$id'
@@ -645,6 +684,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAdminMembersRouteImport
       parentRoute: typeof AuthenticatedAppAdminRoute
     }
+    '/_authenticated/app/admin/logs': {
+      id: '/_authenticated/app/admin/logs'
+      path: '/logs'
+      fullPath: '/app/admin/logs'
+      preLoaderRoute: typeof AuthenticatedAppAdminLogsRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
     '/_authenticated/app/admin/comments': {
       id: '/_authenticated/app/admin/comments'
       path: '/comments'
@@ -657,6 +703,20 @@ declare module '@tanstack/react-router' {
       path: '/categories'
       fullPath: '/app/admin/categories'
       preLoaderRoute: typeof AuthenticatedAppAdminCategoriesRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
+    '/_authenticated/app/admin/billing': {
+      id: '/_authenticated/app/admin/billing'
+      path: '/billing'
+      fullPath: '/app/admin/billing'
+      preLoaderRoute: typeof AuthenticatedAppAdminBillingRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
+    '/_authenticated/app/admin/announcements': {
+      id: '/_authenticated/app/admin/announcements'
+      path: '/announcements'
+      fullPath: '/app/admin/announcements'
+      preLoaderRoute: typeof AuthenticatedAppAdminAnnouncementsRouteImport
       parentRoute: typeof AuthenticatedAppAdminRoute
     }
     '/_authenticated/app/admin/content/': {
@@ -677,8 +737,11 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAppAdminRouteChildren {
+  AuthenticatedAppAdminAnnouncementsRoute: typeof AuthenticatedAppAdminAnnouncementsRoute
+  AuthenticatedAppAdminBillingRoute: typeof AuthenticatedAppAdminBillingRoute
   AuthenticatedAppAdminCategoriesRoute: typeof AuthenticatedAppAdminCategoriesRoute
   AuthenticatedAppAdminCommentsRoute: typeof AuthenticatedAppAdminCommentsRoute
+  AuthenticatedAppAdminLogsRoute: typeof AuthenticatedAppAdminLogsRoute
   AuthenticatedAppAdminMembersRoute: typeof AuthenticatedAppAdminMembersRoute
   AuthenticatedAppAdminIndexRoute: typeof AuthenticatedAppAdminIndexRoute
   AuthenticatedAppAdminContentIdRoute: typeof AuthenticatedAppAdminContentIdRoute
@@ -686,8 +749,12 @@ interface AuthenticatedAppAdminRouteChildren {
 }
 
 const AuthenticatedAppAdminRouteChildren: AuthenticatedAppAdminRouteChildren = {
+  AuthenticatedAppAdminAnnouncementsRoute:
+    AuthenticatedAppAdminAnnouncementsRoute,
+  AuthenticatedAppAdminBillingRoute: AuthenticatedAppAdminBillingRoute,
   AuthenticatedAppAdminCategoriesRoute: AuthenticatedAppAdminCategoriesRoute,
   AuthenticatedAppAdminCommentsRoute: AuthenticatedAppAdminCommentsRoute,
+  AuthenticatedAppAdminLogsRoute: AuthenticatedAppAdminLogsRoute,
   AuthenticatedAppAdminMembersRoute: AuthenticatedAppAdminMembersRoute,
   AuthenticatedAppAdminIndexRoute: AuthenticatedAppAdminIndexRoute,
   AuthenticatedAppAdminContentIdRoute: AuthenticatedAppAdminContentIdRoute,
