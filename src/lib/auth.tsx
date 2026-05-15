@@ -66,8 +66,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
+const FALLBACK_AUTH: AuthContextValue = {
+  session: null,
+  user: null,
+  loading: false,
+  roles: [],
+  isAdmin: false,
+  signOut: async () => {},
+};
+
+export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
+  if (!ctx) {
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.warn("[auth] useAuth() called outside <AuthProvider> — returning anonymous fallback.");
+    }
+    return FALLBACK_AUTH;
+  }
   return ctx;
 }
