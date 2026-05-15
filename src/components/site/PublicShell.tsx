@@ -1,13 +1,16 @@
 import type { ReactNode } from "react";
 import { SiteHeader, SiteFooter } from "./SiteHeader";
 import { AnnouncementBar } from "./AnnouncementBar";
+import { SectionBoundary } from "@/components/SectionBoundary";
 
 export function PublicShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
+      <SectionBoundary label="announcement"><AnnouncementBar /></SectionBoundary>
       <SiteHeader />
-      <main className="flex-1 pt-24">{children}</main>
+      <main className="flex-1 pt-24">
+        <SectionBoundary label="public-content">{children}</SectionBoundary>
+      </main>
       <SiteFooter />
     </div>
   );
