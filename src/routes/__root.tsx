@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/auth";
+import { RouteTransition } from "@/components/RouteTransition";
 
 function NotFoundComponent() {
   return (
