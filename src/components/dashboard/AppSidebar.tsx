@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutGrid,
   Library,
+  Compass,
   Film,
   FileText,
   Headphones,
@@ -23,6 +24,7 @@ const groups = [
     label: "feed",
     items: [
       { to: "/app", label: "home", icon: LayoutGrid, exact: true },
+      { to: "/app/discover", label: "descobrir", icon: Compass },
       { to: "/app/library", label: "biblioteca", icon: Library },
     ],
   },
