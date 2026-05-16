@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import type { RecContent } from "@/lib/recommendations.functions";
 import { Skeleton } from "@/components/Skeleton";
+import { SaveButton } from "@/components/SaveButton";
 
 export function RailCard({ content }: { content: RecContent }) {
   return (
