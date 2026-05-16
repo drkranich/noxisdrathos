@@ -387,6 +387,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          payload: Json
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          payload?: Json
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          payload?: Json
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -493,6 +529,45 @@ export type Database = {
           priority?: string
           status?: string
           subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          digest_enabled: boolean
+          digest_frequency: string
+          notify_announcements: boolean
+          notify_new_content: boolean
+          notify_reminders: boolean
+          notify_replies: boolean
+          notify_trending: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          digest_enabled?: boolean
+          digest_frequency?: string
+          notify_announcements?: boolean
+          notify_new_content?: boolean
+          notify_reminders?: boolean
+          notify_replies?: boolean
+          notify_trending?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          digest_enabled?: boolean
+          digest_frequency?: string
+          notify_announcements?: boolean
+          notify_new_content?: boolean
+          notify_reminders?: boolean
+          notify_replies?: boolean
+          notify_trending?: boolean
           updated_at?: string
           user_id?: string
         }
