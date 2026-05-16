@@ -134,6 +134,10 @@ export function ContentCard({ content }: { content: ContentRow }) {
             </span>
           ) : null}
         </div>
+        <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <SaveButton contentId={content.id} kind="watchlist" size="sm" />
+          <SaveButton contentId={content.id} kind="favorite" size="sm" />
+        </div>
       </div>
       <div className="pt-4">
         <h3 className="text-sm font-medium leading-snug text-balance group-hover:text-foreground">
