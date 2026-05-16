@@ -95,6 +95,7 @@ function RootComponent() {
         <RouteTransition>
           <Outlet />
         </RouteTransition>
+        <Toaster />
       </AuthProvider>
     </QueryClientProvider>
   );
