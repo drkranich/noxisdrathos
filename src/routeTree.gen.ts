@@ -21,6 +21,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ExploreSlugRouteImport } from './routes/explore.$slug'
+import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppWatchlistRouteImport } from './routes/_authenticated/app.watchlist'
@@ -37,6 +38,7 @@ import { Route as AuthenticatedAppAudiosRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authenticated/app.agenda'
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
 import { Route as AuthenticatedAppAdminIndexRouteImport } from './routes/_authenticated/app.admin.index'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedAppAdminMembersRouteImport } from './routes/_authenticated/app.admin.members'
 import { Route as AuthenticatedAppAdminLogsRouteImport } from './routes/_authenticated/app.admin.logs'
 import { Route as AuthenticatedAppAdminCommentsRouteImport } from './routes/_authenticated/app.admin.comments'
@@ -104,6 +106,11 @@ const ExploreSlugRoute = ExploreSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => ExploreRoute,
+} as any)
+const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
+  id: '/checkout/return',
+  path: '/checkout/return',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
@@ -192,6 +199,12 @@ const AuthenticatedAppAdminIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAppAdminRoute,
   } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAppAdminMembersRoute =
   AuthenticatedAppAdminMembersRouteImport.update({
     id: '/members',
@@ -253,6 +266,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/checkout/return': typeof CheckoutReturnRoute
   '/explore/$slug': typeof ExploreSlugRoute
   '/app/admin': typeof AuthenticatedAppAdminRouteWithChildren
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
@@ -274,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
   '/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/app/admin/': typeof AuthenticatedAppAdminIndexRoute
   '/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
   '/app/admin/content/': typeof AuthenticatedAppAdminContentIndexRoute
@@ -289,6 +304,7 @@ export interface FileRoutesByTo {
   '/research': typeof ResearchRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/checkout/return': typeof CheckoutReturnRoute
   '/explore/$slug': typeof ExploreSlugRoute
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/app/audios': typeof AuthenticatedAppAudiosRoute
@@ -309,6 +325,7 @@ export interface FileRoutesByTo {
   '/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
   '/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/app/admin': typeof AuthenticatedAppAdminIndexRoute
   '/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
   '/app/admin/content': typeof AuthenticatedAppAdminContentIndexRoute
@@ -327,6 +344,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/checkout/return': typeof CheckoutReturnRoute
   '/explore/$slug': typeof ExploreSlugRoute
   '/_authenticated/app/admin': typeof AuthenticatedAppAdminRouteWithChildren
   '/_authenticated/app/agenda': typeof AuthenticatedAppAgendaRoute
@@ -348,6 +366,7 @@ export interface FileRoutesById {
   '/_authenticated/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
   '/_authenticated/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/_authenticated/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/_authenticated/app/admin/': typeof AuthenticatedAppAdminIndexRoute
   '/_authenticated/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
   '/_authenticated/app/admin/content/': typeof AuthenticatedAppAdminContentIndexRoute
@@ -366,6 +385,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/app'
+    | '/checkout/return'
     | '/explore/$slug'
     | '/app/admin'
     | '/app/agenda'
@@ -387,6 +407,7 @@ export interface FileRouteTypes {
     | '/app/admin/comments'
     | '/app/admin/logs'
     | '/app/admin/members'
+    | '/api/public/payments/webhook'
     | '/app/admin/'
     | '/app/admin/content/$id'
     | '/app/admin/content/'
@@ -402,6 +423,7 @@ export interface FileRouteTypes {
     | '/research'
     | '/reset-password'
     | '/signup'
+    | '/checkout/return'
     | '/explore/$slug'
     | '/app/agenda'
     | '/app/audios'
@@ -422,6 +444,7 @@ export interface FileRouteTypes {
     | '/app/admin/comments'
     | '/app/admin/logs'
     | '/app/admin/members'
+    | '/api/public/payments/webhook'
     | '/app/admin'
     | '/app/admin/content/$id'
     | '/app/admin/content'
@@ -439,6 +462,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/_authenticated/app'
+    | '/checkout/return'
     | '/explore/$slug'
     | '/_authenticated/app/admin'
     | '/_authenticated/app/agenda'
@@ -460,6 +484,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/admin/comments'
     | '/_authenticated/app/admin/logs'
     | '/_authenticated/app/admin/members'
+    | '/api/public/payments/webhook'
     | '/_authenticated/app/admin/'
     | '/_authenticated/app/admin/content/$id'
     | '/_authenticated/app/admin/content/'
@@ -477,6 +502,8 @@ export interface RootRouteChildren {
   ResearchRoute: typeof ResearchRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  CheckoutReturnRoute: typeof CheckoutReturnRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -564,6 +591,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/explore/$slug'
       preLoaderRoute: typeof ExploreSlugRouteImport
       parentRoute: typeof ExploreRoute
+    }
+    '/checkout/return': {
+      id: '/checkout/return'
+      path: '/checkout/return'
+      fullPath: '/checkout/return'
+      preLoaderRoute: typeof CheckoutReturnRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app': {
       id: '/_authenticated/app'
@@ -676,6 +710,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/admin/'
       preLoaderRoute: typeof AuthenticatedAppAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAppAdminRoute
+    }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app/admin/members': {
       id: '/_authenticated/app/admin/members'
@@ -839,6 +880,8 @@ const rootRouteChildren: RootRouteChildren = {
   ResearchRoute: ResearchRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  CheckoutReturnRoute: CheckoutReturnRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
