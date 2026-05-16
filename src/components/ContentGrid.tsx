@@ -18,8 +18,9 @@ export type ContentRow = {
   created_at: string;
 };
 
+type ContentType = "article" | "audio" | "pdf" | "video";
 type Filter = {
-  types?: string[];
+  types?: ContentType[];
   featured?: boolean;
   ids?: string[];
   search?: string;
