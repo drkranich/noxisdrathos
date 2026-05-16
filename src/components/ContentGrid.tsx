@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton, SkeletonCard } from "@/components/Skeleton";
 import { EmptyState } from "@/components/EmptyState";
+import { SaveButton } from "@/components/SaveButton";
 
 export type ContentRow = {
   id: string;
@@ -132,6 +133,10 @@ export function ContentCard({ content }: { content: ContentRow }) {
               destaque
             </span>
           ) : null}
+        </div>
+        <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <SaveButton contentId={content.id} kind="watchlist" size="sm" />
+          <SaveButton contentId={content.id} kind="favorite" size="sm" />
         </div>
       </div>
       <div className="pt-4">

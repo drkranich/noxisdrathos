@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import type { RecContent } from "@/lib/recommendations.functions";
 import { Skeleton } from "@/components/Skeleton";
+import { SaveButton } from "@/components/SaveButton";
 
 export function RailCard({ content }: { content: RecContent }) {
   return (
@@ -30,6 +31,10 @@ export function RailCard({ content }: { content: RecContent }) {
               destaque
             </span>
           ) : null}
+        </div>
+        <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <SaveButton contentId={content.id} kind="watchlist" size="sm" />
+          <SaveButton contentId={content.id} kind="favorite" size="sm" />
         </div>
         {/* Hover metadata reveal */}
         <div className="absolute inset-x-0 bottom-0 p-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">

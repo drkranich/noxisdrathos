@@ -18,6 +18,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const groups = [
   {
@@ -153,6 +154,7 @@ export function AppSidebar() {
               {isAdmin ? "admin" : "membro"}
             </p>
           </div>
+          <NotificationBell compact />
           <button
             onClick={signOut}
             className="text-muted-foreground hover:text-foreground transition"
