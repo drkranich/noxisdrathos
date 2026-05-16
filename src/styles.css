@@ -195,7 +195,6 @@
   .delay-200 { animation-delay: 200ms; }
   .delay-300 { animation-delay: 300ms; }
   .delay-500 { animation-delay: 500ms; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
