@@ -11,6 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/auth";
 import { RouteTransition } from "@/components/RouteTransition";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
