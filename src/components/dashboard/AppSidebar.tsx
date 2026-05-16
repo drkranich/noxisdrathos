@@ -153,6 +153,7 @@ export function AppSidebar() {
               {isAdmin ? "admin" : "membro"}
             </p>
           </div>
+          <NotificationBell compact />
           <button
             onClick={signOut}
             className="text-muted-foreground hover:text-foreground transition"
