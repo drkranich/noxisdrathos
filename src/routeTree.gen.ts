@@ -33,6 +33,7 @@ import { Route as AuthenticatedAppPdfsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAppLibraryRouteImport } from './routes/_authenticated/app.library'
 import { Route as AuthenticatedAppFavoritesRouteImport } from './routes/_authenticated/app.favorites'
 import { Route as AuthenticatedAppDownloadsRouteImport } from './routes/_authenticated/app.downloads'
+import { Route as AuthenticatedAppDiscoverRouteImport } from './routes/_authenticated/app.discover'
 import { Route as AuthenticatedAppCommunityRouteImport } from './routes/_authenticated/app.community'
 import { Route as AuthenticatedAppAudiosRouteImport } from './routes/_authenticated/app.audios'
 import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authenticated/app.agenda'
@@ -172,6 +173,12 @@ const AuthenticatedAppDownloadsRoute =
     path: '/downloads',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppDiscoverRoute =
+  AuthenticatedAppDiscoverRouteImport.update({
+    id: '/discover',
+    path: '/discover',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppCommunityRoute =
   AuthenticatedAppCommunityRouteImport.update({
     id: '/community',
@@ -272,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/app/audios': typeof AuthenticatedAppAudiosRoute
   '/app/community': typeof AuthenticatedAppCommunityRoute
+  '/app/discover': typeof AuthenticatedAppDiscoverRoute
   '/app/downloads': typeof AuthenticatedAppDownloadsRoute
   '/app/favorites': typeof AuthenticatedAppFavoritesRoute
   '/app/library': typeof AuthenticatedAppLibraryRoute
@@ -309,6 +317,7 @@ export interface FileRoutesByTo {
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/app/audios': typeof AuthenticatedAppAudiosRoute
   '/app/community': typeof AuthenticatedAppCommunityRoute
+  '/app/discover': typeof AuthenticatedAppDiscoverRoute
   '/app/downloads': typeof AuthenticatedAppDownloadsRoute
   '/app/favorites': typeof AuthenticatedAppFavoritesRoute
   '/app/library': typeof AuthenticatedAppLibraryRoute
@@ -350,6 +359,7 @@ export interface FileRoutesById {
   '/_authenticated/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/_authenticated/app/audios': typeof AuthenticatedAppAudiosRoute
   '/_authenticated/app/community': typeof AuthenticatedAppCommunityRoute
+  '/_authenticated/app/discover': typeof AuthenticatedAppDiscoverRoute
   '/_authenticated/app/downloads': typeof AuthenticatedAppDownloadsRoute
   '/_authenticated/app/favorites': typeof AuthenticatedAppFavoritesRoute
   '/_authenticated/app/library': typeof AuthenticatedAppLibraryRoute
@@ -391,6 +401,7 @@ export interface FileRouteTypes {
     | '/app/agenda'
     | '/app/audios'
     | '/app/community'
+    | '/app/discover'
     | '/app/downloads'
     | '/app/favorites'
     | '/app/library'
@@ -428,6 +439,7 @@ export interface FileRouteTypes {
     | '/app/agenda'
     | '/app/audios'
     | '/app/community'
+    | '/app/discover'
     | '/app/downloads'
     | '/app/favorites'
     | '/app/library'
@@ -468,6 +480,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/agenda'
     | '/_authenticated/app/audios'
     | '/_authenticated/app/community'
+    | '/_authenticated/app/discover'
     | '/_authenticated/app/downloads'
     | '/_authenticated/app/favorites'
     | '/_authenticated/app/library'
@@ -676,6 +689,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppDownloadsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/discover': {
+      id: '/_authenticated/app/discover'
+      path: '/discover'
+      fullPath: '/app/discover'
+      preLoaderRoute: typeof AuthenticatedAppDiscoverRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/community': {
       id: '/_authenticated/app/community'
       path: '/community'
@@ -813,6 +833,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAgendaRoute: typeof AuthenticatedAppAgendaRoute
   AuthenticatedAppAudiosRoute: typeof AuthenticatedAppAudiosRoute
   AuthenticatedAppCommunityRoute: typeof AuthenticatedAppCommunityRoute
+  AuthenticatedAppDiscoverRoute: typeof AuthenticatedAppDiscoverRoute
   AuthenticatedAppDownloadsRoute: typeof AuthenticatedAppDownloadsRoute
   AuthenticatedAppFavoritesRoute: typeof AuthenticatedAppFavoritesRoute
   AuthenticatedAppLibraryRoute: typeof AuthenticatedAppLibraryRoute
@@ -830,6 +851,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAgendaRoute: AuthenticatedAppAgendaRoute,
   AuthenticatedAppAudiosRoute: AuthenticatedAppAudiosRoute,
   AuthenticatedAppCommunityRoute: AuthenticatedAppCommunityRoute,
+  AuthenticatedAppDiscoverRoute: AuthenticatedAppDiscoverRoute,
   AuthenticatedAppDownloadsRoute: AuthenticatedAppDownloadsRoute,
   AuthenticatedAppFavoritesRoute: AuthenticatedAppFavoritesRoute,
   AuthenticatedAppLibraryRoute: AuthenticatedAppLibraryRoute,

@@ -1,55 +1,65 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { CinematicHero } from "@/components/CinematicHero";
-import { ContentCarousel, type ContentRow } from "@/components/ContentGrid";
 import { EmptyState } from "@/components/EmptyState";
+import { ContentRail } from "@/components/rails/ContentRail";
+import {
+  getPersonalizedRails,
+  type RecContent,
+} from "@/lib/recommendations.functions";
 
 export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({ meta: [{ title: "Home — Observatório" }, { name: "robots", content: "noindex" }] }),
   component: HomePage,
 });
 
+type Rails = Awaited<ReturnType<typeof getPersonalizedRails>>;
+
 function HomePage() {
   const { user } = useAuth();
-  const [items, setItems] = useState<ContentRow[] | null>(null);
-  const [continueIds, setContinueIds] = useState<string[]>([]);
+  const fetchRails = useServerFn(getPersonalizedRails);
+  const [rails, setRails] = useState<Rails | null>(null);
+  const [featured, setFeatured] = useState<RecContent | null>(null);
+  const [hasAnyContent, setHasAnyContent] = useState<boolean | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+    fetchRails()
+      .then((r) => {
+        if (cancelled) return;
+        setRails(r);
+      })
+      .catch(() => !cancelled && setRails({
+        anchorTitle: null,
+        continueWatching: [],
+        recommended: [],
+        becauseYouWatched: [],
+        trending: [],
+        hidden: [],
+        recentlyExplored: [],
+      }));
     supabase
       .from("content")
-      .select("id,slug,title,subtitle,type,thumbnail_url,duration_seconds,reading_minutes,tags,is_featured,created_at")
+      .select("id,slug,title,subtitle,type,thumbnail_url,duration_seconds,reading_minutes,tags,is_featured,created_at,category_id")
       .eq("status", "published")
+      .order("is_featured", { ascending: false })
       .order("created_at", { ascending: false })
-      .limit(60)
-      .then(({ data }) => setItems((data ?? []) as ContentRow[]));
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("watch_history")
-      .select("content_id,last_seen_at,completed")
-      .eq("user_id", user.id)
-      .eq("completed", false)
-      .order("last_seen_at", { ascending: false })
-      .limit(12)
-      .then(({ data }) => setContinueIds((data ?? []).map((r) => r.content_id)));
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return;
+        setFeatured((data as RecContent) ?? null);
+        setHasAnyContent(!!data);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [user?.id]);
 
-  const featured = items?.find((i) => i.is_featured) ?? items?.[0] ?? null;
   const greeting = (user?.user_metadata?.display_name || user?.email?.split("@")[0] || "membro").toString();
-
-  const newest = items?.slice(0, 12) ?? null;
-  const reports = items?.filter((c) => c.type === "pdf" || c.type === "article").slice(0, 12) ?? null;
-  const videos = items?.filter((c) => c.type === "video").slice(0, 12) ?? null;
-  const featuredRow = items?.filter((c) => c.is_featured).slice(0, 12) ?? null;
-  const continueRow = items && continueIds.length
-    ? continueIds.map((id) => items.find((c) => c.id === id)).filter(Boolean) as ContentRow[]
-    : items
-    ? []
-    : null;
 
   return (
     <div className="pb-24">
@@ -73,26 +83,56 @@ function HomePage() {
                 abrir →
               </Link>
               <Link
-                to="/app/library"
+                to="/app/discover"
                 className="inline-flex items-center gap-2 px-5 py-3 border border-border font-mono text-[11px] uppercase tracking-[0.25em] hover:bg-accent transition"
               >
-                biblioteca
+                descobrir
               </Link>
             </>
           ) : null
         }
       />
 
-      <div className="px-8 lg:px-14 pt-12 space-y-12">
-        {continueRow && continueRow.length > 0 ? (
-          <ContentCarousel title="continue assistindo" items={continueRow} />
+      <div className="px-6 lg:px-14 pt-12 space-y-14">
+        <ContentRail
+          title="continue assistindo"
+          subtitle="retome onde parou"
+          items={rails?.continueWatching ?? null}
+          loading={rails === null}
+        />
+        {rails && rails.becauseYouWatched.length > 0 && rails.anchorTitle ? (
+          <ContentRail
+            title="porque você acompanhou"
+            subtitle={`em diálogo com · ${rails.anchorTitle.toLowerCase()}`}
+            items={rails.becauseYouWatched}
+          />
         ) : null}
-        <ContentCarousel title="destaques" items={featuredRow} />
-        <ContentCarousel title="recém publicados" items={newest} />
-        <ContentCarousel title="dossiês & artigos" items={reports} />
-        <ContentCarousel title="vídeos" items={videos} />
+        <ContentRail
+          title="recomendado para você"
+          subtitle="curadoria personalizada"
+          items={rails?.recommended ?? null}
+          loading={rails === null}
+        />
+        <ContentRail
+          title="em circulação"
+          subtitle="o que está sendo lido no círculo"
+          items={rails?.trending ?? null}
+          loading={rails === null}
+        />
+        <ContentRail
+          title="descobertas silenciosas"
+          subtitle="gemas pouco percorridas"
+          items={rails?.hidden ?? null}
+          loading={rails === null}
+        />
+        <ContentRail
+          title="recentemente explorado"
+          subtitle="seu rastro no observatório"
+          items={rails?.recentlyExplored ?? null}
+          loading={rails === null}
+        />
 
-        {items !== null && items.length === 0 ? (
+        {hasAnyContent === false ? (
           <EmptyState
             eyebrow="biblioteca em construção"
             title="O observatório ainda não publicou."
