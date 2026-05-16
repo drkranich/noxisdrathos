@@ -30,6 +30,7 @@ export const PLANS: Plan[] = [
       "Comunidade silenciosa",
     ],
     cta: "entrar no círculo",
+    stripePriceId: "circle_monthly",
   },
   {
     id: "vault",
@@ -47,6 +48,7 @@ export const PLANS: Plan[] = [
     ],
     cta: "abrir o cofre",
     featured: true,
+    stripePriceId: "vault_monthly",
   },
   {
     id: "council",
@@ -62,5 +64,6 @@ export const PLANS: Plan[] = [
       "Janela direta com a curadoria",
     ],
     cta: "candidatar-se",
+    stripePriceId: "council_yearly",
   },
 ];
