@@ -32,6 +32,10 @@ export function RailCard({ content }: { content: RecContent }) {
             </span>
           ) : null}
         </div>
+        <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <SaveButton contentId={content.id} kind="watchlist" size="sm" />
+          <SaveButton contentId={content.id} kind="favorite" size="sm" />
+        </div>
         {/* Hover metadata reveal */}
         <div className="absolute inset-x-0 bottom-0 p-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
           {content.subtitle ? (
