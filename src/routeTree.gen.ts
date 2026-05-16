@@ -42,6 +42,7 @@ import { Route as AuthenticatedAppAdminIndexRouteImport } from './routes/_authen
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedAppAdminMembersRouteImport } from './routes/_authenticated/app.admin.members'
 import { Route as AuthenticatedAppAdminLogsRouteImport } from './routes/_authenticated/app.admin.logs'
+import { Route as AuthenticatedAppAdminIntelligenceRouteImport } from './routes/_authenticated/app.admin.intelligence'
 import { Route as AuthenticatedAppAdminCommentsRouteImport } from './routes/_authenticated/app.admin.comments'
 import { Route as AuthenticatedAppAdminCategoriesRouteImport } from './routes/_authenticated/app.admin.categories'
 import { Route as AuthenticatedAppAdminBillingRouteImport } from './routes/_authenticated/app.admin.billing'
@@ -224,6 +225,12 @@ const AuthenticatedAppAdminLogsRoute =
     path: '/logs',
     getParentRoute: () => AuthenticatedAppAdminRoute,
   } as any)
+const AuthenticatedAppAdminIntelligenceRoute =
+  AuthenticatedAppAdminIntelligenceRouteImport.update({
+    id: '/intelligence',
+    path: '/intelligence',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
 const AuthenticatedAppAdminCommentsRoute =
   AuthenticatedAppAdminCommentsRouteImport.update({
     id: '/comments',
@@ -294,6 +301,7 @@ export interface FileRoutesByFullPath {
   '/app/admin/billing': typeof AuthenticatedAppAdminBillingRoute
   '/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
   '/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
+  '/app/admin/intelligence': typeof AuthenticatedAppAdminIntelligenceRoute
   '/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -332,6 +340,7 @@ export interface FileRoutesByTo {
   '/app/admin/billing': typeof AuthenticatedAppAdminBillingRoute
   '/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
   '/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
+  '/app/admin/intelligence': typeof AuthenticatedAppAdminIntelligenceRoute
   '/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -374,6 +383,7 @@ export interface FileRoutesById {
   '/_authenticated/app/admin/billing': typeof AuthenticatedAppAdminBillingRoute
   '/_authenticated/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
   '/_authenticated/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
+  '/_authenticated/app/admin/intelligence': typeof AuthenticatedAppAdminIntelligenceRoute
   '/_authenticated/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/_authenticated/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -416,6 +426,7 @@ export interface FileRouteTypes {
     | '/app/admin/billing'
     | '/app/admin/categories'
     | '/app/admin/comments'
+    | '/app/admin/intelligence'
     | '/app/admin/logs'
     | '/app/admin/members'
     | '/api/public/payments/webhook'
@@ -454,6 +465,7 @@ export interface FileRouteTypes {
     | '/app/admin/billing'
     | '/app/admin/categories'
     | '/app/admin/comments'
+    | '/app/admin/intelligence'
     | '/app/admin/logs'
     | '/app/admin/members'
     | '/api/public/payments/webhook'
@@ -495,6 +507,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/admin/billing'
     | '/_authenticated/app/admin/categories'
     | '/_authenticated/app/admin/comments'
+    | '/_authenticated/app/admin/intelligence'
     | '/_authenticated/app/admin/logs'
     | '/_authenticated/app/admin/members'
     | '/api/public/payments/webhook'
@@ -752,6 +765,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAdminLogsRouteImport
       parentRoute: typeof AuthenticatedAppAdminRoute
     }
+    '/_authenticated/app/admin/intelligence': {
+      id: '/_authenticated/app/admin/intelligence'
+      path: '/intelligence'
+      fullPath: '/app/admin/intelligence'
+      preLoaderRoute: typeof AuthenticatedAppAdminIntelligenceRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
     '/_authenticated/app/admin/comments': {
       id: '/_authenticated/app/admin/comments'
       path: '/comments'
@@ -802,6 +822,7 @@ interface AuthenticatedAppAdminRouteChildren {
   AuthenticatedAppAdminBillingRoute: typeof AuthenticatedAppAdminBillingRoute
   AuthenticatedAppAdminCategoriesRoute: typeof AuthenticatedAppAdminCategoriesRoute
   AuthenticatedAppAdminCommentsRoute: typeof AuthenticatedAppAdminCommentsRoute
+  AuthenticatedAppAdminIntelligenceRoute: typeof AuthenticatedAppAdminIntelligenceRoute
   AuthenticatedAppAdminLogsRoute: typeof AuthenticatedAppAdminLogsRoute
   AuthenticatedAppAdminMembersRoute: typeof AuthenticatedAppAdminMembersRoute
   AuthenticatedAppAdminIndexRoute: typeof AuthenticatedAppAdminIndexRoute
@@ -815,6 +836,8 @@ const AuthenticatedAppAdminRouteChildren: AuthenticatedAppAdminRouteChildren = {
   AuthenticatedAppAdminBillingRoute: AuthenticatedAppAdminBillingRoute,
   AuthenticatedAppAdminCategoriesRoute: AuthenticatedAppAdminCategoriesRoute,
   AuthenticatedAppAdminCommentsRoute: AuthenticatedAppAdminCommentsRoute,
+  AuthenticatedAppAdminIntelligenceRoute:
+    AuthenticatedAppAdminIntelligenceRoute,
   AuthenticatedAppAdminLogsRoute: AuthenticatedAppAdminLogsRoute,
   AuthenticatedAppAdminMembersRoute: AuthenticatedAppAdminMembersRoute,
   AuthenticatedAppAdminIndexRoute: AuthenticatedAppAdminIndexRoute,
