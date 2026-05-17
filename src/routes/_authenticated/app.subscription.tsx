@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { createPortalSession } from "@/utils/payments.functions";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
-import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+// PaymentTestModeBanner intentionally not shown to members; admin diagnostics only.
 import { PLANS, type Plan } from "@/lib/billing/plans";
 import { Check, ExternalLink, Sparkles } from "lucide-react";
 
@@ -112,7 +112,7 @@ function SubscriptionPage() {
   if (isOpen) {
     return (
       <div className="px-6 lg:px-14 py-10 max-w-3xl mx-auto">
-        <PaymentTestModeBanner />
+        {/* test-mode banner suppressed for members */}
         <button
           onClick={closeCheckout}
           className="mt-6 mb-4 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground"
@@ -126,7 +126,7 @@ function SubscriptionPage() {
 
   return (
     <div>
-      <PaymentTestModeBanner />
+      {/* test-mode banner suppressed for members */}
       <div className="px-8 lg:px-14 py-12 max-w-6xl">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">conta · assinatura</p>
         <h1 className="font-display text-4xl mt-3">Sua assinatura.</h1>

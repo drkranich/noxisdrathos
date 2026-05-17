@@ -8,21 +8,32 @@ export const Route = createFileRoute("/_authenticated/app/admin")({
 });
 
 function AdminLayout() {
-  const { isAdmin, loading, roles } = useAuth();
+  const { isAdmin, loading, rolesLoading, user } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
+  const stillResolving = loading || rolesLoading;
+
   useEffect(() => {
-    // wait for roles to load (roles is empty until fetched)
-    if (loading) return;
-    if (roles.length > 0 && !isAdmin) navigate({ to: "/app", replace: true });
-  }, [loading, roles, isAdmin, navigate]);
+    if (stillResolving) return;
+    if (!user) navigate({ to: "/login", replace: true });
+    else if (!isAdmin) navigate({ to: "/app", replace: true });
+  }, [stillResolving, user, isAdmin, navigate]);
+
+  if (stillResolving) {
+    return (
+      <div className="px-8 lg:px-14 py-16">
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">autenticando</p>
+        <h1 className="font-display text-3xl mt-4">Verificando privilégios…</h1>
+      </div>
+    );
+  }
 
   if (!isAdmin) {
     return (
       <div className="px-8 lg:px-14 py-16">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">acesso restrito</p>
-        <h1 className="font-display text-3xl mt-4">Verificando privilégios…</h1>
+        <h1 className="font-display text-3xl mt-4">Sem privilégios de administrador.</h1>
       </div>
     );
   }
