@@ -142,6 +142,105 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_items: {
+        Row: {
+          collection_id: string
+          content_id: string
+          created_at: string
+          id: string
+          sort_order: number
+        }
+        Insert: {
+          collection_id: string
+          content_id: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+        }
+        Update: {
+          collection_id?: string
+          content_id?: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_items_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          banner_bucket: string | null
+          banner_path: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_featured: boolean
+          publish_at: string | null
+          required_plan_id: string
+          slug: string
+          sort_order: number
+          status: Database["public"]["Enums"]["content_status"]
+          thumbnail_bucket: string | null
+          thumbnail_path: string | null
+          title: string
+          updated_at: string
+          visibility: Database["public"]["Enums"]["content_visibility"]
+        }
+        Insert: {
+          banner_bucket?: string | null
+          banner_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_featured?: boolean
+          publish_at?: string | null
+          required_plan_id?: string
+          slug: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["content_status"]
+          thumbnail_bucket?: string | null
+          thumbnail_path?: string | null
+          title: string
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["content_visibility"]
+        }
+        Update: {
+          banner_bucket?: string | null
+          banner_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_featured?: boolean
+          publish_at?: string | null
+          required_plan_id?: string
+          slug?: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["content_status"]
+          thumbnail_bucket?: string | null
+          thumbnail_path?: string | null
+          title?: string
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["content_visibility"]
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           body: string
@@ -192,8 +291,12 @@ export type Database = {
       }
       content: {
         Row: {
+          attachment_paths: Json
+          banner_bucket: string | null
+          banner_path: string | null
           body_md: string | null
           category_id: string | null
+          content_kind: string
           created_at: string
           created_by: string | null
           description: string | null
@@ -201,23 +304,34 @@ export type Database = {
           external_url: string | null
           id: string
           is_featured: boolean
+          media_metadata: Json
+          preview_md: string | null
           publish_at: string | null
           reading_minutes: number | null
+          required_plan_id: string
           slug: string
+          sort_order: number
           status: Database["public"]["Enums"]["content_status"]
           storage_bucket: string | null
           storage_path: string | null
           subtitle: string | null
           tags: string[]
+          thumbnail_bucket: string
           thumbnail_url: string | null
           title: string
+          trailer_bucket: string | null
+          trailer_path: string | null
           type: Database["public"]["Enums"]["content_type"]
           updated_at: string
           visibility: Database["public"]["Enums"]["content_visibility"]
         }
         Insert: {
+          attachment_paths?: Json
+          banner_bucket?: string | null
+          banner_path?: string | null
           body_md?: string | null
           category_id?: string | null
+          content_kind?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -225,23 +339,34 @@ export type Database = {
           external_url?: string | null
           id?: string
           is_featured?: boolean
+          media_metadata?: Json
+          preview_md?: string | null
           publish_at?: string | null
           reading_minutes?: number | null
+          required_plan_id?: string
           slug: string
+          sort_order?: number
           status?: Database["public"]["Enums"]["content_status"]
           storage_bucket?: string | null
           storage_path?: string | null
           subtitle?: string | null
           tags?: string[]
+          thumbnail_bucket?: string
           thumbnail_url?: string | null
           title: string
+          trailer_bucket?: string | null
+          trailer_path?: string | null
           type: Database["public"]["Enums"]["content_type"]
           updated_at?: string
           visibility?: Database["public"]["Enums"]["content_visibility"]
         }
         Update: {
+          attachment_paths?: Json
+          banner_bucket?: string | null
+          banner_path?: string | null
           body_md?: string | null
           category_id?: string | null
+          content_kind?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -249,16 +374,23 @@ export type Database = {
           external_url?: string | null
           id?: string
           is_featured?: boolean
+          media_metadata?: Json
+          preview_md?: string | null
           publish_at?: string | null
           reading_minutes?: number | null
+          required_plan_id?: string
           slug?: string
+          sort_order?: number
           status?: Database["public"]["Enums"]["content_status"]
           storage_bucket?: string | null
           storage_path?: string | null
           subtitle?: string | null
           tags?: string[]
+          thumbnail_bucket?: string
           thumbnail_url?: string | null
           title?: string
+          trailer_bucket?: string | null
+          trailer_path?: string | null
           type?: Database["public"]["Enums"]["content_type"]
           updated_at?: string
           visibility?: Database["public"]["Enums"]["content_visibility"]
@@ -344,6 +476,62 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      media_assets: {
+        Row: {
+          asset_role: string
+          bucket: string
+          content_id: string | null
+          created_at: string
+          created_by: string | null
+          file_name: string
+          id: string
+          metadata: Json
+          mime_type: string
+          path: string
+          size_bytes: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          asset_role?: string
+          bucket: string
+          content_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          file_name: string
+          id?: string
+          metadata?: Json
+          mime_type: string
+          path: string
+          size_bytes?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          asset_role?: string
+          bucket?: string
+          content_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          file_name?: string
+          id?: string
+          metadata?: Json
+          mime_type?: string
+          path?: string
+          size_bytes?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_assets_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       memberships: {
         Row: {
@@ -634,9 +822,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_read_storage_object: {
+        Args: { _bucket: string; _path: string }
+        Returns: boolean
+      }
+      current_user_plan: { Args: { _user_id: string }; Returns: string }
       has_active_membership: { Args: { _user_id: string }; Returns: boolean }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
+        Returns: boolean
+      }
+      has_content_access: {
+        Args: {
+          _required_plan_id?: string
+          _user_id: string
+          _visibility: Database["public"]["Enums"]["content_visibility"]
+        }
         Returns: boolean
       }
       has_role: {
@@ -646,6 +847,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      plan_rank: { Args: { _plan: string }; Returns: number }
     }
     Enums: {
       app_role: "admin" | "member"
