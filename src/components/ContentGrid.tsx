@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { getSignedUrl } from "@/lib/storage";
 import { Skeleton, SkeletonCard } from "@/components/Skeleton";
 import { EmptyState } from "@/components/EmptyState";
 import { SaveButton } from "@/components/SaveButton";
@@ -11,22 +12,28 @@ export type ContentRow = {
   title: string;
   subtitle: string | null;
   type: string;
+  content_kind?: string | null;
   thumbnail_url: string | null;
+  thumbnail_bucket?: string | null;
   duration_seconds: number | null;
   reading_minutes: number | null;
   tags: string[];
   is_featured: boolean;
+  required_plan_id?: string | null;
   created_at: string;
 };
 
 type ContentType = "article" | "audio" | "pdf" | "video";
 type Filter = {
   types?: ContentType[];
+  kinds?: string[];
   featured?: boolean;
   ids?: string[];
   search?: string;
   limit?: number;
 };
+
+const SELECT = "id,slug,title,subtitle,type,content_kind,thumbnail_url,thumbnail_bucket,duration_seconds,reading_minutes,tags,is_featured,required_plan_id,created_at";
 
 export function useContent(filter: Filter = {}) {
   const [items, setItems] = useState<ContentRow[] | null>(null);
@@ -38,23 +45,53 @@ export function useContent(filter: Filter = {}) {
     setItems(null);
     let q = supabase
       .from("content")
-      .select("id,slug,title,subtitle,type,thumbnail_url,duration_seconds,reading_minutes,tags,is_featured,created_at")
+      .select(SELECT)
       .eq("status", "published")
+      .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false })
       .limit(filter.limit ?? 60);
     if (filter.types?.length) q = q.in("type", filter.types);
+    if (filter.kinds?.length) q = q.in("content_kind", filter.kinds);
     if (filter.featured) q = q.eq("is_featured", true);
     if (filter.ids?.length) q = q.in("id", filter.ids);
     if (filter.search) q = q.ilike("title", `%${filter.search}%`);
-    q.then(({ data, error }) => {
+    q.then(async ({ data, error }) => {
       if (cancelled) return;
-      if (error) setError(error);
-      else setItems((data ?? []) as ContentRow[]);
+      if (error) {
+        setError(error);
+        setItems([]);
+        return;
+      }
+      const signed = await Promise.all(
+        ((data ?? []) as ContentRow[]).map(async (row) => {
+          if (!row.thumbnail_url) return row;
+          try {
+            return {
+              ...row,
+              thumbnail_url: await getSignedUrl(row.thumbnail_bucket || "thumbnails", row.thumbnail_url, 3600),
+            };
+          } catch {
+            return row;
+          }
+        }),
+      );
+      if (!cancelled) setItems(signed as ContentRow[]);
     });
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+
+  useEffect(() => {
+    const ch = supabase
+      .channel(`content-grid-${key}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "content" }, () => {
+        setItems((prev) => (prev ? [...prev] : prev));
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [key]);
 
   return { items, error };
@@ -109,7 +146,7 @@ export function ContentGrid({
 export function ContentCard({ content }: { content: ContentRow }) {
   return (
     <Link
-      to="/explore/$slug"
+      to="/app/content/$slug"
       params={{ slug: content.slug }}
       className="group block glow-on-hover focus-ring rounded-sm"
     >
@@ -126,8 +163,13 @@ export function ContentCard({ content }: { content: ContentRow }) {
         <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition" />
         <div className="absolute top-2 left-2 flex items-center gap-2">
           <span className="font-mono text-[9px] uppercase tracking-[0.3em] px-2 py-1 bg-background/70 backdrop-blur">
-            {content.type}
+            {content.content_kind || content.type}
           </span>
+          {content.required_plan_id && content.required_plan_id !== "free" ? (
+            <span className="font-mono text-[9px] uppercase tracking-[0.3em] px-2 py-1 bg-accent/80">
+              {content.required_plan_id}
+            </span>
+          ) : null}
           {content.is_featured ? (
             <span className="font-mono text-[9px] uppercase tracking-[0.3em] px-2 py-1 bg-foreground/90 text-background">
               destaque
@@ -158,15 +200,7 @@ export function ContentCard({ content }: { content: ContentRow }) {
   );
 }
 
-export function ContentCarousel({
-  title,
-  items,
-  loading,
-}: {
-  title: string;
-  items: ContentRow[] | null;
-  loading?: boolean;
-}) {
+export function ContentCarousel({ title, items, loading }: { title: string; items: ContentRow[] | null; loading?: boolean }) {
   return (
     <section>
       <div className="flex items-baseline justify-between mb-4">

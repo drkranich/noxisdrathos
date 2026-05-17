@@ -40,6 +40,7 @@ import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
 import { Route as AuthenticatedAppAdminIndexRouteImport } from './routes/_authenticated/app.admin.index'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as AuthenticatedAppContentSlugRouteImport } from './routes/_authenticated/app.content.$slug'
 import { Route as AuthenticatedAppAdminMembersRouteImport } from './routes/_authenticated/app.admin.members'
 import { Route as AuthenticatedAppAdminLogsRouteImport } from './routes/_authenticated/app.admin.logs'
 import { Route as AuthenticatedAppAdminIntelligenceRouteImport } from './routes/_authenticated/app.admin.intelligence'
@@ -213,6 +214,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAppContentSlugRoute =
+  AuthenticatedAppContentSlugRouteImport.update({
+    id: '/content/$slug',
+    path: '/content/$slug',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppAdminMembersRoute =
   AuthenticatedAppAdminMembersRouteImport.update({
     id: '/members',
@@ -304,6 +311,7 @@ export interface FileRoutesByFullPath {
   '/app/admin/intelligence': typeof AuthenticatedAppAdminIntelligenceRoute
   '/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
+  '/app/content/$slug': typeof AuthenticatedAppContentSlugRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/app/admin/': typeof AuthenticatedAppAdminIndexRoute
   '/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
@@ -343,6 +351,7 @@ export interface FileRoutesByTo {
   '/app/admin/intelligence': typeof AuthenticatedAppAdminIntelligenceRoute
   '/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
+  '/app/content/$slug': typeof AuthenticatedAppContentSlugRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/app/admin': typeof AuthenticatedAppAdminIndexRoute
   '/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
@@ -386,6 +395,7 @@ export interface FileRoutesById {
   '/_authenticated/app/admin/intelligence': typeof AuthenticatedAppAdminIntelligenceRoute
   '/_authenticated/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/_authenticated/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
+  '/_authenticated/app/content/$slug': typeof AuthenticatedAppContentSlugRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/_authenticated/app/admin/': typeof AuthenticatedAppAdminIndexRoute
   '/_authenticated/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
     | '/app/admin/intelligence'
     | '/app/admin/logs'
     | '/app/admin/members'
+    | '/app/content/$slug'
     | '/api/public/payments/webhook'
     | '/app/admin/'
     | '/app/admin/content/$id'
@@ -468,6 +479,7 @@ export interface FileRouteTypes {
     | '/app/admin/intelligence'
     | '/app/admin/logs'
     | '/app/admin/members'
+    | '/app/content/$slug'
     | '/api/public/payments/webhook'
     | '/app/admin'
     | '/app/admin/content/$id'
@@ -510,6 +522,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/admin/intelligence'
     | '/_authenticated/app/admin/logs'
     | '/_authenticated/app/admin/members'
+    | '/_authenticated/app/content/$slug'
     | '/api/public/payments/webhook'
     | '/_authenticated/app/admin/'
     | '/_authenticated/app/admin/content/$id'
@@ -751,6 +764,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/app/content/$slug': {
+      id: '/_authenticated/app/content/$slug'
+      path: '/content/$slug'
+      fullPath: '/app/content/$slug'
+      preLoaderRoute: typeof AuthenticatedAppContentSlugRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/admin/members': {
       id: '/_authenticated/app/admin/members'
       path: '/members'
@@ -867,6 +887,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppVideosRoute: typeof AuthenticatedAppVideosRoute
   AuthenticatedAppWatchlistRoute: typeof AuthenticatedAppWatchlistRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+  AuthenticatedAppContentSlugRoute: typeof AuthenticatedAppContentSlugRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
@@ -885,6 +906,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppVideosRoute: AuthenticatedAppVideosRoute,
   AuthenticatedAppWatchlistRoute: AuthenticatedAppWatchlistRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+  AuthenticatedAppContentSlugRoute: AuthenticatedAppContentSlugRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =
@@ -931,3 +953,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -7,7 +7,7 @@ import { SaveButton } from "@/components/SaveButton";
 export function RailCard({ content }: { content: RecContent }) {
   return (
     <Link
-      to="/explore/$slug"
+      to="/app/content/$slug"
       params={{ slug: content.slug }}
       className="group relative block w-72 shrink-0 snap-start focus-ring rounded-sm"
     >
