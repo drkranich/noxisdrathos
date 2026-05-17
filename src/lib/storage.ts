@@ -1,44 +1,106 @@
 import { supabase } from "@/integrations/supabase/client";
 
+export type PublishingBucket = "videos" | "pdfs" | "audio" | "thumbnails" | "banners" | "attachments";
+
 export type UploadOpts = {
-  bucket: "videos" | "pdfs" | "thumbnails" | "audios";
+  bucket: PublishingBucket;
   file: File;
   pathPrefix?: string;
   onProgress?: (pct: number) => void;
 };
 
-function slugifyName(name: string) {
-  return name
+type Rule = { maxBytes: number; accept: RegExp; label: string };
+
+const MB = 1024 * 1024;
+
+export const BUCKET_RULES: Record<PublishingBucket, Rule> = {
+  videos: { maxBytes: 1024 * MB, accept: /^video\//, label: "vídeo" },
+  pdfs: { maxBytes: 80 * MB, accept: /^application\/pdf$/, label: "PDF" },
+  audio: { maxBytes: 250 * MB, accept: /^audio\//, label: "áudio" },
+  thumbnails: { maxBytes: 15 * MB, accept: /^image\//, label: "thumbnail" },
+  banners: { maxBytes: 25 * MB, accept: /^image\//, label: "banner" },
+  attachments: { maxBytes: 120 * MB, accept: /^(application\/pdf|image\/|text\/|application\/zip|application\/json)/, label: "anexo" },
+};
+
+export function slugifyName(name: string) {
+  const safe = name
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9.\-]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+  return safe || "arquivo";
 }
 
-export async function uploadToBucket({ bucket, file, pathPrefix }: UploadOpts) {
+export function validateFile(bucket: PublishingBucket, file: File) {
+  const rule = BUCKET_RULES[bucket];
+  if (!rule.accept.test(file.type || "")) {
+    throw new Error(`Formato inválido para ${rule.label}.`);
+  }
+  if (file.size > rule.maxBytes) {
+    throw new Error(`${rule.label} excede ${Math.round(rule.maxBytes / MB)}MB.`);
+  }
+}
+
+function objectUrl(bucket: PublishingBucket, path: string) {
+  const base = import.meta.env.VITE_SUPABASE_URL;
+  if (!base) throw new Error("Backend indisponível para upload.");
+  return `${base.replace(/\/$/, "")}/storage/v1/object/${bucket}/${encodeURI(path).replace(/#/g, "%23")}`;
+}
+
+export async function uploadToBucket({ bucket, file, pathPrefix, onProgress }: UploadOpts) {
+  validateFile(bucket, file);
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData.session?.access_token;
+  const apikey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  if (!token || !apikey) throw new Error("Sessão administrativa expirada. Entre novamente.");
+
   const ts = Date.now();
   const safe = slugifyName(file.name);
-  const path = `${pathPrefix ? pathPrefix.replace(/^\/|\/$/g, "") + "/" : ""}${ts}-${safe}`;
-  const { error } = await supabase.storage.from(bucket).upload(path, file, {
-    cacheControl: "3600",
-    upsert: false,
-    contentType: file.type || undefined,
+  const prefix = pathPrefix ? pathPrefix.replace(/^\/|\/$/g, "") : "admin";
+  const path = `${prefix}/${ts}-${safe}`;
+
+  await new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", objectUrl(bucket, path));
+    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    xhr.setRequestHeader("apikey", apikey);
+    xhr.setRequestHeader("x-upsert", "false");
+    xhr.setRequestHeader("cache-control", "3600");
+    xhr.setRequestHeader("content-type", file.type || "application/octet-stream");
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress?.(Math.max(1, Math.round((event.loaded / event.total) * 100)));
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress?.(100);
+        resolve();
+      } else {
+        let message = `Upload falhou (${xhr.status}).`;
+        try {
+          const parsed = JSON.parse(xhr.responseText) as { message?: string; error?: string };
+          message = parsed.message || parsed.error || message;
+        } catch {
+          if (xhr.responseText) message = xhr.responseText;
+        }
+        reject(new Error(message));
+      }
+    };
+    xhr.onerror = () => reject(new Error("Falha de rede durante o upload."));
+    xhr.onabort = () => reject(new Error("Upload cancelado."));
+    xhr.send(file);
   });
-  if (error) throw error;
-  return { bucket, path };
+
+  return { bucket, path, fileName: file.name, mimeType: file.type || "application/octet-stream", sizeBytes: file.size };
 }
 
 export async function getSignedUrl(bucket: string, path: string, expiresIn = 60 * 60) {
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path;
   const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
   if (error) throw error;
   return data.signedUrl;
-}
-
-export async function getPublicThumbnailUrl(path: string) {
-  // thumbnails bucket is private but readable by authenticated users via signed URL
-  return getSignedUrl("thumbnails", path, 60 * 60 * 24);
 }
 
 export async function deleteFromBucket(bucket: string, path: string) {
