@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { createPortalSession } from "@/utils/payments.functions";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
-import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+// PaymentTestModeBanner intentionally not shown to members; admin diagnostics only.
 import { PLANS, type Plan } from "@/lib/billing/plans";
 import { Check, ExternalLink, Sparkles } from "lucide-react";
 

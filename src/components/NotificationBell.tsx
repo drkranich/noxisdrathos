@@ -43,7 +43,7 @@ export function NotificationBell({ compact = false }: { compact?: boolean }) {
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-40"
           />
-          <div className="absolute right-0 mt-2 w-[360px] max-w-[92vw] bg-card border border-border shadow-2xl z-50 backdrop-blur-xl">
+          <div className="absolute right-0 bottom-full mb-2 w-[360px] max-w-[92vw] max-h-[min(70vh,560px)] flex flex-col bg-card border border-border shadow-2xl z-50 backdrop-blur-xl">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
                 inbox · {unread} não lidas
@@ -56,7 +56,7 @@ export function NotificationBell({ compact = false }: { compact?: boolean }) {
                 marcar tudo
               </button>
             </div>
-            <div className="max-h-[60vh] overflow-y-auto">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
               {items.length === 0 ? (
                 <div className="px-6 py-12 text-center text-sm text-muted-foreground">
                   <p className="font-mono text-[10px] uppercase tracking-[0.3em] mb-3">silêncio</p>
