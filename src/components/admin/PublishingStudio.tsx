@@ -166,7 +166,7 @@ export function PublishingStudio({ contentId = "new" }: { contentId?: string }) 
     const assetPaths = [thumbPath, bannerPath, storagePath, trailerPath, ...attachments.map((a) => a.path)].filter(Boolean) as string[];
     if (assetPaths.length) await supabase.from("media_assets").update({ content_id: savedId, status: "attached" }).in("path", assetPaths);
     toast.success(finalStatus === "published" ? "Conteúdo publicado" : finalStatus === "scheduled" ? "Publicação agendada" : "Rascunho salvo");
-    if (isNew && data?.id) nav({ to: "/app/admin/content/$id", params: { id: data.id }, replace: true });
+    if (isNew && data?.id) nav({ to: "/app/admin/content/edit/$id", params: { id: data.id }, replace: true });
   }
 
   if (loading) return <div className="px-8 lg:px-14 py-12 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">carregando…</div>;
