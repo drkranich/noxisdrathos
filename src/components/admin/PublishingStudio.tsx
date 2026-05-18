@@ -73,10 +73,13 @@ export function PublishingStudio({ contentId = "new" }: { contentId?: string }) 
   const [readingMin, setReadingMin] = useState<string>("");
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [collections, setCollections] = useState<Array<{ id: string; title: string }>>([]);
+  const [collectionId, setCollectionId] = useState<string | null>(null);
   const slugDirty = useRef(false);
 
   useEffect(() => {
     supabase.from("categories").select("id,name,slug").order("sort_order").then(({ data }) => setCategories((data ?? []) as Category[]));
+    supabase.from("collections").select("id,title").order("sort_order").then(({ data }) => setCollections((data ?? []) as Array<{ id: string; title: string }>));
   }, []);
 
   useEffect(() => {
@@ -92,6 +95,7 @@ export function PublishingStudio({ contentId = "new" }: { contentId?: string }) 
       setDuration(data.duration_seconds ? String(data.duration_seconds) : ""); setReadingMin(data.reading_minutes ? String(data.reading_minutes) : "");
       setTrailerBucket(data.trailer_bucket as PublishingBucket | null); setTrailerPath(data.trailer_path); setBannerPath(data.banner_path);
       if (data.attachment_paths && Array.isArray(data.attachment_paths)) setAttachments(data.attachment_paths as Array<{ bucket: PublishingBucket; path: string; name: string }>);
+      supabase.from("collection_items").select("collection_id").eq("content_id", id).limit(1).maybeSingle().then(({ data }) => setCollectionId(data?.collection_id ?? null));
       if (data.thumbnail_url) { setThumbPath(data.thumbnail_url); try { setThumbPreview(await getSignedUrl(data.thumbnail_bucket || "thumbnails", data.thumbnail_url, 3600)); } catch {} }
       if (data.banner_path && data.banner_bucket) { try { setBannerPreview(await getSignedUrl(data.banner_bucket, data.banner_path, 3600)); } catch {} }
       setLoading(false); slugDirty.current = true;
@@ -101,9 +105,10 @@ export function PublishingStudio({ contentId = "new" }: { contentId?: string }) 
   function onTitleChange(v: string) { setTitle(v); if (!slugDirty.current) setSlug(slugify(v)); }
 
   async function recordAsset(asset: Awaited<ReturnType<typeof uploadToBucket>>, role: UploadRole, contentId?: string | null) {
+    if (!user?.id) throw new Error("Sessão administrativa expirada. Entre novamente.");
     await supabase.from("media_assets").upsert({
       content_id: contentId ?? (isNew ? null : id), bucket: asset.bucket, path: asset.path, file_name: asset.fileName,
-      mime_type: asset.mimeType, size_bytes: asset.sizeBytes, asset_role: role, status: contentId ? "attached" : "uploaded", created_by: user?.id ?? null,
+      mime_type: asset.mimeType, size_bytes: asset.sizeBytes, asset_role: role, status: contentId ? "attached" : "uploaded", created_by: user.id,
     }, { onConflict: "bucket,path" });
   }
 
