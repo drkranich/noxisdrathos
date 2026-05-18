@@ -309,6 +309,7 @@ export type Database = {
           publish_at: string | null
           reading_minutes: number | null
           required_plan_id: string
+          search_vector: unknown
           slug: string
           sort_order: number
           status: Database["public"]["Enums"]["content_status"]
@@ -344,6 +345,7 @@ export type Database = {
           publish_at?: string | null
           reading_minutes?: number | null
           required_plan_id?: string
+          search_vector?: unknown
           slug: string
           sort_order?: number
           status?: Database["public"]["Enums"]["content_status"]
@@ -379,6 +381,7 @@ export type Database = {
           publish_at?: string | null
           reading_minutes?: number | null
           required_plan_id?: string
+          search_vector?: unknown
           slug?: string
           sort_order?: number
           status?: Database["public"]["Enums"]["content_status"]
