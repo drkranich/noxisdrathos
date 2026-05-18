@@ -38,6 +38,7 @@ const SELECT = "id,slug,title,subtitle,type,content_kind,thumbnail_url,thumbnail
 export function useContent(filter: Filter = {}) {
   const [items, setItems] = useState<ContentRow[] | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [version, setVersion] = useState(0);
   const key = JSON.stringify(filter);
 
   useEffect(() => {
@@ -80,13 +81,13 @@ export function useContent(filter: Filter = {}) {
     return () => {
       cancelled = true;
     };
-  }, [key]);
+  }, [key, version]);
 
   useEffect(() => {
     const ch = supabase
       .channel(`content-grid-${key}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "content" }, () => {
-        setItems((prev) => (prev ? [...prev] : prev));
+        setVersion((v) => v + 1);
       })
       .subscribe();
     return () => {

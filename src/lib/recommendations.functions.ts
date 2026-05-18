@@ -8,6 +8,7 @@ export type RecContent = {
   subtitle: string | null;
   type: string;
   thumbnail_url: string | null;
+  thumbnail_bucket?: string | null;
   duration_seconds: number | null;
   reading_minutes: number | null;
   tags: string[];
@@ -19,7 +20,7 @@ export type RecContent = {
 };
 
 const SELECT_COLS =
-  "id,slug,title,subtitle,type,thumbnail_url,duration_seconds,reading_minutes,tags,is_featured,created_at,category_id";
+  "id,slug,title,subtitle,type,thumbnail_url,thumbnail_bucket,duration_seconds,reading_minutes,tags,is_featured,created_at,category_id";
 
 export const getPersonalizedRails = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

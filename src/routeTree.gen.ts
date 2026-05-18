@@ -41,15 +41,20 @@ import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAppAdminIndexRouteImport } from './routes/_authenticated/app.admin.index'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedAppContentSlugRouteImport } from './routes/_authenticated/app.content.$slug'
+import { Route as AuthenticatedAppAdminUploadsRouteImport } from './routes/_authenticated/app.admin.uploads'
 import { Route as AuthenticatedAppAdminMembersRouteImport } from './routes/_authenticated/app.admin.members'
+import { Route as AuthenticatedAppAdminMediaRouteImport } from './routes/_authenticated/app.admin.media'
 import { Route as AuthenticatedAppAdminLogsRouteImport } from './routes/_authenticated/app.admin.logs'
 import { Route as AuthenticatedAppAdminIntelligenceRouteImport } from './routes/_authenticated/app.admin.intelligence'
 import { Route as AuthenticatedAppAdminCommentsRouteImport } from './routes/_authenticated/app.admin.comments'
+import { Route as AuthenticatedAppAdminCollectionsRouteImport } from './routes/_authenticated/app.admin.collections'
 import { Route as AuthenticatedAppAdminCategoriesRouteImport } from './routes/_authenticated/app.admin.categories'
 import { Route as AuthenticatedAppAdminBillingRouteImport } from './routes/_authenticated/app.admin.billing'
 import { Route as AuthenticatedAppAdminAnnouncementsRouteImport } from './routes/_authenticated/app.admin.announcements'
 import { Route as AuthenticatedAppAdminContentIndexRouteImport } from './routes/_authenticated/app.admin.content.index'
+import { Route as AuthenticatedAppAdminContentNewRouteImport } from './routes/_authenticated/app.admin.content.new'
 import { Route as AuthenticatedAppAdminContentIdRouteImport } from './routes/_authenticated/app.admin.content.$id'
+import { Route as AuthenticatedAppAdminContentEditRouteImport } from './routes/_authenticated/app.admin.content.edit.'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -220,10 +225,22 @@ const AuthenticatedAppContentSlugRoute =
     path: '/content/$slug',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppAdminUploadsRoute =
+  AuthenticatedAppAdminUploadsRouteImport.update({
+    id: '/uploads',
+    path: '/uploads',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
 const AuthenticatedAppAdminMembersRoute =
   AuthenticatedAppAdminMembersRouteImport.update({
     id: '/members',
     path: '/members',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
+const AuthenticatedAppAdminMediaRoute =
+  AuthenticatedAppAdminMediaRouteImport.update({
+    id: '/media',
+    path: '/media',
     getParentRoute: () => AuthenticatedAppAdminRoute,
   } as any)
 const AuthenticatedAppAdminLogsRoute =
@@ -242,6 +259,12 @@ const AuthenticatedAppAdminCommentsRoute =
   AuthenticatedAppAdminCommentsRouteImport.update({
     id: '/comments',
     path: '/comments',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
+const AuthenticatedAppAdminCollectionsRoute =
+  AuthenticatedAppAdminCollectionsRouteImport.update({
+    id: '/collections',
+    path: '/collections',
     getParentRoute: () => AuthenticatedAppAdminRoute,
   } as any)
 const AuthenticatedAppAdminCategoriesRoute =
@@ -268,10 +291,22 @@ const AuthenticatedAppAdminContentIndexRoute =
     path: '/content/',
     getParentRoute: () => AuthenticatedAppAdminRoute,
   } as any)
+const AuthenticatedAppAdminContentNewRoute =
+  AuthenticatedAppAdminContentNewRouteImport.update({
+    id: '/content/new',
+    path: '/content/new',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
 const AuthenticatedAppAdminContentIdRoute =
   AuthenticatedAppAdminContentIdRouteImport.update({
     id: '/content/$id',
     path: '/content/$id',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
+const AuthenticatedAppAdminContentEditRoute =
+  AuthenticatedAppAdminContentEditRouteImport.update({
+    id: '/content/edit/',
+    path: '/content/edit/',
     getParentRoute: () => AuthenticatedAppAdminRoute,
   } as any)
 
@@ -307,15 +342,20 @@ export interface FileRoutesByFullPath {
   '/app/admin/announcements': typeof AuthenticatedAppAdminAnnouncementsRoute
   '/app/admin/billing': typeof AuthenticatedAppAdminBillingRoute
   '/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
+  '/app/admin/collections': typeof AuthenticatedAppAdminCollectionsRoute
   '/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
   '/app/admin/intelligence': typeof AuthenticatedAppAdminIntelligenceRoute
   '/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
+  '/app/admin/media': typeof AuthenticatedAppAdminMediaRoute
   '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
+  '/app/admin/uploads': typeof AuthenticatedAppAdminUploadsRoute
   '/app/content/$slug': typeof AuthenticatedAppContentSlugRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/app/admin/': typeof AuthenticatedAppAdminIndexRoute
   '/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
+  '/app/admin/content/new': typeof AuthenticatedAppAdminContentNewRoute
   '/app/admin/content/': typeof AuthenticatedAppAdminContentIndexRoute
+  '/app/admin/content/edit/': typeof AuthenticatedAppAdminContentEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -347,15 +387,20 @@ export interface FileRoutesByTo {
   '/app/admin/announcements': typeof AuthenticatedAppAdminAnnouncementsRoute
   '/app/admin/billing': typeof AuthenticatedAppAdminBillingRoute
   '/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
+  '/app/admin/collections': typeof AuthenticatedAppAdminCollectionsRoute
   '/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
   '/app/admin/intelligence': typeof AuthenticatedAppAdminIntelligenceRoute
   '/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
+  '/app/admin/media': typeof AuthenticatedAppAdminMediaRoute
   '/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
+  '/app/admin/uploads': typeof AuthenticatedAppAdminUploadsRoute
   '/app/content/$slug': typeof AuthenticatedAppContentSlugRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/app/admin': typeof AuthenticatedAppAdminIndexRoute
   '/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
+  '/app/admin/content/new': typeof AuthenticatedAppAdminContentNewRoute
   '/app/admin/content': typeof AuthenticatedAppAdminContentIndexRoute
+  '/app/admin/content/edit': typeof AuthenticatedAppAdminContentEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -391,15 +436,20 @@ export interface FileRoutesById {
   '/_authenticated/app/admin/announcements': typeof AuthenticatedAppAdminAnnouncementsRoute
   '/_authenticated/app/admin/billing': typeof AuthenticatedAppAdminBillingRoute
   '/_authenticated/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
+  '/_authenticated/app/admin/collections': typeof AuthenticatedAppAdminCollectionsRoute
   '/_authenticated/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
   '/_authenticated/app/admin/intelligence': typeof AuthenticatedAppAdminIntelligenceRoute
   '/_authenticated/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
+  '/_authenticated/app/admin/media': typeof AuthenticatedAppAdminMediaRoute
   '/_authenticated/app/admin/members': typeof AuthenticatedAppAdminMembersRoute
+  '/_authenticated/app/admin/uploads': typeof AuthenticatedAppAdminUploadsRoute
   '/_authenticated/app/content/$slug': typeof AuthenticatedAppContentSlugRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/_authenticated/app/admin/': typeof AuthenticatedAppAdminIndexRoute
   '/_authenticated/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
+  '/_authenticated/app/admin/content/new': typeof AuthenticatedAppAdminContentNewRoute
   '/_authenticated/app/admin/content/': typeof AuthenticatedAppAdminContentIndexRoute
+  '/_authenticated/app/admin/content/edit/': typeof AuthenticatedAppAdminContentEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -435,15 +485,20 @@ export interface FileRouteTypes {
     | '/app/admin/announcements'
     | '/app/admin/billing'
     | '/app/admin/categories'
+    | '/app/admin/collections'
     | '/app/admin/comments'
     | '/app/admin/intelligence'
     | '/app/admin/logs'
+    | '/app/admin/media'
     | '/app/admin/members'
+    | '/app/admin/uploads'
     | '/app/content/$slug'
     | '/api/public/payments/webhook'
     | '/app/admin/'
     | '/app/admin/content/$id'
+    | '/app/admin/content/new'
     | '/app/admin/content/'
+    | '/app/admin/content/edit/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -475,15 +530,20 @@ export interface FileRouteTypes {
     | '/app/admin/announcements'
     | '/app/admin/billing'
     | '/app/admin/categories'
+    | '/app/admin/collections'
     | '/app/admin/comments'
     | '/app/admin/intelligence'
     | '/app/admin/logs'
+    | '/app/admin/media'
     | '/app/admin/members'
+    | '/app/admin/uploads'
     | '/app/content/$slug'
     | '/api/public/payments/webhook'
     | '/app/admin'
     | '/app/admin/content/$id'
+    | '/app/admin/content/new'
     | '/app/admin/content'
+    | '/app/admin/content/edit'
   id:
     | '__root__'
     | '/'
@@ -518,15 +578,20 @@ export interface FileRouteTypes {
     | '/_authenticated/app/admin/announcements'
     | '/_authenticated/app/admin/billing'
     | '/_authenticated/app/admin/categories'
+    | '/_authenticated/app/admin/collections'
     | '/_authenticated/app/admin/comments'
     | '/_authenticated/app/admin/intelligence'
     | '/_authenticated/app/admin/logs'
+    | '/_authenticated/app/admin/media'
     | '/_authenticated/app/admin/members'
+    | '/_authenticated/app/admin/uploads'
     | '/_authenticated/app/content/$slug'
     | '/api/public/payments/webhook'
     | '/_authenticated/app/admin/'
     | '/_authenticated/app/admin/content/$id'
+    | '/_authenticated/app/admin/content/new'
     | '/_authenticated/app/admin/content/'
+    | '/_authenticated/app/admin/content/edit/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -771,11 +836,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppContentSlugRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/admin/uploads': {
+      id: '/_authenticated/app/admin/uploads'
+      path: '/uploads'
+      fullPath: '/app/admin/uploads'
+      preLoaderRoute: typeof AuthenticatedAppAdminUploadsRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
     '/_authenticated/app/admin/members': {
       id: '/_authenticated/app/admin/members'
       path: '/members'
       fullPath: '/app/admin/members'
       preLoaderRoute: typeof AuthenticatedAppAdminMembersRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
+    '/_authenticated/app/admin/media': {
+      id: '/_authenticated/app/admin/media'
+      path: '/media'
+      fullPath: '/app/admin/media'
+      preLoaderRoute: typeof AuthenticatedAppAdminMediaRouteImport
       parentRoute: typeof AuthenticatedAppAdminRoute
     }
     '/_authenticated/app/admin/logs': {
@@ -797,6 +876,13 @@ declare module '@tanstack/react-router' {
       path: '/comments'
       fullPath: '/app/admin/comments'
       preLoaderRoute: typeof AuthenticatedAppAdminCommentsRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
+    '/_authenticated/app/admin/collections': {
+      id: '/_authenticated/app/admin/collections'
+      path: '/collections'
+      fullPath: '/app/admin/collections'
+      preLoaderRoute: typeof AuthenticatedAppAdminCollectionsRouteImport
       parentRoute: typeof AuthenticatedAppAdminRoute
     }
     '/_authenticated/app/admin/categories': {
@@ -827,11 +913,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAdminContentIndexRouteImport
       parentRoute: typeof AuthenticatedAppAdminRoute
     }
+    '/_authenticated/app/admin/content/new': {
+      id: '/_authenticated/app/admin/content/new'
+      path: '/content/new'
+      fullPath: '/app/admin/content/new'
+      preLoaderRoute: typeof AuthenticatedAppAdminContentNewRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
     '/_authenticated/app/admin/content/$id': {
       id: '/_authenticated/app/admin/content/$id'
       path: '/content/$id'
       fullPath: '/app/admin/content/$id'
       preLoaderRoute: typeof AuthenticatedAppAdminContentIdRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
+    '/_authenticated/app/admin/content/edit/': {
+      id: '/_authenticated/app/admin/content/edit/'
+      path: '/content/edit'
+      fullPath: '/app/admin/content/edit/'
+      preLoaderRoute: typeof AuthenticatedAppAdminContentEditRouteImport
       parentRoute: typeof AuthenticatedAppAdminRoute
     }
   }
@@ -841,13 +941,18 @@ interface AuthenticatedAppAdminRouteChildren {
   AuthenticatedAppAdminAnnouncementsRoute: typeof AuthenticatedAppAdminAnnouncementsRoute
   AuthenticatedAppAdminBillingRoute: typeof AuthenticatedAppAdminBillingRoute
   AuthenticatedAppAdminCategoriesRoute: typeof AuthenticatedAppAdminCategoriesRoute
+  AuthenticatedAppAdminCollectionsRoute: typeof AuthenticatedAppAdminCollectionsRoute
   AuthenticatedAppAdminCommentsRoute: typeof AuthenticatedAppAdminCommentsRoute
   AuthenticatedAppAdminIntelligenceRoute: typeof AuthenticatedAppAdminIntelligenceRoute
   AuthenticatedAppAdminLogsRoute: typeof AuthenticatedAppAdminLogsRoute
+  AuthenticatedAppAdminMediaRoute: typeof AuthenticatedAppAdminMediaRoute
   AuthenticatedAppAdminMembersRoute: typeof AuthenticatedAppAdminMembersRoute
+  AuthenticatedAppAdminUploadsRoute: typeof AuthenticatedAppAdminUploadsRoute
   AuthenticatedAppAdminIndexRoute: typeof AuthenticatedAppAdminIndexRoute
   AuthenticatedAppAdminContentIdRoute: typeof AuthenticatedAppAdminContentIdRoute
+  AuthenticatedAppAdminContentNewRoute: typeof AuthenticatedAppAdminContentNewRoute
   AuthenticatedAppAdminContentIndexRoute: typeof AuthenticatedAppAdminContentIndexRoute
+  AuthenticatedAppAdminContentEditRoute: typeof AuthenticatedAppAdminContentEditRoute
 }
 
 const AuthenticatedAppAdminRouteChildren: AuthenticatedAppAdminRouteChildren = {
@@ -855,15 +960,20 @@ const AuthenticatedAppAdminRouteChildren: AuthenticatedAppAdminRouteChildren = {
     AuthenticatedAppAdminAnnouncementsRoute,
   AuthenticatedAppAdminBillingRoute: AuthenticatedAppAdminBillingRoute,
   AuthenticatedAppAdminCategoriesRoute: AuthenticatedAppAdminCategoriesRoute,
+  AuthenticatedAppAdminCollectionsRoute: AuthenticatedAppAdminCollectionsRoute,
   AuthenticatedAppAdminCommentsRoute: AuthenticatedAppAdminCommentsRoute,
   AuthenticatedAppAdminIntelligenceRoute:
     AuthenticatedAppAdminIntelligenceRoute,
   AuthenticatedAppAdminLogsRoute: AuthenticatedAppAdminLogsRoute,
+  AuthenticatedAppAdminMediaRoute: AuthenticatedAppAdminMediaRoute,
   AuthenticatedAppAdminMembersRoute: AuthenticatedAppAdminMembersRoute,
+  AuthenticatedAppAdminUploadsRoute: AuthenticatedAppAdminUploadsRoute,
   AuthenticatedAppAdminIndexRoute: AuthenticatedAppAdminIndexRoute,
   AuthenticatedAppAdminContentIdRoute: AuthenticatedAppAdminContentIdRoute,
+  AuthenticatedAppAdminContentNewRoute: AuthenticatedAppAdminContentNewRoute,
   AuthenticatedAppAdminContentIndexRoute:
     AuthenticatedAppAdminContentIndexRoute,
+  AuthenticatedAppAdminContentEditRoute: AuthenticatedAppAdminContentEditRoute,
 }
 
 const AuthenticatedAppAdminRouteWithChildren =
@@ -953,13 +1063,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
