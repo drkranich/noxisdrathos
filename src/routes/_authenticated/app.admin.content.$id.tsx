@@ -138,6 +138,7 @@ function ContentEditor() {
     let finalStatus: "draft" | "scheduled" | "published" = targetStatus;
     let publishTs: string | null = scheduled && publishAt ? new Date(publishAt).toISOString() : null;
     if (publishTs && targetStatus !== "draft" && new Date(publishTs) > new Date()) finalStatus = "scheduled";
+    if (!user?.id) { setError("Sessão administrativa expirada. Entre novamente."); setSaving(false); return; }
     if (!title.trim()) { setError("O título é obrigatório."); setSaving(false); return; }
 
     const payload = {
@@ -153,7 +154,7 @@ function ContentEditor() {
     const { data, error } = isNew ? await supabase.from("content").insert(payload).select("id").single() : await supabase.from("content").update(payload).eq("id", id).select("id").single();
     setSaving(false);
     if (error) { setError(error.message); toast.error(error.message); return; }
-    await supabase.from("admin_logs").insert({ actor_id: user?.id, action: `content_${finalStatus}`, target_table: "content", target_id: data?.id ?? id, metadata: { title: payload.title, type, contentKind } });
+    await supabase.from("admin_logs").insert({ actor_id: user.id, action: `content_${finalStatus}`, target_table: "content", target_id: data?.id ?? id, metadata: { title: payload.title, type, contentKind } });
     if (data?.id) await supabase.from("media_assets").update({ content_id: data.id, status: "attached" }).is("content_id", null);
     toast.success(finalStatus === "published" ? "Conteúdo publicado" : finalStatus === "scheduled" ? "Publicação agendada" : "Rascunho salvo");
     if (isNew && data?.id) nav({ to: "/app/admin/content/$id", params: { id: data.id }, replace: true });
