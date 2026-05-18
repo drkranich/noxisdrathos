@@ -120,7 +120,7 @@ function AdminContentList() {
               <tr key={r.id} className="border-b border-border/50 hover:bg-card/30">
                 <td className="p-4">
                   <Link
-                    to="/app/admin/content/$id"
+                    to="/app/admin/content/edit/$id"
                     params={{ id: r.id }}
                     className="hover:text-[var(--neon)]"
                   >
@@ -141,7 +141,7 @@ function AdminContentList() {
                 <td className="p-4">
                   <div className="flex items-center gap-2 justify-end">
                     <Link
-                      to="/app/admin/content/$id"
+                      to="/app/admin/content/edit/$id"
                       params={{ id: r.id }}
                       className="p-2 text-muted-foreground hover:text-foreground"
                       aria-label="Editar"

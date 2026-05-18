@@ -49,7 +49,9 @@ import { Route as AuthenticatedAppAdminCategoriesRouteImport } from './routes/_a
 import { Route as AuthenticatedAppAdminBillingRouteImport } from './routes/_authenticated/app.admin.billing'
 import { Route as AuthenticatedAppAdminAnnouncementsRouteImport } from './routes/_authenticated/app.admin.announcements'
 import { Route as AuthenticatedAppAdminContentIndexRouteImport } from './routes/_authenticated/app.admin.content.index'
+import { Route as AuthenticatedAppAdminContentNewRouteImport } from './routes/_authenticated/app.admin.content.new'
 import { Route as AuthenticatedAppAdminContentIdRouteImport } from './routes/_authenticated/app.admin.content.$id'
+import { Route as AuthenticatedAppAdminContentEditRouteImport } from './routes/_authenticated/app.admin.content.edit.'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -268,10 +270,22 @@ const AuthenticatedAppAdminContentIndexRoute =
     path: '/content/',
     getParentRoute: () => AuthenticatedAppAdminRoute,
   } as any)
+const AuthenticatedAppAdminContentNewRoute =
+  AuthenticatedAppAdminContentNewRouteImport.update({
+    id: '/content/new',
+    path: '/content/new',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
 const AuthenticatedAppAdminContentIdRoute =
   AuthenticatedAppAdminContentIdRouteImport.update({
     id: '/content/$id',
     path: '/content/$id',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
+const AuthenticatedAppAdminContentEditRoute =
+  AuthenticatedAppAdminContentEditRouteImport.update({
+    id: '/content/edit/',
+    path: '/content/edit/',
     getParentRoute: () => AuthenticatedAppAdminRoute,
   } as any)
 
@@ -315,7 +329,9 @@ export interface FileRoutesByFullPath {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/app/admin/': typeof AuthenticatedAppAdminIndexRoute
   '/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
+  '/app/admin/content/new': typeof AuthenticatedAppAdminContentNewRoute
   '/app/admin/content/': typeof AuthenticatedAppAdminContentIndexRoute
+  '/app/admin/content/edit/': typeof AuthenticatedAppAdminContentEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -355,7 +371,9 @@ export interface FileRoutesByTo {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/app/admin': typeof AuthenticatedAppAdminIndexRoute
   '/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
+  '/app/admin/content/new': typeof AuthenticatedAppAdminContentNewRoute
   '/app/admin/content': typeof AuthenticatedAppAdminContentIndexRoute
+  '/app/admin/content/edit': typeof AuthenticatedAppAdminContentEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -399,7 +417,9 @@ export interface FileRoutesById {
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/_authenticated/app/admin/': typeof AuthenticatedAppAdminIndexRoute
   '/_authenticated/app/admin/content/$id': typeof AuthenticatedAppAdminContentIdRoute
+  '/_authenticated/app/admin/content/new': typeof AuthenticatedAppAdminContentNewRoute
   '/_authenticated/app/admin/content/': typeof AuthenticatedAppAdminContentIndexRoute
+  '/_authenticated/app/admin/content/edit/': typeof AuthenticatedAppAdminContentEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -443,7 +463,9 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/app/admin/'
     | '/app/admin/content/$id'
+    | '/app/admin/content/new'
     | '/app/admin/content/'
+    | '/app/admin/content/edit/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -483,7 +505,9 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/app/admin'
     | '/app/admin/content/$id'
+    | '/app/admin/content/new'
     | '/app/admin/content'
+    | '/app/admin/content/edit'
   id:
     | '__root__'
     | '/'
@@ -526,7 +550,9 @@ export interface FileRouteTypes {
     | '/api/public/payments/webhook'
     | '/_authenticated/app/admin/'
     | '/_authenticated/app/admin/content/$id'
+    | '/_authenticated/app/admin/content/new'
     | '/_authenticated/app/admin/content/'
+    | '/_authenticated/app/admin/content/edit/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -827,11 +853,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAdminContentIndexRouteImport
       parentRoute: typeof AuthenticatedAppAdminRoute
     }
+    '/_authenticated/app/admin/content/new': {
+      id: '/_authenticated/app/admin/content/new'
+      path: '/content/new'
+      fullPath: '/app/admin/content/new'
+      preLoaderRoute: typeof AuthenticatedAppAdminContentNewRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
     '/_authenticated/app/admin/content/$id': {
       id: '/_authenticated/app/admin/content/$id'
       path: '/content/$id'
       fullPath: '/app/admin/content/$id'
       preLoaderRoute: typeof AuthenticatedAppAdminContentIdRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
+    '/_authenticated/app/admin/content/edit/': {
+      id: '/_authenticated/app/admin/content/edit/'
+      path: '/content/edit'
+      fullPath: '/app/admin/content/edit/'
+      preLoaderRoute: typeof AuthenticatedAppAdminContentEditRouteImport
       parentRoute: typeof AuthenticatedAppAdminRoute
     }
   }
@@ -847,7 +887,9 @@ interface AuthenticatedAppAdminRouteChildren {
   AuthenticatedAppAdminMembersRoute: typeof AuthenticatedAppAdminMembersRoute
   AuthenticatedAppAdminIndexRoute: typeof AuthenticatedAppAdminIndexRoute
   AuthenticatedAppAdminContentIdRoute: typeof AuthenticatedAppAdminContentIdRoute
+  AuthenticatedAppAdminContentNewRoute: typeof AuthenticatedAppAdminContentNewRoute
   AuthenticatedAppAdminContentIndexRoute: typeof AuthenticatedAppAdminContentIndexRoute
+  AuthenticatedAppAdminContentEditRoute: typeof AuthenticatedAppAdminContentEditRoute
 }
 
 const AuthenticatedAppAdminRouteChildren: AuthenticatedAppAdminRouteChildren = {
@@ -862,8 +904,10 @@ const AuthenticatedAppAdminRouteChildren: AuthenticatedAppAdminRouteChildren = {
   AuthenticatedAppAdminMembersRoute: AuthenticatedAppAdminMembersRoute,
   AuthenticatedAppAdminIndexRoute: AuthenticatedAppAdminIndexRoute,
   AuthenticatedAppAdminContentIdRoute: AuthenticatedAppAdminContentIdRoute,
+  AuthenticatedAppAdminContentNewRoute: AuthenticatedAppAdminContentNewRoute,
   AuthenticatedAppAdminContentIndexRoute:
     AuthenticatedAppAdminContentIndexRoute,
+  AuthenticatedAppAdminContentEditRoute: AuthenticatedAppAdminContentEditRoute,
 }
 
 const AuthenticatedAppAdminRouteWithChildren =
@@ -953,3 +997,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
