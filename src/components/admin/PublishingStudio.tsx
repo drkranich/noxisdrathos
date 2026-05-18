@@ -148,12 +148,18 @@ export function PublishingStudio({ contentId = "new" }: { contentId?: string }) 
       publish_at: publishTs, thumbnail_bucket: "thumbnails", thumbnail_url: thumbPath, banner_bucket: bannerPath ? "banners" : null, banner_path: bannerPath,
       storage_bucket: storageBucket, storage_path: storagePath, trailer_bucket: trailerBucket, trailer_path: trailerPath, attachment_paths: attachments,
       external_url: externalUrl.trim() || null, duration_seconds: duration ? Number(duration) : null, reading_minutes: readingMin ? Number(readingMin) : null,
-      sort_order: Number(sortOrder) || 0, media_metadata: { attachments: attachments.length, hasTrailer: !!trailerPath }, created_by: user?.id ?? null,
+      sort_order: Number(sortOrder) || 0, media_metadata: { attachments: attachments.length, hasTrailer: !!trailerPath, collectionId }, created_by: user.id,
     };
 
     const { data, error } = isNew ? await supabase.from("content").insert(payload).select("id").single() : await supabase.from("content").update(payload).eq("id", id).select("id").single();
     setSaving(false);
     if (error) { setError(error.message); toast.error(error.message); return; }
+    const savedId = data?.id ?? id;
+    if (collectionId) {
+      await supabase.from("collection_items").upsert({ collection_id: collectionId, content_id: savedId, sort_order: Number(sortOrder) || 0 }, { onConflict: "collection_id,content_id" });
+    } else if (!isNew) {
+      await supabase.from("collection_items").delete().eq("content_id", savedId);
+    }
     await supabase.from("admin_logs").insert({ actor_id: user.id, action: `content_${finalStatus}`, target_table: "content", target_id: data?.id ?? id, metadata: { title: payload.title, type, contentKind } });
     if (data?.id) await supabase.from("media_assets").update({ content_id: data.id, status: "attached" }).is("content_id", null);
     toast.success(finalStatus === "published" ? "Conteúdo publicado" : finalStatus === "scheduled" ? "Publicação agendada" : "Rascunho salvo");
@@ -186,6 +192,7 @@ export function PublishingStudio({ contentId = "new" }: { contentId?: string }) 
           <Section label="anexos"><div className="space-y-2">{attachments.map((a) => <AssetLine key={a.path} path={a.name || a.path} onRemove={() => setAttachments((prev) => prev.filter((x) => x.path !== a.path))} />)}</div><FileButton accept="application/pdf,image/*,text/*,application/zip,application/json" onPick={uploadAttachment} loadingPct={uploadProgress.attachment} label="adicionar anexo" /></Section>
           <Section label="acesso"><Select value={visibility} onValueChange={(v) => setVisibility(v as typeof visibility)}><SelectTrigger className="bg-card border-border"><SelectValue /></SelectTrigger><SelectContent>{VISIBILITIES.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent></Select><Select value={requiredPlan} onValueChange={(v) => setRequiredPlan(v as typeof requiredPlan)}><SelectTrigger className="bg-card border-border"><SelectValue /></SelectTrigger><SelectContent>{PLANS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent></Select></Section>
           <Section label="categoria"><Select value={categoryId ?? "none"} onValueChange={(v) => setCategoryId(v === "none" ? null : v)}><SelectTrigger className="bg-card border-border"><SelectValue placeholder="—" /></SelectTrigger><SelectContent><SelectItem value="none">sem categoria</SelectItem>{categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select></Section>
+          <Section label="coleção"><Select value={collectionId ?? "none"} onValueChange={(v) => setCollectionId(v === "none" ? null : v)}><SelectTrigger className="bg-card border-border"><SelectValue placeholder="—" /></SelectTrigger><SelectContent><SelectItem value="none">sem coleção</SelectItem>{collections.map((c) => <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>)}</SelectContent></Select></Section>
           <Section label="tags"><Input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="ia, automação…" className="bg-card border-border" /></Section>
           <Section label="operação"><Input value={sortOrder} onChange={(e) => setSortOrder(e.target.value.replace(/[^0-9-]/g, ""))} placeholder="ordem" className="bg-card border-border" /><div className="flex items-center justify-between"><span className="text-sm">agendar</span><Switch checked={scheduled} onCheckedChange={setScheduled} /></div>{scheduled ? <Input type="datetime-local" value={publishAt} onChange={(e) => setPublishAt(e.target.value)} className="bg-card border-border" /> : null}<div className="flex items-center justify-between"><span className="text-sm">destaque</span><Switch checked={featured} onCheckedChange={setFeatured} /></div></Section>
           <Section label="metadados"><Input value={externalUrl} onChange={(e) => setExternalUrl(e.target.value)} placeholder="URL externa opcional" className="bg-card border-border" /><Input value={duration} onChange={(e) => setDuration(e.target.value.replace(/\D/g, ""))} placeholder="duração em segundos" className="bg-card border-border" /><Input value={readingMin} onChange={(e) => setReadingMin(e.target.value.replace(/\D/g, ""))} placeholder="minutos de leitura" className="bg-card border-border" /></Section>
