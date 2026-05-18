@@ -45,7 +45,7 @@ function MemberContentDetail() {
   }, [c.id]);
 
   const hero = assets.banner || assets.thumb;
-  const tags = useMemo(() => (c.tags ?? []).slice(0, 8), [c.tags]);
+  const tags = useMemo(() => ((c.tags ?? []) as string[]).slice(0, 8), [c.tags]);
 
   return (
     <div className="pb-24">
@@ -62,7 +62,7 @@ function MemberContentDetail() {
           <h1 className="font-display text-5xl md:text-7xl mt-5 leading-[0.92] text-balance">{c.title}</h1>
           {c.subtitle ? <p className="mt-6 text-lg text-muted-foreground max-w-2xl">{c.subtitle}</p> : null}
           <div className="mt-7 flex flex-wrap gap-2">
-            {tags.map((tag) => <span key={tag} className="border border-border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground">{tag}</span>)}
+            {tags.map((tag: string) => <span key={tag} className="border border-border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground">{tag}</span>)}
           </div>
         </div>
       </section>
