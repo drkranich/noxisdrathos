@@ -76,6 +76,7 @@ export function PublishingStudio({ contentId = "new" }: { contentId?: string }) 
   const [collections, setCollections] = useState<Array<{ id: string; title: string }>>([]);
   const [collectionId, setCollectionId] = useState<string | null>(null);
   const slugDirty = useRef(false);
+  const uploadBatch = useRef(typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : String(Date.now()));
 
   useEffect(() => {
     supabase.from("categories").select("id,name,slug").order("sort_order").then(({ data }) => setCategories((data ?? []) as Category[]));
@@ -115,7 +116,8 @@ export function PublishingStudio({ contentId = "new" }: { contentId?: string }) 
   async function doUpload(bucket: PublishingBucket, file: File, role: UploadRole) {
     setError(null); setUploadProgress((p) => ({ ...p, [role]: 1 }));
     try {
-      const asset = await uploadToBucket({ bucket, file, pathPrefix: role, onProgress: (pct) => setUploadProgress((p) => ({ ...p, [role]: pct })) });
+      if (!user?.id) throw new Error("Sessão administrativa expirada. Entre novamente.");
+      const asset = await uploadToBucket({ bucket, file, pathPrefix: `admin/${user.id}/${uploadBatch.current}/${role}`, onProgress: (pct) => setUploadProgress((p) => ({ ...p, [role]: pct })) });
       await recordAsset(asset, role);
       toast.success("Upload concluído");
       return asset;
@@ -160,8 +162,9 @@ export function PublishingStudio({ contentId = "new" }: { contentId?: string }) 
     } else if (!isNew) {
       await supabase.from("collection_items").delete().eq("content_id", savedId);
     }
-    await supabase.from("admin_logs").insert({ actor_id: user.id, action: `content_${finalStatus}`, target_table: "content", target_id: data?.id ?? id, metadata: { title: payload.title, type, contentKind } });
-    if (data?.id) await supabase.from("media_assets").update({ content_id: data.id, status: "attached" }).is("content_id", null);
+    await supabase.from("admin_logs").insert({ actor_id: user.id, action: `content_${finalStatus}`, target_table: "content", target_id: savedId, metadata: { title: payload.title, type, contentKind, collectionId } });
+    const assetPaths = [thumbPath, bannerPath, storagePath, trailerPath, ...attachments.map((a) => a.path)].filter(Boolean) as string[];
+    if (assetPaths.length) await supabase.from("media_assets").update({ content_id: savedId, status: "attached" }).in("path", assetPaths);
     toast.success(finalStatus === "published" ? "Conteúdo publicado" : finalStatus === "scheduled" ? "Publicação agendada" : "Rascunho salvo");
     if (isNew && data?.id) nav({ to: "/app/admin/content/$id", params: { id: data.id }, replace: true });
   }
