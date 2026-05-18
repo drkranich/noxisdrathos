@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { getSignedUrl } from "@/lib/storage";
 import { CinematicHero } from "@/components/CinematicHero";
 import { EmptyState } from "@/components/EmptyState";
 import { ContentRail } from "@/components/rails/ContentRail";
@@ -25,12 +26,32 @@ function HomePage() {
   const [featured, setFeatured] = useState<RecContent | null>(null);
   const [hasAnyContent, setHasAnyContent] = useState<boolean | null>(null);
 
+  async function signThumbs<T extends RecContent>(items: T[]) {
+    return Promise.all(items.map(async (item) => {
+      if (!item.thumbnail_url) return item;
+      try {
+        return { ...item, thumbnail_url: await getSignedUrl(item.thumbnail_bucket || "thumbnails", item.thumbnail_url, 3600) };
+      } catch {
+        return item;
+      }
+    }));
+  }
+
   useEffect(() => {
     let cancelled = false;
     fetchRails()
       .then((r) => {
         if (cancelled) return;
-        setRails(r);
+        Promise.all([
+          signThumbs(r.continueWatching),
+          signThumbs(r.recommended),
+          signThumbs(r.becauseYouWatched),
+          signThumbs(r.trending),
+          signThumbs(r.hidden),
+          signThumbs(r.recentlyExplored),
+        ]).then(([continueWatching, recommended, becauseYouWatched, trending, hidden, recentlyExplored]) => {
+          if (!cancelled) setRails({ ...r, continueWatching, recommended, becauseYouWatched, trending, hidden, recentlyExplored });
+        });
       })
       .catch(() => !cancelled && setRails({
         anchorTitle: null,
@@ -43,7 +64,7 @@ function HomePage() {
       }));
     supabase
       .from("content")
-      .select("id,slug,title,subtitle,type,thumbnail_url,duration_seconds,reading_minutes,tags,is_featured,created_at,category_id")
+      .select("id,slug,title,subtitle,type,thumbnail_url,thumbnail_bucket,duration_seconds,reading_minutes,tags,is_featured,created_at,category_id")
       .eq("status", "published")
       .order("is_featured", { ascending: false })
       .order("created_at", { ascending: false })
@@ -51,7 +72,7 @@ function HomePage() {
       .maybeSingle()
       .then(({ data }) => {
         if (cancelled) return;
-        setFeatured((data as RecContent) ?? null);
+        signThumbs(data ? [data as RecContent] : []).then((signed) => !cancelled && setFeatured(signed[0] ?? null));
         setHasAnyContent(!!data);
       });
     return () => {
