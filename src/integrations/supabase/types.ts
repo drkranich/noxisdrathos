@@ -853,7 +853,7 @@ export type Database = {
       plan_rank: { Args: { _plan: string }; Returns: number }
     }
     Enums: {
-      app_role: "admin" | "member"
+      app_role: "admin" | "member" | "super_admin"
       content_status: "draft" | "scheduled" | "published" | "archived"
       content_type: "video" | "pdf" | "audio" | "article"
       content_visibility: "public" | "members" | "premium"
@@ -990,7 +990,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "member"],
+      app_role: ["admin", "member", "super_admin"],
       content_status: ["draft", "scheduled", "published", "archived"],
       content_type: ["video", "pdf", "audio", "article"],
       content_visibility: ["public", "members", "premium"],
