@@ -65,8 +65,9 @@ export async function uploadToBucket({ bucket, file, pathPrefix, onProgress }: U
   await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("PUT", `${objectUrl(bucket, path).replace("/object/", "/object/upload/sign/")}?token=${encodeURIComponent(signed.data.token)}`);
-    xhr.setRequestHeader("cache-control", "3600");
-    xhr.setRequestHeader("content-type", file.type || "application/octet-stream");
+    const body = new FormData();
+    body.append("cacheControl", "3600");
+    body.append("", file);
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) onProgress?.(Math.max(1, Math.round((event.loaded / event.total) * 100)));
     };
@@ -87,7 +88,7 @@ export async function uploadToBucket({ bucket, file, pathPrefix, onProgress }: U
     };
     xhr.onerror = () => reject(new Error("Falha de rede durante o upload."));
     xhr.onabort = () => reject(new Error("Upload cancelado."));
-    xhr.send(file);
+    xhr.send(body);
   });
 
   return { bucket, path, fileName: file.name, mimeType: file.type || "application/octet-stream", sizeBytes: file.size };
