@@ -107,10 +107,11 @@ export function PublishingStudio({ contentId = "new" }: { contentId?: string }) 
 
   async function recordAsset(asset: Awaited<ReturnType<typeof uploadToBucket>>, role: UploadRole, contentId?: string | null) {
     if (!user?.id) throw new Error("Sessão administrativa expirada. Entre novamente.");
-    await supabase.from("media_assets").upsert({
+    const { error } = await supabase.from("media_assets").upsert({
       content_id: contentId ?? (isNew ? null : id), bucket: asset.bucket, path: asset.path, file_name: asset.fileName,
       mime_type: asset.mimeType, size_bytes: asset.sizeBytes, asset_role: role, status: contentId ? "attached" : "uploaded", created_by: user.id,
     }, { onConflict: "bucket,path" });
+    if (error) throw error;
   }
 
   async function doUpload(bucket: PublishingBucket, file: File, role: UploadRole) {
@@ -158,13 +159,19 @@ export function PublishingStudio({ contentId = "new" }: { contentId?: string }) 
     if (error) { setError(error.message); toast.error(error.message); return; }
     const savedId = data?.id ?? id;
     if (collectionId) {
-      await supabase.from("collection_items").upsert({ collection_id: collectionId, content_id: savedId, sort_order: Number(sortOrder) || 0 }, { onConflict: "collection_id,content_id" });
+      const { error: collectionError } = await supabase.from("collection_items").upsert({ collection_id: collectionId, content_id: savedId, sort_order: Number(sortOrder) || 0 }, { onConflict: "collection_id,content_id" });
+      if (collectionError) { setError(collectionError.message); toast.error(collectionError.message); return; }
     } else if (!isNew) {
-      await supabase.from("collection_items").delete().eq("content_id", savedId);
+      const { error: collectionDeleteError } = await supabase.from("collection_items").delete().eq("content_id", savedId);
+      if (collectionDeleteError) { setError(collectionDeleteError.message); toast.error(collectionDeleteError.message); return; }
     }
-    await supabase.from("admin_logs").insert({ actor_id: user.id, action: `content_${finalStatus}`, target_table: "content", target_id: savedId, metadata: { title: payload.title, type, contentKind, collectionId } });
+    const { error: logError } = await supabase.from("admin_logs").insert({ actor_id: user.id, action: `content_${finalStatus}`, target_table: "content", target_id: savedId, metadata: { title: payload.title, type, contentKind, collectionId } });
+    if (logError) { setError(logError.message); toast.error(logError.message); return; }
     const assetPaths = [thumbPath, bannerPath, storagePath, trailerPath, ...attachments.map((a) => a.path)].filter(Boolean) as string[];
-    if (assetPaths.length) await supabase.from("media_assets").update({ content_id: savedId, status: "attached" }).in("path", assetPaths);
+    if (assetPaths.length) {
+      const { error: assetError } = await supabase.from("media_assets").update({ content_id: savedId, status: "attached" }).in("path", assetPaths);
+      if (assetError) { setError(assetError.message); toast.error(assetError.message); return; }
+    }
     toast.success(finalStatus === "published" ? "Conteúdo publicado" : finalStatus === "scheduled" ? "Publicação agendada" : "Rascunho salvo");
     if (isNew && data?.id) nav({ to: "/app/admin/content/edit/$id", params: { id: data.id }, replace: true });
   }
