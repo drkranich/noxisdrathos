@@ -25,13 +25,16 @@ function AdminDashboard() {
 
   useEffect(() => {
     if (!user?.id) return;
+    let realtimeStatus = "CONNECTING";
+    const channel = supabase.channel("admin-diagnostics-probe").subscribe((status) => {
+      realtimeStatus = status;
+    });
     Promise.all([
       supabase.from("content").select("id", { count: "exact", head: true }),
       supabase.from("media_assets").select("id", { count: "exact", head: true }),
       supabase.from("collections").select("id", { count: "exact", head: true }),
       supabase.storage.from("thumbnails").createSignedUploadUrl(`diagnostics/${user.id}/${Date.now()}.txt`, { upsert: false }),
-      supabase.channel("admin-diagnostics-probe").subscribe((status) => status),
-    ]).then(([content, media, collections, storage, realtime]) => {
+    ]).then(([content, media, collections, storage]) => {
       setDiag([
         { label: "role", value: roles.join(" · ") || "sem papel", ok: isAdmin },
         { label: "hydration", value: loading || rolesLoading ? "resolvendo" : "resolvido", ok: !loading && !rolesLoading },
@@ -39,11 +42,11 @@ function AdminDashboard() {
         { label: "rls · mídia", value: media.error?.message ?? `${media.count ?? 0} assets visíveis`, ok: !media.error },
         { label: "rls · coleções", value: collections.error?.message ?? `${collections.count ?? 0} coleções visíveis`, ok: !collections.error },
         { label: "storage · upload", value: storage.error?.message ?? "signed upload disponível", ok: !storage.error },
-        { label: "realtime", value: String(realtime), ok: realtime === "SUBSCRIBED" },
+        { label: "realtime", value: realtimeStatus, ok: realtimeStatus === "SUBSCRIBED" },
       ]);
     });
     return () => {
-      supabase.removeChannel(supabase.channel("admin-diagnostics-probe"));
+      supabase.removeChannel(channel);
     };
   }, [user?.id, roles.join("|"), isAdmin, loading, rolesLoading]);
 
