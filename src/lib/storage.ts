@@ -51,24 +51,23 @@ function objectUrl(bucket: PublishingBucket, path: string) {
 
 export async function uploadToBucket({ bucket, file, pathPrefix, onProgress }: UploadOpts) {
   validateFile(bucket, file);
-  const { data: sessionData } = await supabase.auth.getSession();
-  const token = sessionData.session?.access_token;
-  const apikey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-  if (!token || !apikey) throw new Error("Sessão administrativa expirada. Entre novamente.");
 
   const ts = Date.now();
   const safe = slugifyName(file.name);
   const prefix = pathPrefix ? pathPrefix.replace(/^\/|\/$/g, "") : "admin";
   const path = `${prefix}/${ts}-${safe}`;
 
+  const signed = await supabase.storage.from(bucket).createSignedUploadUrl(path, { upsert: false });
+  if (signed.error || !signed.data?.token) {
+    throw new Error(signed.error?.message || "Não foi possível preparar o upload assinado.");
+  }
+
   await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", objectUrl(bucket, path));
-    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-    xhr.setRequestHeader("apikey", apikey);
-    xhr.setRequestHeader("x-upsert", "false");
-    xhr.setRequestHeader("cache-control", "3600");
-    xhr.setRequestHeader("content-type", file.type || "application/octet-stream");
+    xhr.open("PUT", `${objectUrl(bucket, path).replace("/object/", "/object/upload/sign/")}?token=${encodeURIComponent(signed.data.token)}`);
+    const body = new FormData();
+    body.append("cacheControl", "3600");
+    body.append("", file);
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) onProgress?.(Math.max(1, Math.round((event.loaded / event.total) * 100)));
     };
@@ -89,7 +88,7 @@ export async function uploadToBucket({ bucket, file, pathPrefix, onProgress }: U
     };
     xhr.onerror = () => reject(new Error("Falha de rede durante o upload."));
     xhr.onabort = () => reject(new Error("Upload cancelado."));
-    xhr.send(file);
+    xhr.send(body);
   });
 
   return { bucket, path, fileName: file.name, mimeType: file.type || "application/octet-stream", sizeBytes: file.size };

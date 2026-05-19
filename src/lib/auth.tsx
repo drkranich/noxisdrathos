@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-type Role = "admin" | "member";
+type Role = "admin" | "super_admin" | "member";
 
 export type AuthContextValue = {
   session: Session | null;
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       rolesLoading,
       roles,
-      isAdmin: roles.includes("admin"),
+      isAdmin: roles.includes("admin") || roles.includes("super_admin"),
       signOut: async () => {
         await supabase.auth.signOut();
       },
