@@ -221,7 +221,7 @@ export function PublishingStudio({
     }
     toast.success(finalStatus === "published" ? "Conteúdo publicado" : finalStatus === "scheduled" ? "Publicação agendada" : "Rascunho salvo");
     onSaved?.();
-    if (isNew && data?.id) nav({ to: "/app/admin/content/edit/$id", params: { id: data.id }, replace: true });
+    if (isNew && data?.id && !embedded) nav({ to: "/app/admin/content/edit/$id", params: { id: data.id }, replace: true });
   }
 
   if (loading) return <div className={embedded ? "py-10 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground" : "px-8 lg:px-14 py-12 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground"}>carregando…</div>;
