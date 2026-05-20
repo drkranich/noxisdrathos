@@ -129,7 +129,7 @@ function AdminContentStudio() {
                 <span className="block mt-5 font-mono text-[11px] uppercase tracking-[0.25em]">{action.label}</span>
               </Link>
             ) : (
-              <button key={action.kind} onClick={() => setActiveKind(action.kind)} className="group border border-border bg-card/30 p-4 text-left hover:bg-accent/70 transition">
+              <button key={action.kind} onClick={() => setActiveKind(action.kind as StudioKind)} className="group border border-border bg-card/30 p-4 text-left hover:bg-accent/70 transition">
                 <Icon className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
                 <span className="block mt-5 font-mono text-[11px] uppercase tracking-[0.25em]">+ {action.label}</span>
               </button>
