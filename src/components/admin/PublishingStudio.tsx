@@ -191,14 +191,14 @@ export function PublishingStudio({
     if (!user?.id) { setError("Sessão administrativa expirada. Entre novamente."); setSaving(false); return; }
     if (!title.trim()) { setError("O título é obrigatório."); setSaving(false); return; }
 
-    const payload = {
+    const payload: TablesInsert<"content"> = {
       title: title.trim(), slug: slug.trim() || slugify(title), subtitle: subtitle.trim() || null, description: description.trim() || null,
       preview_md: previewMd.trim() || null, body_md: bodyMd || null, type, content_kind: contentKind, visibility, required_plan_id: requiredPlan,
       status: finalStatus, category_id: categoryId, tags: tags.split(",").map((t) => t.trim()).filter(Boolean), is_featured: featured,
       publish_at: publishTs, thumbnail_bucket: "thumbnails", thumbnail_url: thumbPath, banner_bucket: bannerPath ? "banners" : null, banner_path: bannerPath,
       storage_bucket: storageBucket, storage_path: storagePath, trailer_bucket: trailerBucket, trailer_path: trailerPath, attachment_paths: attachments,
       external_url: externalUrl.trim() || null, duration_seconds: duration ? Number(duration) : null, reading_minutes: readingMin ? Number(readingMin) : null,
-      sort_order: Number(sortOrder) || 0, media_metadata: { attachments: attachments.length, hasTrailer: !!trailerPath, collectionId }, created_by: user.id,
+      sort_order: Number(sortOrder) || 0, media_metadata: { attachments: attachments.length, hasTrailer: !!trailerPath, collectionId, metadata: metadataNote.trim() || null }, created_by: user.id,
     };
 
     const { data, error } = isNew ? await supabase.from("content").insert(payload).select("id").single() : await supabase.from("content").update(payload).eq("id", id).select("id").single();
@@ -220,10 +220,11 @@ export function PublishingStudio({
       if (assetError) { setError(assetError.message); toast.error(assetError.message); return; }
     }
     toast.success(finalStatus === "published" ? "Conteúdo publicado" : finalStatus === "scheduled" ? "Publicação agendada" : "Rascunho salvo");
+    onSaved?.();
     if (isNew && data?.id) nav({ to: "/app/admin/content/edit/$id", params: { id: data.id }, replace: true });
   }
 
-  if (loading) return <div className="px-8 lg:px-14 py-12 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">carregando…</div>;
+  if (loading) return <div className={embedded ? "py-10 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground" : "px-8 lg:px-14 py-12 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground"}>carregando…</div>;
 
   return (
     <div className="px-8 lg:px-14 py-10">
