@@ -1,24 +1,38 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Eye, FileText, Image as ImageIcon, RotateCcw, Save, Upload } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ArrowLeft, CheckCircle2, Eye, FileText, Image as ImageIcon, RotateCcw, Save, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import type { TablesInsert } from "@/integrations/supabase/types";
 import { useAuth } from "@/lib/auth";
 import { getSignedUrl, uploadToBucket, type PublishingBucket } from "@/lib/storage";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Category = { id: string; name: string; slug: string };
 type UploadRole = "primary" | "thumbnail" | "banner" | "trailer" | "attachment" | "preview";
+type StudioKind = "video" | "pdf" | "audio" | "article" | "report";
+type ContentType = "video" | "pdf" | "audio" | "article";
+type ContentKind = "article" | "video" | "pdf" | "audio" | "report" | "briefing" | "premium_drop" | "collection" | "hero_banner";
+type Visibility = "public" | "members" | "premium";
 
-const TYPES = ["video", "pdf", "audio", "article"] as const;
-const KINDS = ["article", "video", "pdf", "audio", "report", "briefing", "premium_drop", "collection", "hero_banner"] as const;
-const VISIBILITIES = ["public", "members", "premium"] as const;
-const PLANS = ["free", "circle", "vault", "council", "premium", "vip", "beta"] as const;
+const TYPES: ContentType[] = ["video", "pdf", "audio", "article"];
+const KINDS: ContentKind[] = ["article", "video", "pdf", "audio", "report", "briefing", "premium_drop", "collection", "hero_banner"];
+const VISIBILITIES: Visibility[] = ["public", "members", "premium"];
+const PLANS = ["free", "premium", "vip", "beta"] as const;
+
+const KIND_COPY: Record<StudioKind, { title: string; primary: string; accept: string; type: ContentType; kind: ContentKind }> = {
+  video: { title: "New Video", primary: "Video Upload", accept: "video/*", type: "video", kind: "video" },
+  pdf: { title: "New PDF", primary: "PDF Upload", accept: "application/pdf", type: "pdf", kind: "pdf" },
+  audio: { title: "New Audio", primary: "Audio Upload", accept: "audio/*", type: "audio", kind: "audio" },
+  article: { title: "New Article", primary: "Article Attachments", accept: "application/pdf,image/*,text/*,application/zip,application/json", type: "article", kind: "article" },
+  report: { title: "New Report", primary: "Report PDF Upload", accept: "application/pdf", type: "pdf", kind: "report" },
+};
 
 function slugify(s: string) {
   return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -31,27 +45,48 @@ function bucketForType(type: string): PublishingBucket {
   return "attachments";
 }
 
-export function PublishingStudio({ contentId = "new" }: { contentId?: string }) {
+function kindFromType(type: string, contentKind?: string | null): StudioKind {
+  if (contentKind === "report") return "report";
+  if (type === "video" || type === "pdf" || type === "audio") return type;
+  return "article";
+}
+
+export function PublishingStudio({
+  contentId = "new",
+  initialKind = "article",
+  embedded = false,
+  onSaved,
+  onCancel,
+}: {
+  contentId?: string;
+  initialKind?: StudioKind;
+  embedded?: boolean;
+  onSaved?: () => void;
+  onCancel?: () => void;
+}) {
   const id = contentId;
   const nav = useNavigate();
   const { user } = useAuth();
   const isNew = id === "new";
+  const initial = KIND_COPY[initialKind];
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
 
+  const [studioKind, setStudioKind] = useState<StudioKind>(initialKind);
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [description, setDescription] = useState("");
   const [previewMd, setPreviewMd] = useState("");
   const [bodyMd, setBodyMd] = useState("");
-  const [type, setType] = useState<(typeof TYPES)[number]>("article");
-  const [contentKind, setContentKind] = useState<(typeof KINDS)[number]>("article");
-  const [visibility, setVisibility] = useState<(typeof VISIBILITIES)[number]>("members");
+  const [type, setType] = useState<ContentType>(initial.type);
+  const [contentKind, setContentKind] = useState<ContentKind>(initial.kind);
+  const [visibility, setVisibility] = useState<Visibility>("members");
   const [requiredPlan, setRequiredPlan] = useState<(typeof PLANS)[number]>("free");
+  const [publishMode, setPublishMode] = useState<"draft" | "published">("draft");
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [tags, setTags] = useState("");
   const [featured, setFeatured] = useState(false);
@@ -71,12 +106,21 @@ export function PublishingStudio({ contentId = "new" }: { contentId?: string }) 
   const [externalUrl, setExternalUrl] = useState("");
   const [duration, setDuration] = useState<string>("");
   const [readingMin, setReadingMin] = useState<string>("");
+  const [metadataNote, setMetadataNote] = useState("");
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [collections, setCollections] = useState<Array<{ id: string; title: string }>>([]);
   const [collectionId, setCollectionId] = useState<string | null>(null);
   const slugDirty = useRef(false);
   const uploadBatch = useRef(typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : String(Date.now()));
+
+  useEffect(() => {
+    if (!isNew) return;
+    const copy = KIND_COPY[initialKind];
+    setStudioKind(initialKind);
+    setType(copy.type);
+    setContentKind(copy.kind);
+  }, [initialKind, isNew]);
 
   useEffect(() => {
     supabase.from("categories").select("id,name,slug").order("sort_order").then(({ data }) => setCategories((data ?? []) as Category[]));
@@ -88,12 +132,15 @@ export function PublishingStudio({ contentId = "new" }: { contentId?: string }) 
     supabase.from("content").select("*").eq("id", id).single().then(async ({ data, error }) => {
       if (error || !data) { setError(error?.message ?? "Não encontrado"); setLoading(false); return; }
       setTitle(data.title); setSlug(data.slug); setSubtitle(data.subtitle ?? ""); setDescription(data.description ?? "");
-      setPreviewMd(data.preview_md ?? ""); setBodyMd(data.body_md ?? ""); setType(data.type as typeof type); setContentKind((data.content_kind ?? data.type) as typeof contentKind);
-      setVisibility(data.visibility as typeof visibility); setRequiredPlan((data.required_plan_id ?? "free") as typeof requiredPlan); setCategoryId(data.category_id);
+      setPreviewMd(data.preview_md ?? ""); setBodyMd(data.body_md ?? ""); setType(data.type as ContentType); setContentKind((data.content_kind ?? data.type) as ContentKind);
+      setStudioKind(kindFromType(data.type, data.content_kind));
+      setVisibility(data.visibility as Visibility); setRequiredPlan(PLANS.includes(data.required_plan_id as typeof requiredPlan) ? (data.required_plan_id as typeof requiredPlan) : "free"); setCategoryId(data.category_id);
       setTags((data.tags ?? []).join(", ")); setFeatured(data.is_featured); setSortOrder(String(data.sort_order ?? 0));
       if (data.publish_at) { setScheduled(true); setPublishAt(new Date(data.publish_at).toISOString().slice(0, 16)); }
+      setPublishMode(data.status === "published" ? "published" : "draft");
       setStorageBucket(data.storage_bucket as PublishingBucket | null); setStoragePath(data.storage_path); setExternalUrl(data.external_url ?? "");
       setDuration(data.duration_seconds ? String(data.duration_seconds) : ""); setReadingMin(data.reading_minutes ? String(data.reading_minutes) : "");
+      if (data.media_metadata && typeof data.media_metadata === "object" && !Array.isArray(data.media_metadata) && "metadata" in data.media_metadata) setMetadataNote(String(data.media_metadata.metadata ?? ""));
       setTrailerBucket(data.trailer_bucket as PublishingBucket | null); setTrailerPath(data.trailer_path); setBannerPath(data.banner_path);
       if (data.attachment_paths && Array.isArray(data.attachment_paths)) setAttachments(data.attachment_paths as Array<{ bucket: PublishingBucket; path: string; name: string }>);
       supabase.from("collection_items").select("collection_id").eq("content_id", id).limit(1).maybeSingle().then(({ data }) => setCollectionId(data?.collection_id ?? null));
