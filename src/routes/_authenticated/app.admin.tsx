@@ -16,9 +16,21 @@ function AdminLayout() {
 
   useEffect(() => {
     if (stillResolving) return;
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.log("[admin-guard] decision", {
+        currentEmail: user?.email ?? null,
+        isAdmin,
+        loading,
+        rolesLoading,
+        currentPathname: pathname,
+        redirectTriggerSource: !user ? "missing_user" : !isAdmin ? "role_denied_after_hydration" : "admin_allowed",
+        redirectTarget: !user ? "/login" : !isAdmin ? "/app" : null,
+      });
+    }
     if (!user) navigate({ to: "/login", replace: true });
     else if (!isAdmin) navigate({ to: "/app", replace: true });
-  }, [stillResolving, user, isAdmin, navigate]);
+  }, [stillResolving, user, isAdmin, navigate, loading, rolesLoading, pathname]);
 
   if (stillResolving) {
     return (
@@ -40,6 +52,7 @@ function AdminLayout() {
 
   const tabs = [
     { to: "/app/admin", label: "dashboard", exact: true },
+    { to: "/app/admin/diagnostics", label: "diagnóstico" },
     { to: "/app/admin/intelligence", label: "inteligência" },
     { to: "/app/admin/content", label: "conteúdo" },
     { to: "/app/admin/uploads", label: "uploads" },
