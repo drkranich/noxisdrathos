@@ -13,12 +13,25 @@ function AdminLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const stillResolving = loading || rolesLoading;
+  const isDiagnosticsRoute = pathname.startsWith("/app/admin/diagnostics");
 
   useEffect(() => {
     if (stillResolving) return;
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.log("[admin-guard] decision", {
+        currentEmail: user?.email ?? null,
+        isAdmin,
+        loading,
+        rolesLoading,
+        currentPathname: pathname,
+        redirectTriggerSource: !user ? "missing_user" : !isAdmin ? "role_denied_after_hydration" : "admin_allowed",
+        redirectTarget: !user ? "/login" : !isAdmin ? "/app" : null,
+      });
+    }
     if (!user) navigate({ to: "/login", replace: true });
-    else if (!isAdmin) navigate({ to: "/app", replace: true });
-  }, [stillResolving, user, isAdmin, navigate]);
+    else if (!isAdmin && !isDiagnosticsRoute) navigate({ to: "/app", replace: true });
+  }, [stillResolving, user, isAdmin, navigate, loading, rolesLoading, pathname]);
 
   if (stillResolving) {
     return (
@@ -29,7 +42,7 @@ function AdminLayout() {
     );
   }
 
-  if (!isAdmin) {
+  if (!isAdmin && !isDiagnosticsRoute) {
     return (
       <div className="px-8 lg:px-14 py-16">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">acesso restrito</p>
@@ -40,6 +53,7 @@ function AdminLayout() {
 
   const tabs = [
     { to: "/app/admin", label: "dashboard", exact: true },
+    { to: "/app/admin/diagnostics", label: "diagnóstico" },
     { to: "/app/admin/intelligence", label: "inteligência" },
     { to: "/app/admin/content", label: "conteúdo" },
     { to: "/app/admin/uploads", label: "uploads" },
