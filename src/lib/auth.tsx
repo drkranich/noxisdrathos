@@ -3,6 +3,7 @@ import type { Session, User } from "@supabase/supabase-js";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureSuperAdminRole } from "@/lib/admin-auth.functions";
+import type { SuperAdminBootstrapResult } from "@/lib/admin-auth.functions";
 
 type Role = "admin" | "super_admin" | "member";
 
@@ -20,7 +21,7 @@ export type AuthContextValue = {
   roles: Role[];
   primaryRole: Role | "none";
   roleQuery: RoleQueryState | null;
-  bootstrapResult: Awaited<ReturnType<typeof ensureSuperAdminRole>> | null;
+  bootstrapResult: SuperAdminBootstrapResult | null;
   isAdmin: boolean;
   signOut: () => Promise<void>;
 };
@@ -33,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [roles, setRoles] = useState<Role[]>([]);
   const [rolesLoading, setRolesLoading] = useState(true);
   const [roleQuery, setRoleQuery] = useState<RoleQueryState | null>(null);
-  const [bootstrapResult, setBootstrapResult] = useState<Awaited<ReturnType<typeof ensureSuperAdminRole>> | null>(null);
+  const [bootstrapResult, setBootstrapResult] = useState<SuperAdminBootstrapResult | null>(null);
   const bootstrapSuperAdmin = useServerFn(ensureSuperAdminRole);
 
   useEffect(() => {
@@ -59,16 +60,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const uid = session?.user?.id;
     if (!uid) return;
+    const userId = uid;
     let cancelled = false;
     const email = session.user.email ?? "";
     setRolesLoading(true);
     const startedAt = performance.now();
 
     async function hydrateRoles() {
-      const bootstrap = await bootstrapSuperAdmin({ data: { observedEmail: email } }).catch((error) => ({
+      const bootstrap = await bootstrapSuperAdmin({ data: { observedEmail: email } }).catch((error): SuperAdminBootstrapResult => ({
         ok: false,
         matched: false,
-        userId: uid,
+        userId,
         authEmail: email,
         superAdminEmail: "unavailable",
         source: "client catch",
@@ -79,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", uid);
+      .eq("user_id", userId);
       if (cancelled) return;
 
       const resolvedRoles = (response.data ?? []).map((r) => r.role as Role);
