@@ -46,6 +46,7 @@ import { Route as AuthenticatedAppAdminMembersRouteImport } from './routes/_auth
 import { Route as AuthenticatedAppAdminMediaRouteImport } from './routes/_authenticated/app.admin.media'
 import { Route as AuthenticatedAppAdminLogsRouteImport } from './routes/_authenticated/app.admin.logs'
 import { Route as AuthenticatedAppAdminIntelligenceRouteImport } from './routes/_authenticated/app.admin.intelligence'
+import { Route as AuthenticatedAppAdminDiagnosticsRouteImport } from './routes/_authenticated/app.admin.diagnostics'
 import { Route as AuthenticatedAppAdminCommentsRouteImport } from './routes/_authenticated/app.admin.comments'
 import { Route as AuthenticatedAppAdminCollectionsRouteImport } from './routes/_authenticated/app.admin.collections'
 import { Route as AuthenticatedAppAdminCategoriesRouteImport } from './routes/_authenticated/app.admin.categories'
@@ -255,6 +256,12 @@ const AuthenticatedAppAdminIntelligenceRoute =
     path: '/intelligence',
     getParentRoute: () => AuthenticatedAppAdminRoute,
   } as any)
+const AuthenticatedAppAdminDiagnosticsRoute =
+  AuthenticatedAppAdminDiagnosticsRouteImport.update({
+    id: '/diagnostics',
+    path: '/diagnostics',
+    getParentRoute: () => AuthenticatedAppAdminRoute,
+  } as any)
 const AuthenticatedAppAdminCommentsRoute =
   AuthenticatedAppAdminCommentsRouteImport.update({
     id: '/comments',
@@ -344,6 +351,7 @@ export interface FileRoutesByFullPath {
   '/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
   '/app/admin/collections': typeof AuthenticatedAppAdminCollectionsRoute
   '/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
+  '/app/admin/diagnostics': typeof AuthenticatedAppAdminDiagnosticsRoute
   '/app/admin/intelligence': typeof AuthenticatedAppAdminIntelligenceRoute
   '/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/app/admin/media': typeof AuthenticatedAppAdminMediaRoute
@@ -389,6 +397,7 @@ export interface FileRoutesByTo {
   '/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
   '/app/admin/collections': typeof AuthenticatedAppAdminCollectionsRoute
   '/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
+  '/app/admin/diagnostics': typeof AuthenticatedAppAdminDiagnosticsRoute
   '/app/admin/intelligence': typeof AuthenticatedAppAdminIntelligenceRoute
   '/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/app/admin/media': typeof AuthenticatedAppAdminMediaRoute
@@ -438,6 +447,7 @@ export interface FileRoutesById {
   '/_authenticated/app/admin/categories': typeof AuthenticatedAppAdminCategoriesRoute
   '/_authenticated/app/admin/collections': typeof AuthenticatedAppAdminCollectionsRoute
   '/_authenticated/app/admin/comments': typeof AuthenticatedAppAdminCommentsRoute
+  '/_authenticated/app/admin/diagnostics': typeof AuthenticatedAppAdminDiagnosticsRoute
   '/_authenticated/app/admin/intelligence': typeof AuthenticatedAppAdminIntelligenceRoute
   '/_authenticated/app/admin/logs': typeof AuthenticatedAppAdminLogsRoute
   '/_authenticated/app/admin/media': typeof AuthenticatedAppAdminMediaRoute
@@ -487,6 +497,7 @@ export interface FileRouteTypes {
     | '/app/admin/categories'
     | '/app/admin/collections'
     | '/app/admin/comments'
+    | '/app/admin/diagnostics'
     | '/app/admin/intelligence'
     | '/app/admin/logs'
     | '/app/admin/media'
@@ -532,6 +543,7 @@ export interface FileRouteTypes {
     | '/app/admin/categories'
     | '/app/admin/collections'
     | '/app/admin/comments'
+    | '/app/admin/diagnostics'
     | '/app/admin/intelligence'
     | '/app/admin/logs'
     | '/app/admin/media'
@@ -580,6 +592,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/admin/categories'
     | '/_authenticated/app/admin/collections'
     | '/_authenticated/app/admin/comments'
+    | '/_authenticated/app/admin/diagnostics'
     | '/_authenticated/app/admin/intelligence'
     | '/_authenticated/app/admin/logs'
     | '/_authenticated/app/admin/media'
@@ -871,6 +884,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAdminIntelligenceRouteImport
       parentRoute: typeof AuthenticatedAppAdminRoute
     }
+    '/_authenticated/app/admin/diagnostics': {
+      id: '/_authenticated/app/admin/diagnostics'
+      path: '/diagnostics'
+      fullPath: '/app/admin/diagnostics'
+      preLoaderRoute: typeof AuthenticatedAppAdminDiagnosticsRouteImport
+      parentRoute: typeof AuthenticatedAppAdminRoute
+    }
     '/_authenticated/app/admin/comments': {
       id: '/_authenticated/app/admin/comments'
       path: '/comments'
@@ -943,6 +963,7 @@ interface AuthenticatedAppAdminRouteChildren {
   AuthenticatedAppAdminCategoriesRoute: typeof AuthenticatedAppAdminCategoriesRoute
   AuthenticatedAppAdminCollectionsRoute: typeof AuthenticatedAppAdminCollectionsRoute
   AuthenticatedAppAdminCommentsRoute: typeof AuthenticatedAppAdminCommentsRoute
+  AuthenticatedAppAdminDiagnosticsRoute: typeof AuthenticatedAppAdminDiagnosticsRoute
   AuthenticatedAppAdminIntelligenceRoute: typeof AuthenticatedAppAdminIntelligenceRoute
   AuthenticatedAppAdminLogsRoute: typeof AuthenticatedAppAdminLogsRoute
   AuthenticatedAppAdminMediaRoute: typeof AuthenticatedAppAdminMediaRoute
@@ -962,6 +983,7 @@ const AuthenticatedAppAdminRouteChildren: AuthenticatedAppAdminRouteChildren = {
   AuthenticatedAppAdminCategoriesRoute: AuthenticatedAppAdminCategoriesRoute,
   AuthenticatedAppAdminCollectionsRoute: AuthenticatedAppAdminCollectionsRoute,
   AuthenticatedAppAdminCommentsRoute: AuthenticatedAppAdminCommentsRoute,
+  AuthenticatedAppAdminDiagnosticsRoute: AuthenticatedAppAdminDiagnosticsRoute,
   AuthenticatedAppAdminIntelligenceRoute:
     AuthenticatedAppAdminIntelligenceRoute,
   AuthenticatedAppAdminLogsRoute: AuthenticatedAppAdminLogsRoute,
