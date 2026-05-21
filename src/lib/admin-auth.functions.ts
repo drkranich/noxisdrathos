@@ -5,6 +5,16 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const FALLBACK_SUPER_ADMIN_EMAIL = "genialidadefilosofica@gmail.com";
 
+export type SuperAdminBootstrapResult = {
+  ok: boolean;
+  matched: boolean;
+  userId: string;
+  authEmail: string;
+  superAdminEmail: string;
+  source: "env" | "app fallback" | "client catch";
+  error: string | null;
+};
+
 export const ensureSuperAdminRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
@@ -26,7 +36,7 @@ export const ensureSuperAdminRole = createServerFn({ method: "POST" })
         superAdminEmail,
         source: process.env.SUPER_ADMIN_EMAIL ? "env" : "app fallback",
         error: userError?.message ?? null,
-      };
+      } satisfies SuperAdminBootstrapResult;
     }
 
     await supabaseAdmin.from("profiles").upsert({
@@ -53,7 +63,7 @@ export const ensureSuperAdminRole = createServerFn({ method: "POST" })
       superAdminEmail,
       source: process.env.SUPER_ADMIN_EMAIL ? "env" : "app fallback",
       error: roleError?.message ?? null,
-    };
+    } satisfies SuperAdminBootstrapResult;
   });
 
 export const getAdminDiagnostics = createServerFn({ method: "GET" })
