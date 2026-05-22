@@ -69,6 +69,11 @@ export const ensureSuperAdminRole = createServerFn({ method: "POST" })
 export const getAdminDiagnostics = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    const { userId, supabase } = context;
+    const { data: isAdminData } = await supabaseAdmin.rpc("is_admin", { _user_id: userId });
+    if (!isAdminData) {
+      throw new Response("Forbidden", { status: 403 });
+    }
     const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || FALLBACK_SUPER_ADMIN_EMAIL).trim();
     const { userId, supabase } = context;
     const [authUser, profile, adminRoles, roleQuery, adminAccess] = await Promise.all([
