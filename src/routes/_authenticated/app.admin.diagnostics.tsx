@@ -84,8 +84,8 @@ function AdminDiagnostics() {
       </div>
 
       <div className="mt-8 grid gap-4 xl:grid-cols-2">
-        <DiagnosticBlock title="Current profile row" value={diagnostics?.profileRow} error={diagnostics?.profileError} />
-        <DiagnosticBlock title="Current user_roles row" value={diagnostics?.userRolesRows ?? roles} error={diagnostics?.userRolesError} />
+        <DiagnosticBlock title="Current profile row" value={d?.profileRow} error={d?.profileError} />
+        <DiagnosticBlock title="Current user_roles row" value={d?.userRolesRows ?? roles} error={d?.userRolesError} />
         <DiagnosticBlock title="Role query response" value={diagnostics?.roleQueryResponse ?? roleQuery} />
         <DiagnosticBlock title="Super admin bootstrap" value={bootstrapResult} />
       </div>
