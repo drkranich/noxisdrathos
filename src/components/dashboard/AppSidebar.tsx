@@ -16,6 +16,16 @@ import {
   LifeBuoy,
   Shield,
   LogOut,
+  PlusSquare,
+  UploadCloud,
+  Image as ImageIcon,
+  FolderTree,
+  Layers,
+  MessageSquare,
+  Megaphone,
+  Activity,
+  Sparkles,
+  Stethoscope,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -121,23 +131,45 @@ export function AppSidebar() {
         {isAdmin ? (
           <div>
             <p className="px-3 mb-2 font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
-              admin
+              super admin
             </p>
             <ul className="space-y-0.5">
-              <li>
-                <Link
-                  to="/app/admin"
-                  className={
-                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition " +
-                    (pathname.startsWith("/app/admin")
-                      ? "bg-accent text-foreground"
-                      : "text-muted-foreground hover:bg-accent/50 hover:text-foreground")
-                  }
-                >
-                  <Shield className="w-4 h-4" />
-                  <span>painel</span>
-                </Link>
-              </li>
+              {[
+                { to: "/app/admin", label: "painel", icon: Shield, exact: true },
+                { to: "/app/admin/content/new", label: "novo conteúdo", icon: PlusSquare },
+                { to: "/app/admin/content", label: "conteúdos", icon: FileText },
+                { to: "/app/admin/uploads", label: "uploads", icon: UploadCloud },
+                { to: "/app/admin/media", label: "biblioteca mídia", icon: ImageIcon },
+                { to: "/app/admin/categories", label: "categorias", icon: FolderTree },
+                { to: "/app/admin/collections", label: "coleções", icon: Layers },
+                { to: "/app/admin/members", label: "membros", icon: Users },
+                { to: "/app/admin/comments", label: "moderação", icon: MessageSquare },
+                { to: "/app/admin/announcements", label: "anúncios", icon: Megaphone },
+                { to: "/app/admin/intelligence", label: "inteligência", icon: Sparkles },
+                { to: "/app/admin/billing", label: "billing", icon: CreditCard },
+                { to: "/app/admin/logs", label: "logs", icon: Activity },
+                { to: "/app/admin/diagnostics", label: "diagnóstico", icon: Stethoscope },
+              ].map((it) => {
+                const Icon = it.icon;
+                const active = it.exact ? pathname === it.to : pathname === it.to || pathname.startsWith(it.to + "/");
+                return (
+                  <li key={it.to}>
+                    <Link
+                      to={it.to}
+                      className={
+                        "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition " +
+                        (active
+                          ? "bg-accent text-foreground"
+                          : "text-muted-foreground hover:bg-accent/50 hover:text-foreground")
+                      }
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span>{it.label}</span>
+                      {active ? <span className="ml-auto neon-dot" /> : null}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ) : null}
