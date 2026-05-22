@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-const FALLBACK_SUPER_ADMIN_EMAIL = "";
+const FALLBACK_SUPER_ADMIN_EMAIL = "genialidadefilosofica@gmail.com";
 
 export type SuperAdminBootstrapResult = {
   ok: boolean;
@@ -15,539 +15,290 @@ export type SuperAdminBootstrapResult = {
   error: string | null;
 };
 
-export const ensureSuperAdminRole =
-createServerFn({
-  method:"POST"
-})
+export const ensureSuperAdminRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({ observedEmail: z.string().email().optional() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || FALLBACK_SUPER_ADMIN_EMAIL).trim();
+    const { userId } = context;
+
+    const { data: userRes, error: userError } =
+      await supabaseAdmin.auth.admin.getUserById(userId);
+
+    const authEmail =
+      userRes.user?.email?.trim()
+      ??
+      data.observedEmail?.trim()
+      ??
+      "";
+
+    const matched =
+      authEmail.toLowerCase()
+      ===
+      superAdminEmail.toLowerCase();
+
+    if (userError || !matched) {
+      return {
+        ok: false,
+        matched,
+        userId,
+        authEmail,
+        superAdminEmail,
+        source: process.env.SUPER_ADMIN_EMAIL
+          ? "env"
+          : "app fallback",
+        error: userError?.message ?? null,
+      } satisfies SuperAdminBootstrapResult;
+    }
+
+    await supabaseAdmin
+      .from("profiles")
+      .upsert(
+        {
+          id: userId,
+          display_name:
+            userRes.user?.user_metadata?.display_name
+            ??
+            userRes.user?.user_metadata?.full_name
+            ??
+            authEmail.split("@")[0],
+
+          avatar_url:
+            userRes.user?.user_metadata?.avatar_url
+            ??
+            null,
+        },
+        {
+          onConflict: "id",
+        },
+      );
+
+    await supabaseAdmin
+      .from("user_roles")
+      .delete()
+      .eq("user_id", userId)
+      .neq("role", "super_admin");
+
+    const { error: roleError } =
+      await supabaseAdmin
+        .from("user_roles")
+        .upsert(
+          {
+            user_id: userId,
+            role: "super_admin",
+          },
+          {
+            onConflict: "user_id,role",
+          },
+        );
+
+    return {
+      ok: !roleError,
+      matched,
+      userId,
+      authEmail,
+      superAdminEmail,
+      source:
+        process.env.SUPER_ADMIN_EMAIL
+          ? "env"
+          : "app fallback",
+      error: roleError?.message ?? null,
+    } satisfies SuperAdminBootstrapResult;
+  });
+
+export const getAdminDiagnostics =
+createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+
+    const superAdminEmail =
+      (
+        process.env.SUPER_ADMIN_EMAIL
+        ||
+        FALLBACK_SUPER_ADMIN_EMAIL
+      ).trim();
 
-.middleware([
-  requireSupabaseAuth
-])
+    const { userId, supabase } = context;
 
-.inputValidator(
+    const [
 
-(input)=>
+      authUser,
 
-z.object({
+      profile,
 
-observedEmail:
+      adminRoles,
 
-z
+      roleQuery,
 
-.string()
+      adminAccess,
 
-.email()
+    ] = await Promise.all([
 
-.optional()
+      supabaseAdmin
+        .auth
+        .admin
+        .getUserById(userId),
 
-}).parse(input)
+      supabaseAdmin
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle(),
 
-)
+      supabaseAdmin
+        .from("user_roles")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", {
+          ascending: false,
+        }),
 
-.handler(
+      supabase
+        .from("user_roles")
+        .select(
+          "id,user_id,role,created_at"
+        )
+        .eq("user_id", userId)
+        .order("created_at", {
+          ascending: false,
+        }),
 
-async({
+      supabaseAdmin
+        .rpc(
+          "is_admin",
+          {
+            _user_id: userId,
+          },
+        ),
 
-data,
+    ]);
 
-context
+    const email =
+      authUser.data.user?.email?.trim()
+      ??
+      null;
 
-})=>{
+    const roles =
+      (adminRoles.data ?? [])
+      .map(
+        row => row.role as string
+      );
 
-const {
+    const resolvedRole =
 
-userId
+      roles.includes("super_admin")
 
-}=context;
+      ?
 
-const {
+      "super_admin"
 
-data:userRes,
+      :
 
-error:userError
+      roles.includes("admin")
 
-}
+      ?
 
-=
+      "admin"
 
-await
+      :
 
-supabaseAdmin
+      roles[0]
 
-.auth
+      ??
 
-.admin
+      "none";
 
-.getUserById(
+    return {
 
-userId
+      currentEmail: email,
 
-);
+      currentAuthUid: userId,
 
-const authEmail=
+      currentRole: resolvedRole,
 
-userRes
+      profileRow: profile.data,
 
-.user
+      profileError:
+        profile.error?.message
+        ??
+        null,
 
-?.email
+      userRolesRows:
+        adminRoles.data
+        ??
+        [],
 
-?.trim()
+      userRolesError:
+        adminRoles.error?.message
+        ??
+        null,
 
-??
+      superAdminEmail,
 
-data
+      superAdminEmailSource:
 
-.observedEmail
+        process.env.SUPER_ADMIN_EMAIL
 
-?.trim()
+        ?
 
-??
+        "env"
 
-"";
+        :
 
-if(
+        "app fallback",
 
-userError
+      emailMatchesSuperAdmin:
 
-){
+        !!email
 
-return{
+        &&
 
-ok:false,
+        email.toLowerCase()
 
-matched:false,
+        ===
 
-userId,
+        superAdminEmail.toLowerCase(),
 
-authEmail,
+      authEmailHasNoOuterSpaces:
 
-superAdminEmail:
+        !!email
 
-"[DISABLED]",
+        &&
 
-source:
+        email===email.trim(),
 
-"client catch",
+      roleQueryResponse: {
 
-error:
+        data:
+          roleQuery.data
+          ??
+          null,
 
-userError.message
+        error:
+          roleQuery.error?.message
+          ??
+          null,
 
-}
+      },
 
-satisfies
+      adminAccessResult:
 
-SuperAdminBootstrapResult;
+        !!adminAccess.data,
 
-}
+      adminAccessError:
 
-await
+        adminAccess.error?.message
+        ??
+        null,
 
-supabaseAdmin
+      authUserError:
 
-.from(
+        authUser.error?.message
+        ??
+        null,
 
-"profiles"
+    };
 
-)
-
-.upsert(
-
-{
-
-id:userId,
-
-display_name:
-
-userRes.user
-
-?.user_metadata
-
-?.display_name
-
-??
-
-userRes.user
-
-?.user_metadata
-
-?.full_name
-
-??
-
-authEmail
-
-.split("@")[0],
-
-avatar_url:
-
-userRes.user
-
-?.user_metadata
-
-?.avatar_url
-
-??
-
-null,
-
-},
-
-{
-
-onConflict:
-
-"id"
-
-}
-
-);
-
-const {
-
-data:roles
-
-}
-
-=
-
-await
-
-supabaseAdmin
-
-.from(
-
-"user_roles"
-
-)
-
-.select(
-
-"role"
-
-)
-
-.eq(
-
-"user_id",
-
-userId
-
-);
-
-const alreadyAdmin=
-
-roles?.some(
-
-r=>
-
-r.role==="admin"
-
-||
-
-r.role==="super_admin"
-
-)
-
-??
-
-false;
-
-if(
-
-!alreadyAdmin
-
-){
-
-await
-
-supabaseAdmin
-
-.from(
-
-"user_roles"
-
-)
-
-.upsert(
-
-{
-
-user_id:userId,
-
-role:"member"
-
-},
-
-{
-
-onConflict:
-
-"user_id,role"
-
-}
-
-);
-
-}
-
-return{
-
-ok:true,
-
-matched:true,
-
-userId,
-
-authEmail,
-
-superAdminEmail:
-
-"[DISABLED]",
-
-source:
-
-"app fallback",
-
-error:null
-
-}
-
-satisfies
-
-SuperAdminBootstrapResult;
-
-}
-
-);
-
-export const getAdminDiagnostics=
-
-createServerFn({
-
-method:"GET"
-
-})
-
-.middleware([
-
-requireSupabaseAuth
-
-])
-
-.handler(
-
-async({
-
-context
-
-})=>{
-
-const{
-
-userId,
-
-supabase
-
-}=context;
-
-const[
-
-authUser,
-
-profile,
-
-adminRoles,
-
-roleQuery
-
-]
-
-=
-
-await
-
-Promise.all([
-
-supabaseAdmin
-
-.auth
-
-.admin
-
-.getUserById(
-
-userId
-
-),
-
-supabaseAdmin
-
-.from(
-
-"profiles"
-
-)
-
-.select("*")
-
-.eq(
-
-"id",
-
-userId
-
-)
-
-.maybeSingle(),
-
-supabaseAdmin
-
-.from(
-
-"user_roles"
-
-)
-
-.select("*")
-
-.eq(
-
-"user_id",
-
-userId
-
-),
-
-supabase
-
-.from(
-
-"user_roles"
-
-)
-
-.select("*")
-
-.eq(
-
-"user_id",
-
-userId
-
-)
-
-]);
-
-const email=
-
-authUser
-
-.data
-
-.user
-
-?.email
-
-??
-
-null;
-
-const roles=
-
-(
-
-adminRoles
-
-.data
-
-??
-
-[]
-
-)
-
-.map(
-
-r=>
-
-r.role
-
-);
-
-const currentRole=
-
-roles.includes(
-
-"super_admin"
-
-)
-
-?
-
-"super_admin"
-
-:
-
-roles.includes(
-
-"admin"
-
-)
-
-?
-
-"admin"
-
-:
-
-roles.includes(
-
-"member"
-
-)
-
-?
-
-"member"
-
-:
-
-"none";
-
-return{
-
-currentEmail:
-
-email,
-
-currentAuthUid:
-
-userId,
-
-currentRole,
-
-roles,
-
-profile:
-
-profile.data,
-
-profileError:
-
-profile.error?.message,
-
-roleQuery:
-
-roleQuery.data,
-
-roleQueryError:
-
-roleQuery.error?.message,
-
-};
-
-}
-
-);
+  });
