@@ -13,7 +13,6 @@ function AdminLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const stillResolving = loading || rolesLoading;
-  const isDiagnosticsRoute = pathname.startsWith("/app/admin/diagnostics");
 
   useEffect(() => {
     if (stillResolving) return;
