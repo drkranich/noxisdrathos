@@ -32,8 +32,8 @@ export const ensureSuperAdminRole = createServerFn({ method: "POST" })
         ok: false,
         matched,
         userId,
-        authEmail,
-        superAdminEmail,
+        authEmail: matched ? authEmail : "[REDACTED]",
+        superAdminEmail: "[REDACTED]",
         source: process.env.SUPER_ADMIN_EMAIL ? "env" : "app fallback",
         error: userError?.message ?? null,
       } satisfies SuperAdminBootstrapResult;
