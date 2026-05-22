@@ -484,7 +484,7 @@ export type Database = {
         Row: {
           asset_role: string
           bucket: string
-          content_id: string | null
+          content_id: string
           created_at: string
           created_by: string | null
           file_name: string
@@ -499,7 +499,7 @@ export type Database = {
         Insert: {
           asset_role?: string
           bucket: string
-          content_id?: string | null
+          content_id: string
           created_at?: string
           created_by?: string | null
           file_name: string
@@ -514,7 +514,7 @@ export type Database = {
         Update: {
           asset_role?: string
           bucket?: string
-          content_id?: string | null
+          content_id?: string
           created_at?: string
           created_by?: string | null
           file_name?: string
