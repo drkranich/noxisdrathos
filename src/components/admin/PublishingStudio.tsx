@@ -154,8 +154,10 @@ export function PublishingStudio({
 
   async function recordAsset(asset: Awaited<ReturnType<typeof uploadToBucket>>, role: UploadRole, contentId?: string | null) {
     if (!user?.id) throw new Error("Sessão administrativa expirada. Entre novamente.");
+    const resolvedContentId = contentId ?? (isNew ? null : id);
+    if (!resolvedContentId) return; // tracking deferred until content row exists
     const { error } = await supabase.from("media_assets").upsert({
-      content_id: contentId ?? (isNew ? null : id), bucket: asset.bucket, path: asset.path, file_name: asset.fileName,
+      content_id: resolvedContentId, bucket: asset.bucket, path: asset.path, file_name: asset.fileName,
       mime_type: asset.mimeType, size_bytes: asset.sizeBytes, asset_role: role, status: contentId ? "attached" : "uploaded", created_by: user.id,
     }, { onConflict: "bucket,path" });
     if (error) throw error;
