@@ -27,10 +27,9 @@ function UploadsPage() {
       setUploads((u) => [{ bucket, name: file.name, progress: 1, status: "enviando" }, ...u]);
       try {
         const asset = await uploadToBucket({ bucket, file, pathPrefix: `admin/${user.id}/manual`, onProgress: (progress) => setUploads((u) => u.map((x) => x.name === file.name ? { ...x, progress } : x)) });
-        const { error } = await supabase.from("media_assets").upsert({ bucket: asset.bucket, path: asset.path, file_name: asset.fileName, mime_type: asset.mimeType, size_bytes: asset.sizeBytes, asset_role: bucket === "thumbnails" ? "thumbnail" : bucket === "banners" ? "banner" : "primary", status: "uploaded", created_by: user.id }, { onConflict: "bucket,path" });
-        if (error) throw error;
+        void asset;
         setUploads((u) => u.map((x) => x.name === file.name ? { ...x, progress: 100, status: "sincronizado" } : x));
-        toast.success(`${file.name} sincronizado`);
+        toast.success(`${file.name} enviado · vincule a um conteúdo no estúdio para registrar como mídia.`);
       } catch (e) {
         const message = e instanceof Error ? e.message : "Upload falhou";
         setUploads((u) => u.map((x) => x.name === file.name ? { ...x, status: "falhou", error: message } : x));
