@@ -16,6 +16,16 @@ import {
   LifeBuoy,
   Shield,
   LogOut,
+  PlusSquare,
+  UploadCloud,
+  Image as ImageIcon,
+  FolderTree,
+  Layers,
+  MessageSquare,
+  Megaphone,
+  Activity,
+  Sparkles,
+  Stethoscope,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { NotificationBell } from "@/components/NotificationBell";
