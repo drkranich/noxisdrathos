@@ -29,7 +29,7 @@ function AdminLayout() {
       });
     }
     if (!user) navigate({ to: "/login", replace: true });
-    else if (!isAdmin && !isDiagnosticsRoute) navigate({ to: "/app", replace: true });
+    else if (!isAdmin) navigate({ to: "/app", replace: true });
   }, [stillResolving, user, isAdmin, navigate, loading, rolesLoading, pathname]);
 
   if (stillResolving) {
