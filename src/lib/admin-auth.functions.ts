@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-const FALLBACK_SUPER_ADMIN_EMAIL = "genialidadefilosofica@gmail.com";
+const FALLBACK_SUPER_ADMIN_EMAIL = "";
 
 export type SuperAdminBootstrapResult = {
   ok: boolean;
@@ -15,95 +15,267 @@ export type SuperAdminBootstrapResult = {
   error: string | null;
 };
 
-export const ensureSuperAdminRole = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
-    z.object({ observedEmail: z.string().email().optional() }).parse(input),
-  )
-  .handler(async ({ data, context }) => {
-    const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || FALLBACK_SUPER_ADMIN_EMAIL).trim();
-    const { userId } = context;
-    const { data: userRes, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId);
-    const authEmail = userRes.user?.email?.trim() ?? data.observedEmail?.trim() ?? "";
-    const matched = authEmail.toLowerCase() === superAdminEmail.toLowerCase();
+export const ensureSuperAdminRole = createServerFn({
+  method: "POST",
+})
+.middleware([requireSupabaseAuth])
+.inputValidator((input) =>
+  z.object({
+    observedEmail: z.string().email().optional(),
+  }).parse(input)
+)
+.handler(async ({ data, context }) => {
 
-    if (userError || !matched) {
-      return {
-        ok: false,
-        matched,
-        userId,
-        authEmail: matched ? authEmail : "[REDACTED]",
-        superAdminEmail: "[REDACTED]",
-        source: process.env.SUPER_ADMIN_EMAIL ? "env" : "app fallback",
-        error: userError?.message ?? null,
-      } satisfies SuperAdminBootstrapResult;
-    }
+  const { userId } = context;
 
-    await supabaseAdmin.from("profiles").upsert({
-      id: userId,
-      display_name: userRes.user?.user_metadata?.display_name ?? userRes.user?.user_metadata?.full_name ?? authEmail.split("@")[0],
-      avatar_url: userRes.user?.user_metadata?.avatar_url ?? null,
-    }, { onConflict: "id" });
+  const {
+    data: userRes,
+    error: userError,
+  } = await supabaseAdmin.auth.admin.getUserById(userId);
+
+  const authEmail =
+    userRes.user?.email?.trim()
+    ??
+    data.observedEmail?.trim()
+    ??
+    "";
+
+  if (userError) {
+
+    return {
+      ok: false,
+      matched: false,
+      userId,
+      authEmail: "[REDACTED]",
+      superAdminEmail: "[REDACTED]",
+      source:
+        process.env.SUPER_ADMIN_EMAIL
+          ? "env"
+          : "app fallback",
+      error: userError.message,
+    } satisfies SuperAdminBootstrapResult;
+
+  }
+
+  await supabaseAdmin
+    .from("profiles")
+    .upsert(
+      {
+        id: userId,
+
+        display_name:
+          userRes.user?.user_metadata?.display_name
+          ??
+          userRes.user?.user_metadata?.full_name
+          ??
+          authEmail.split("@")[0],
+
+        avatar_url:
+          userRes.user?.user_metadata?.avatar_url
+          ??
+          null,
+      },
+      {
+        onConflict: "id",
+      }
+    );
+
+  const {
+    data: existingRoles,
+  } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId);
+
+  const alreadyAdmin =
+    existingRoles?.some(
+      r =>
+        r.role === "super_admin"
+        ||
+        r.role === "admin"
+    ) ?? false;
+
+  if (!alreadyAdmin) {
 
     await supabaseAdmin
       .from("user_roles")
-      .delete()
-      .eq("user_id", userId)
-      .neq("role", "super_admin");
+      .upsert(
+        {
+          user_id: userId,
+          role: "member",
+        },
+        {
+          onConflict: "user_id,role",
+        }
+      );
 
-    const { error: roleError } = await supabaseAdmin
+  }
+
+  return {
+
+    ok: true,
+
+    matched: true,
+
+    userId,
+
+    authEmail,
+
+    superAdminEmail:
+      process.env.SUPER_ADMIN_EMAIL
+      ??
+      "",
+
+    source:
+      process.env.SUPER_ADMIN_EMAIL
+        ? "env"
+        : "app fallback",
+
+    error: null,
+
+  } satisfies SuperAdminBootstrapResult;
+
+});
+
+export const getAdminDiagnostics =
+createServerFn({
+  method: "GET",
+})
+.middleware([
+  requireSupabaseAuth,
+])
+.handler(
+async ({ context }) => {
+
+  const {
+    userId,
+    supabase,
+  } = context;
+
+  const [
+
+    authUser,
+
+    profile,
+
+    adminRoles,
+
+    roleQuery,
+
+    adminAccess,
+
+  ] = await Promise.all([
+
+    supabaseAdmin
+      .auth
+      .admin
+      .getUserById(userId),
+
+    supabaseAdmin
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle(),
+
+    supabaseAdmin
       .from("user_roles")
-      .upsert({ user_id: userId, role: "super_admin" }, { onConflict: "user_id,role" });
+      .select("*")
+      .eq("user_id", userId),
 
-    return {
-      ok: !roleError,
-      matched,
-      userId,
-      authEmail,
-      superAdminEmail,
-      source: process.env.SUPER_ADMIN_EMAIL ? "env" : "app fallback",
-      error: roleError?.message ?? null,
-    } satisfies SuperAdminBootstrapResult;
-  });
+    supabase
+      .from("user_roles")
+      .select("*")
+      .eq("user_id", userId),
 
-export const getAdminDiagnostics = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { userId, supabase } = context;
-    const { data: isAdminData } = await supabaseAdmin.rpc("is_admin", { _user_id: userId });
-    if (!isAdminData) {
-      throw new Response("Forbidden", { status: 403 });
-    }
-    const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || FALLBACK_SUPER_ADMIN_EMAIL).trim();
-    const [authUser, profile, adminRoles, roleQuery, adminAccess] = await Promise.all([
-      supabaseAdmin.auth.admin.getUserById(userId),
-      supabaseAdmin.from("profiles").select("*").eq("id", userId).maybeSingle(),
-      supabaseAdmin.from("user_roles").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
-      supabase.from("user_roles").select("id,user_id,role,created_at").eq("user_id", userId).order("created_at", { ascending: false }),
-      supabaseAdmin.rpc("is_admin", { _user_id: userId }),
-    ]);
-    const email = authUser.data.user?.email?.trim() ?? null;
-    const roles = (adminRoles.data ?? []).map((row) => row.role as string);
-    const resolvedRole = roles.includes("super_admin") ? "super_admin" : roles.includes("admin") ? "admin" : roles[0] ?? "none";
+    supabaseAdmin
+      .rpc(
+        "is_admin",
+        {
+          _user_id: userId,
+        }
+      ),
 
-    return {
-      currentEmail: email,
-      currentAuthUid: userId,
-      currentRole: resolvedRole,
-      profileRow: profile.data,
-      profileError: profile.error?.message ?? null,
-      userRolesRows: adminRoles.data ?? [],
-      userRolesError: adminRoles.error?.message ?? null,
-      superAdminEmail,
-      superAdminEmailSource: process.env.SUPER_ADMIN_EMAIL ? "env" : "app fallback",
-      emailMatchesSuperAdmin: !!email && email.toLowerCase() === superAdminEmail.toLowerCase(),
-      authEmailHasNoOuterSpaces: !!email && email === email.trim(),
-      roleQueryResponse: {
-        data: roleQuery.data ?? null,
-        error: roleQuery.error?.message ?? null,
-      },
-      adminAccessResult: !!adminAccess.data,
-      adminAccessError: adminAccess.error?.message ?? null,
-      authUserError: authUser.error?.message ?? null,
-    };
-  });
+  ]);
+
+  const email =
+    authUser
+    .data
+    .user
+    ?.email
+    ?.trim()
+    ??
+    null;
+
+  const roles =
+    (adminRoles.data ?? [])
+    .map(
+      r => r.role
+    );
+
+  const resolvedRole =
+
+    roles.includes("super_admin")
+
+    ?
+
+    "super_admin"
+
+    :
+
+    roles.includes("admin")
+
+    ?
+
+    "admin"
+
+    :
+
+    roles.includes("member")
+
+    ?
+
+    "member"
+
+    :
+
+    "none";
+
+  return {
+
+    currentEmail: email,
+
+    currentAuthUid: userId,
+
+    currentRole: resolvedRole,
+
+    roles,
+
+    profileRow:
+      profile.data,
+
+    userRolesRows:
+      adminRoles.data,
+
+    roleQueryResponse: {
+
+      data:
+        roleQuery.data,
+
+      error:
+        roleQuery.error?.message
+        ??
+        null,
+
+    },
+
+    adminAccessResult:
+      !!adminAccess.data,
+
+    adminAccessError:
+      adminAccess.error?.message
+      ??
+      null,
+
+  };
+
+});
