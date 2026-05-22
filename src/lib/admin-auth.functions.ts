@@ -75,7 +75,6 @@ export const getAdminDiagnostics = createServerFn({ method: "GET" })
       throw new Response("Forbidden", { status: 403 });
     }
     const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || FALLBACK_SUPER_ADMIN_EMAIL).trim();
-    const { userId, supabase } = context;
     const [authUser, profile, adminRoles, roleQuery, adminAccess] = await Promise.all([
       supabaseAdmin.auth.admin.getUserById(userId),
       supabaseAdmin.from("profiles").select("*").eq("id", userId).maybeSingle(),
