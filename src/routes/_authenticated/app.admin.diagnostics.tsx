@@ -44,19 +44,20 @@ function AdminDiagnostics() {
     loadDiagnostics();
   }, []);
 
+  const d = diagnostics as any;
   const rows = [
-    ["Current email", user?.email ?? diagnostics?.currentEmail ?? "—"],
-    ["Current auth uid", user?.id ?? diagnostics?.currentAuthUid ?? "—"],
+    ["Current email", user?.email ?? d?.currentEmail ?? "—"],
+    ["Current auth uid", user?.id ?? d?.currentAuthUid ?? "—"],
     ["Current role", primaryRole],
-    ["SUPER_ADMIN_EMAIL env value", diagnostics?.superAdminEmail ?? bootstrapResult?.superAdminEmail ?? "carregando"],
-    ["SUPER_ADMIN_EMAIL source", diagnostics?.superAdminEmailSource ?? bootstrapResult?.source ?? "—"],
+    ["SUPER_ADMIN_EMAIL env value", d?.superAdminEmail ?? bootstrapResult?.superAdminEmail ?? "carregando"],
+    ["SUPER_ADMIN_EMAIL source", d?.superAdminEmailSource ?? bootstrapResult?.source ?? "—"],
     ["Session hydrated", loading ? "não" : "sim"],
     ["Role hydrated", rolesLoading ? "não" : "sim"],
     ["Admin access result", isAdmin ? "permitido" : "negado"],
     ["Current pathname", pathname],
     ["Current redirect target", redirectTarget],
-    ["Email matches SUPER_ADMIN_EMAIL", diagnostics?.emailMatchesSuperAdmin ? "sim" : "não"],
-    ["Email has no spaces", diagnostics?.authEmailHasNoOuterSpaces ? "sim" : "não"],
+    ["Email matches SUPER_ADMIN_EMAIL", d?.emailMatchesSuperAdmin ? "sim" : "não"],
+    ["Email has no spaces", d?.authEmailHasNoOuterSpaces ? "sim" : "não"],
   ];
 
   return (
@@ -83,9 +84,9 @@ function AdminDiagnostics() {
       </div>
 
       <div className="mt-8 grid gap-4 xl:grid-cols-2">
-        <DiagnosticBlock title="Current profile row" value={diagnostics?.profileRow} error={diagnostics?.profileError} />
-        <DiagnosticBlock title="Current user_roles row" value={diagnostics?.userRolesRows ?? roles} error={diagnostics?.userRolesError} />
-        <DiagnosticBlock title="Role query response" value={diagnostics?.roleQueryResponse ?? roleQuery} />
+        <DiagnosticBlock title="Current profile row" value={d?.profileRow} error={d?.profileError} />
+        <DiagnosticBlock title="Current user_roles row" value={d?.userRolesRows ?? roles} error={d?.userRolesError} />
+        <DiagnosticBlock title="Role query response" value={d?.roleQueryResponse ?? roleQuery} />
         <DiagnosticBlock title="Super admin bootstrap" value={bootstrapResult} />
       </div>
     </div>
