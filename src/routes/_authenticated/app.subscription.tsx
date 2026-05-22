@@ -82,8 +82,6 @@ function SubscriptionPage() {
     setError(null);
     openCheckout({
       priceId: plan.stripePriceId,
-      customerEmail: user.email ?? undefined,
-      userId: user.id,
       returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
     });
   }
