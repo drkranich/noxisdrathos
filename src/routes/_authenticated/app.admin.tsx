@@ -13,7 +13,6 @@ function AdminLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const stillResolving = loading || rolesLoading;
-  const isDiagnosticsRoute = pathname.startsWith("/app/admin/diagnostics");
 
   useEffect(() => {
     if (stillResolving) return;
@@ -30,7 +29,7 @@ function AdminLayout() {
       });
     }
     if (!user) navigate({ to: "/login", replace: true });
-    else if (!isAdmin && !isDiagnosticsRoute) navigate({ to: "/app", replace: true });
+    else if (!isAdmin) navigate({ to: "/app", replace: true });
   }, [stillResolving, user, isAdmin, navigate, loading, rolesLoading, pathname]);
 
   if (stillResolving) {
@@ -42,7 +41,7 @@ function AdminLayout() {
     );
   }
 
-  if (!isAdmin && !isDiagnosticsRoute) {
+  if (!isAdmin) {
     return (
       <div className="px-8 lg:px-14 py-16">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">acesso restrito</p>

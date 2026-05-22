@@ -32,8 +32,8 @@ export const ensureSuperAdminRole = createServerFn({ method: "POST" })
         ok: false,
         matched,
         userId,
-        authEmail,
-        superAdminEmail,
+        authEmail: matched ? authEmail : "[REDACTED]",
+        superAdminEmail: "[REDACTED]",
         source: process.env.SUPER_ADMIN_EMAIL ? "env" : "app fallback",
         error: userError?.message ?? null,
       } satisfies SuperAdminBootstrapResult;
@@ -69,8 +69,12 @@ export const ensureSuperAdminRole = createServerFn({ method: "POST" })
 export const getAdminDiagnostics = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || FALLBACK_SUPER_ADMIN_EMAIL).trim();
     const { userId, supabase } = context;
+    const { data: isAdminData } = await supabaseAdmin.rpc("is_admin", { _user_id: userId });
+    if (!isAdminData) {
+      throw new Response("Forbidden", { status: 403 });
+    }
+    const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || FALLBACK_SUPER_ADMIN_EMAIL).trim();
     const [authUser, profile, adminRoles, roleQuery, adminAccess] = await Promise.all([
       supabaseAdmin.auth.admin.getUserById(userId),
       supabaseAdmin.from("profiles").select("*").eq("id", userId).maybeSingle(),
