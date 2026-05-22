@@ -41,7 +41,7 @@ function AdminLayout() {
     );
   }
 
-  if (!isAdmin && !isDiagnosticsRoute) {
+  if (!isAdmin) {
     return (
       <div className="px-8 lg:px-14 py-16">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">acesso restrito</p>
