@@ -160,7 +160,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRolesLoading(false);
 
       if (import.meta.env.DEV) {
-        // eslint-disable-next-line no-console
         console.log("[auth] role hydration", {
           currentEmail: email,
           hydratedRole: resolvePrimaryRole(resolvedRoles),
@@ -270,7 +269,6 @@ export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) {
     if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
       console.warn(
         "[auth] useAuth() called outside <AuthProvider> — returning anonymous fallback.",
       );
