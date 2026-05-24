@@ -19,7 +19,6 @@ function AdminLayout() {
   useEffect(() => {
     if (stillResolving) return;
     if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
       console.log("[admin-guard] decision", {
         currentEmail: user?.email ?? null,
         isAdmin,
