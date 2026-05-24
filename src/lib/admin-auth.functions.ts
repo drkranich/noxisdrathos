@@ -427,7 +427,7 @@ supabaseAdmin
 .select("*")
 
 .eq(
-"auth_user_id",
+"id",
 userId,
 )
 
