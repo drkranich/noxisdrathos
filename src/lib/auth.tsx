@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Session, User } from "@supabase/supabase-js";
 import { useServerFn } from "@tanstack/react-start";
@@ -120,28 +128,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const startedAt = performance.now();
 
     async function hydrateRoles() {
-      const bootstrap = await bootstrapSuperAdmin({ data: { observedEmail: email } }).catch((error): SuperAdminBootstrapResult => ({
-        ok: false,
-        matched: false,
-        userId,
-        authEmail: email,
-        superAdminEmail: "unavailable",
-        source: "app fallback",
-        roleAssigned: null,
-        error: error instanceof Error ? error.message : String(error),
-      }));
+      const bootstrap = await bootstrapSuperAdmin({ data: { observedEmail: email } }).catch(
+        (error): SuperAdminBootstrapResult => ({
+          ok: false,
+          matched: false,
+          userId,
+          authEmail: email,
+          superAdminEmail: "unavailable",
+          source: "app fallback",
+          roleAssigned: null,
+          error: error instanceof Error ? error.message : String(error),
+        }),
+      );
       if (!cancelled) setBootstrapResult(bootstrap);
 
       const response = await supabase
-      .from("user_roles")
-      .select("id,user_id,role,created_at")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+        .from("user_roles")
+        .select("id,user_id,role,created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
       if (cancelled) return;
 
       const rawRows = response.data ?? [];
       const resolvedRoles = normalizeRoles(rawRows);
-      setRoleQuery({ data: response.data ?? [], error: response.error?.message ?? null, source: "user_roles" });
+      setRoleQuery({
+        data: response.data ?? [],
+        error: response.error?.message ?? null,
+        source: "user_roles",
+      });
       setRoles(resolvedRoles);
       setRolesLoading(false);
 
@@ -153,7 +167,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           rawUserRolesRows: rawRows,
           roleQueryResult: response,
           bootstrap,
-          guardDecision: resolvedRoles.includes("admin") || resolvedRoles.includes("super_admin") ? "admin_allowed" : "member_or_denied",
+          guardDecision:
+            resolvedRoles.includes("admin") || resolvedRoles.includes("super_admin")
+              ? "admin_allowed"
+              : "member_or_denied",
           hydrationTimingMs: Math.round(performance.now() - startedAt),
         });
       }
@@ -177,7 +194,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       rawUserRolesRows,
       cacheRole,
       effectiveRole: primaryRole,
-      guardRole: loading || rolesLoading ? "pending" : !session?.user ? "anonymous" : isAdmin ? "admin_allowed" : "member_or_denied",
+      guardRole:
+        loading || rolesLoading
+          ? "pending"
+          : !session?.user
+            ? "anonymous"
+            : isAdmin
+              ? "admin_allowed"
+              : "member_or_denied",
       roleQuery,
     };
   }, [isAdmin, loading, primaryRole, roleQuery, rolesLoading, session?.user]);
@@ -199,7 +223,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut();
       },
     }),
-    [session, loading, rolesLoading, roles, primaryRole, roleQuery, roleDiagnostics, bootstrapResult, isAdmin, refreshRoles],
+    [
+      session,
+      loading,
+      rolesLoading,
+      roles,
+      primaryRole,
+      roleQuery,
+      roleDiagnostics,
+      bootstrapResult,
+      isAdmin,
+      refreshRoles,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -236,7 +271,9 @@ export function useAuth(): AuthContextValue {
   if (!ctx) {
     if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console
-      console.warn("[auth] useAuth() called outside <AuthProvider> — returning anonymous fallback.");
+      console.warn(
+        "[auth] useAuth() called outside <AuthProvider> — returning anonymous fallback.",
+      );
     }
     return FALLBACK_AUTH;
   }

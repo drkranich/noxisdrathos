@@ -161,7 +161,9 @@ export function AppSidebar() {
                 { to: "/app/admin/diagnostics", label: "diagnóstico", icon: Stethoscope },
               ].map((it) => {
                 const Icon = it.icon;
-                const active = it.exact ? pathname === it.to : pathname === it.to || pathname.startsWith(it.to + "/");
+                const active = it.exact
+                  ? pathname === it.to
+                  : pathname === it.to || pathname.startsWith(it.to + "/");
                 return (
                   <li key={it.to}>
                     <Link

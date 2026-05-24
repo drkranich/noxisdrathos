@@ -81,9 +81,7 @@ function LoginPage() {
             className="mt-2 bg-card border-border"
           />
         </div>
-        {error ? (
-          <p className="font-mono text-[11px] text-destructive">{error}</p>
-        ) : null}
+        {error ? <p className="font-mono text-[11px] text-destructive">{error}</p> : null}
         <Button type="submit" disabled={submitting} className="w-full mt-2">
           {submitting ? "verificando…" : "entrar →"}
         </Button>
