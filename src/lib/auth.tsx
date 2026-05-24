@@ -205,6 +205,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+const FALLBACK_ROLE_DIAGNOSTICS: RolePipelineDiagnostics = {
+  authEmail: null,
+  authUid: null,
+  hydratedRole: "none",
+  rawUserRolesRows: [],
+  cacheRole: "none",
+  effectiveRole: "none",
+  guardRole: "anonymous",
+  roleQuery: null,
+};
+
 const FALLBACK_AUTH: AuthContextValue = {
   session: null,
   user: null,
@@ -213,8 +224,10 @@ const FALLBACK_AUTH: AuthContextValue = {
   roles: [],
   primaryRole: "none",
   roleQuery: null,
+  roleDiagnostics: FALLBACK_ROLE_DIAGNOSTICS,
   bootstrapResult: null,
   isAdmin: false,
+  refreshRoles: () => {},
   signOut: async () => {},
 };
 
