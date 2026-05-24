@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_authenticated/app/admin")({
 });
 
 function AdminLayout() {
-  const { isAdmin, loading, rolesLoading, user } = useAuth();
+  const { isAdmin, loading, rolesLoading, user, roleDiagnostics } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -25,11 +25,10 @@ function AdminLayout() {
         rolesLoading,
         currentPathname: pathname,
         redirectTriggerSource: !user ? "missing_user" : !isAdmin ? "role_denied_after_hydration" : "admin_allowed",
-        redirectTarget: !user ? "/login" : !isAdmin ? "/app" : null,
+        redirectTarget: !user ? "/login" : null,
       });
     }
     if (!user) navigate({ to: "/login", replace: true });
-    else if (!isAdmin) navigate({ to: "/app", replace: true });
   }, [stillResolving, user, isAdmin, navigate, loading, rolesLoading, pathname]);
 
   if (stillResolving) {
@@ -46,6 +45,9 @@ function AdminLayout() {
       <div className="px-8 lg:px-14 py-16">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">acesso restrito</p>
         <h1 className="font-display text-3xl mt-4">Sem privilégios de administrador.</h1>
+        <pre className="mt-8 max-w-3xl overflow-auto whitespace-pre-wrap break-words border border-border bg-card/30 p-5 font-mono text-[11px] leading-relaxed text-muted-foreground">
+          {JSON.stringify(roleDiagnostics, null, 2)}
+        </pre>
       </div>
     );
   }
