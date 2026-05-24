@@ -215,39 +215,19 @@ await supabaseAdmin
 .from("profiles")
 
 .upsert(
-
 {
-
-auth_user_id:
-userId,
-
-email:
-authEmail,
-
-display_name:
-displayName,
-
+id: userId,
+display_name: displayName,
 avatar_url:
-
 userRes
 .user
 ?.user_metadata
 ?.avatar_url
-
-??
-
-null,
-
+?? null,
 },
-
-{
-
-onConflict:
-"auth_user_id",
-
-},
-
+{ onConflict: "id" },
 );
+
 
 await supabaseAdmin
 
