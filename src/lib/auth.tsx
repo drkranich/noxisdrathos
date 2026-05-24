@@ -15,17 +15,7 @@ import type {
   User,
 } from "@supabase/supabase-js";
 
-import { useServerFn } from "@tanstack/react-start";
-
 import { supabase } from "@/integrations/supabase/client";
-
-import {
-  ensureSuperAdminRole,
-} from "@/lib/admin-auth.functions";
-
-import type {
-  SuperAdminBootstrapResult,
-} from "@/lib/admin-auth.functions";
 
 type Role =
   | "super_admin"
@@ -46,14 +36,16 @@ type RoleQueryState = {
 };
 
 type RolePipelineDiagnostics = {
-  authEmail: string | null;
-  authUid: string | null;
+  authEmail:string|null;
+  authUid:string|null;
+
   hydratedRole:
     | Role
     | "none"
     | "pending";
 
-  rawUserRolesRows: RoleRow[];
+  rawUserRolesRows:
+    RoleRow[];
 
   cacheRole:
     | Role
@@ -70,124 +62,128 @@ type RolePipelineDiagnostics = {
     | "anonymous";
 
   roleQuery:
-    | RoleQueryState
+    RoleQueryState
     | null;
 };
 
-export type AuthContextValue = {
-  session: Session | null;
+export type AuthContextValue={
 
-  user: User | null;
+session:
+Session|null;
 
-  loading: boolean;
+user:
+User|null;
 
-  rolesLoading: boolean;
+loading:
+boolean;
 
-  roles: Role[];
+rolesLoading:
+boolean;
 
-  primaryRole:
-    | Role
-    | "none";
+roles:
+Role[];
 
-  roleQuery:
-    | RoleQueryState
-    | null;
+primaryRole:
+Role
+|
+"none";
 
-  roleDiagnostics:
-    RolePipelineDiagnostics;
+roleQuery:
+RoleQueryState
+|
+null;
 
-  bootstrapResult:
-    SuperAdminBootstrapResult
-    | null;
+roleDiagnostics:
+RolePipelineDiagnostics;
 
-  isAdmin: boolean;
+isAdmin:
+boolean;
 
-  refreshRoles: () => void;
+refreshRoles:
+()=>void;
 
-  signOut: () => Promise<void>;
+signOut:
+()=>Promise<void>;
+
 };
 
-const ROLE_PRIORITY: Record<Role, number> = {
+const ROLE_PRIORITY={
 
-  super_admin: 3,
+super_admin:3,
 
-  admin: 2,
+admin:2,
 
-  member: 1,
+member:1,
 
 };
 
 function isRole(
-  value: string,
-): value is Role {
+value:string,
+):value is Role{
 
-  return (
+return(
 
-    value === "super_admin"
+value==="super_admin"
 
-    ||
+||
 
-    value === "admin"
+value==="admin"
 
-    ||
+||
 
-    value === "member"
+value==="member"
 
-  );
+);
 
 }
 
 function normalizeRoles(
-  rows: RoleRow[],
-): Role[] {
+rows:RoleRow[],
+):Role[]{
 
-  return Array
+return Array
 
-  .from(
+.from(
 
-    new Set(
+new Set(
 
-      rows
+rows
 
-      .map(
+.map(
+r=>r.role
+)
 
-        r => r.role,
+.filter(
+isRole
+)
 
-      )
+)
 
-      .filter(
+)
 
-        isRole,
+.sort(
 
-      ),
+(a,b)=>
 
-    ),
+ROLE_PRIORITY[b]
 
-  )
+-
 
-  .sort(
+ROLE_PRIORITY[a]
 
-    (a,b)=>
-
-      ROLE_PRIORITY[b]
-
-      -
-
-      ROLE_PRIORITY[a],
-
-  );
+);
 
 }
 
 function resolvePrimaryRole(
-  roles: Role[],
+roles:Role[],
 ){
 
-  return roles[0]
+return roles[0]
 
-  ??
+??
 
-  "none";
+"none";
 
 }
 
@@ -228,13 +224,9 @@ setSession,
 ]=
 
 useState<
-
 Session
-
 |
-
 null
-
 >(null);
 
 const [
@@ -276,31 +268,9 @@ setRoleQuery,
 ]=
 
 useState<
-
 RoleQueryState
-
 |
-
 null
-
->(null);
-
-const [
-
-bootstrapResult,
-
-setBootstrapResult,
-
-]=
-
-useState<
-
-SuperAdminBootstrapResult
-
-|
-
-null
-
 >(null);
 
 const [
@@ -313,14 +283,6 @@ setRoleRefreshNonce,
 
 useState(0);
 
-const bootstrapSuperAdmin=
-
-useServerFn(
-
-ensureSuperAdminRole,
-
-);
-
 const refreshRoles=
 
 useCallback(
@@ -329,7 +291,7 @@ useCallback(
 
 setRoleRefreshNonce(
 
-v=>v+1,
+v=>v+1
 
 );
 
@@ -367,17 +329,15 @@ nextSession,
 
 );
 
-queryClient.removeQueries();
+queryClient
 
-queryClient.invalidateQueries();
+.invalidateQueries();
 
 if(
 
 nextSession?.user
 
 ){
-
-setRoles([]);
 
 setRolesLoading(true);
 
@@ -419,15 +379,11 @@ setLoading(false);
 
 )
 
-.catch(
-
-()=>{
+.catch(()=>{
 
 setLoading(false);
 
-},
-
-);
+});
 
 return()=>{
 
@@ -471,53 +427,19 @@ try{
 
 setRolesLoading(true);
 
-bootstrapSuperAdmin({
-
-data:{},
-
-})
-
-.then(
-
-result=>{
-
-if(
-
-!cancelled
-
-){
-
-setBootstrapResult(
-
-result,
-
-);
-
-}
-
-},
-
-)
-
-.catch(
-
-console.error,
-
-);
-
 const response=
 
 await supabase
 
 .from(
 
-"user_roles",
+"user_roles"
 
 )
 
 .select(
 
-"id,user_id,role,created_at",
+"id,user_id,role,created_at"
 
 )
 
@@ -567,9 +489,7 @@ data:raw,
 
 error:
 
-response.error
-
-?.message
+response.error?.message
 
 ??
 
@@ -591,9 +511,7 @@ error
 
 console.error(
 
-"ROLE ERROR",
-
-error,
+error
 
 );
 
@@ -628,8 +546,6 @@ cancelled=true;
 },[
 
 session?.user?.id,
-
-bootstrapSuperAdmin,
 
 roleRefreshNonce,
 
@@ -783,8 +699,6 @@ roleQuery,
 
 roleDiagnostics,
 
-bootstrapResult,
-
 isAdmin,
 
 refreshRoles,
@@ -818,8 +732,6 @@ primaryRole,
 roleQuery,
 
 roleDiagnostics,
-
-bootstrapResult,
 
 isAdmin,
 
