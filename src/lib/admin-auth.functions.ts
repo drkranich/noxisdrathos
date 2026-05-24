@@ -130,7 +130,7 @@ userId,
 
 authEmail,
 
-superAdminEmail,
+superAdminEmail: "",
 
 source:
 
@@ -168,7 +168,7 @@ userId,
 
 authEmail,
 
-superAdminEmail,
+superAdminEmail: "",
 
 source:
 
@@ -299,7 +299,7 @@ userId,
 
 authEmail,
 
-superAdminEmail,
+superAdminEmail: "",
 
 source:
 
@@ -333,7 +333,7 @@ userId,
 
 authEmail,
 
-superAdminEmail,
+superAdminEmail: "",
 
 source:
 
