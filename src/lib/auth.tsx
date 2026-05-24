@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         userId,
         authEmail: email,
         superAdminEmail: "unavailable",
-        source: "client catch",
+        source: "app fallback",
         error: error instanceof Error ? error.message : String(error),
       }));
       if (!cancelled) setBootstrapResult(bootstrap);
