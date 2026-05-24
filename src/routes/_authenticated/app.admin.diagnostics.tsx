@@ -1,6 +1,6 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getAdminDiagnostics } from "@/lib/admin-auth.functions";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -40,7 +40,7 @@ function AdminDiagnostics() {
     return "nenhum";
   }, [isAdmin, loading, rolesLoading, user]);
 
-  async function loadDiagnostics() {
+  const loadDiagnostics = useCallback(async () => {
     setLoadingPanel(true);
     setError(null);
     try {
@@ -51,13 +51,13 @@ function AdminDiagnostics() {
     } finally {
       setLoadingPanel(false);
     }
-  }
+  }, [fetchDiagnostics]);
 
   useEffect(() => {
     loadDiagnostics();
-  }, []);
+  }, [loadDiagnostics]);
 
-  const d = diagnostics as any;
+  const d = diagnostics;
   const rows = [
     ["Current email", user?.email ?? d?.currentEmail ?? "—"],
     ["Current auth uid", user?.id ?? d?.currentAuthUid ?? "—"],
