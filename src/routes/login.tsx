@@ -19,15 +19,15 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { session, loading } = useAuth();
+  const { session, loading, rolesLoading, refreshRoles } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!loading && session) navigate({ to: "/app" });
-  }, [loading, session, navigate]);
+    if (!loading && !rolesLoading && session) navigate({ to: "/app" });
+  }, [loading, rolesLoading, session, navigate]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -36,6 +36,7 @@ function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setSubmitting(false);
     if (error) setError(error.message);
+    else refreshRoles();
   }
 
   return (
@@ -80,9 +81,7 @@ function LoginPage() {
             className="mt-2 bg-card border-border"
           />
         </div>
-        {error ? (
-          <p className="font-mono text-[11px] text-destructive">{error}</p>
-        ) : null}
+        {error ? <p className="font-mono text-[11px] text-destructive">{error}</p> : null}
         <Button type="submit" disabled={submitting} className="w-full mt-2">
           {submitting ? "verificando…" : "entrar →"}
         </Button>

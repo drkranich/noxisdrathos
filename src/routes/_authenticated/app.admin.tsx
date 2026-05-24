@@ -3,12 +3,14 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/_authenticated/app/admin")({
-  head: () => ({ meta: [{ title: "Admin — Observatório" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Admin — Observatório" }, { name: "robots", content: "noindex" }],
+  }),
   component: AdminLayout,
 });
 
 function AdminLayout() {
-  const { isAdmin, loading, rolesLoading, user } = useAuth();
+  const { isAdmin, loading, rolesLoading, user, roleDiagnostics } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -17,25 +19,29 @@ function AdminLayout() {
   useEffect(() => {
     if (stillResolving) return;
     if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
       console.log("[admin-guard] decision", {
         currentEmail: user?.email ?? null,
         isAdmin,
         loading,
         rolesLoading,
         currentPathname: pathname,
-        redirectTriggerSource: !user ? "missing_user" : !isAdmin ? "role_denied_after_hydration" : "admin_allowed",
-        redirectTarget: !user ? "/login" : !isAdmin ? "/app" : null,
+        redirectTriggerSource: !user
+          ? "missing_user"
+          : !isAdmin
+            ? "role_denied_after_hydration"
+            : "admin_allowed",
+        redirectTarget: !user ? "/login" : null,
       });
     }
     if (!user) navigate({ to: "/login", replace: true });
-    else if (!isAdmin) navigate({ to: "/app", replace: true });
   }, [stillResolving, user, isAdmin, navigate, loading, rolesLoading, pathname]);
 
   if (stillResolving) {
     return (
       <div className="px-8 lg:px-14 py-16">
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">autenticando</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+          autenticando
+        </p>
         <h1 className="font-display text-3xl mt-4">Verificando privilégios…</h1>
       </div>
     );
@@ -44,8 +50,13 @@ function AdminLayout() {
   if (!isAdmin) {
     return (
       <div className="px-8 lg:px-14 py-16">
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">acesso restrito</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+          acesso restrito
+        </p>
         <h1 className="font-display text-3xl mt-4">Sem privilégios de administrador.</h1>
+        <pre className="mt-8 max-w-3xl overflow-auto whitespace-pre-wrap break-words border border-border bg-card/30 p-5 font-mono text-[11px] leading-relaxed text-muted-foreground">
+          {JSON.stringify(roleDiagnostics, null, 2)}
+        </pre>
       </div>
     );
   }
@@ -70,7 +81,9 @@ function AdminLayout() {
     <div>
       <header className="border-b border-border px-8 lg:px-14 py-6 flex items-center gap-8">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">painel · admin</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+            painel · admin
+          </p>
           <h1 className="font-display text-2xl mt-1">Sala de controle</h1>
         </div>
         <nav className="ml-auto flex gap-1">
@@ -82,7 +95,9 @@ function AdminLayout() {
                 to={t.to}
                 className={
                   "px-4 py-2 font-mono text-[11px] uppercase tracking-[0.25em] " +
-                  (active ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground")
+                  (active
+                    ? "bg-accent text-foreground"
+                    : "text-muted-foreground hover:text-foreground")
                 }
               >
                 {t.label}
