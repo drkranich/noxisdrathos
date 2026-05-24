@@ -134,11 +134,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const response = await supabase
       .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
+      .select("id,user_id,role,created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
       if (cancelled) return;
 
-      const resolvedRoles = (response.data ?? []).map((r) => r.role as Role);
+      const rawRows = response.data ?? [];
+      const resolvedRoles = normalizeRoles(rawRows);
       setRoleQuery({ data: response.data ?? [], error: response.error?.message ?? null, source: "user_roles" });
       setRoles(resolvedRoles);
       setRolesLoading(false);
@@ -147,7 +149,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // eslint-disable-next-line no-console
         console.log("[auth] role hydration", {
           currentEmail: email,
-          currentRole: resolvedRoles.includes("super_admin") ? "super_admin" : resolvedRoles.includes("admin") ? "admin" : resolvedRoles[0] ?? "none",
+          hydratedRole: resolvePrimaryRole(resolvedRoles),
+          rawUserRolesRows: rawRows,
           roleQueryResult: response,
           bootstrap,
           guardDecision: resolvedRoles.includes("admin") || resolvedRoles.includes("super_admin") ? "admin_allowed" : "member_or_denied",
@@ -160,9 +163,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [bootstrapSuperAdmin, session?.user?.email, session?.user?.id]);
+  }, [bootstrapSuperAdmin, roleRefreshNonce, session?.user?.email, session?.user?.id]);
 
-  const primaryRole = roles.includes("super_admin") ? "super_admin" : roles.includes("admin") ? "admin" : roles.includes("member") ? "member" : "none";
+  const primaryRole = resolvePrimaryRole(roles);
+  const isAdmin = primaryRole === "super_admin" || primaryRole === "admin";
+  const roleDiagnostics = useMemo<RolePipelineDiagnostics>(() => {
+    const rawUserRolesRows = roleQuery?.data ?? [];
+    const cacheRole = resolvePrimaryRole(normalizeRoles(rawUserRolesRows));
+    return {
+      authEmail: session?.user?.email ?? null,
+      authUid: session?.user?.id ?? null,
+      hydratedRole: rolesLoading ? "pending" : primaryRole,
+      rawUserRolesRows,
+      cacheRole,
+      effectiveRole: primaryRole,
+      guardRole: loading || rolesLoading ? "pending" : !session?.user ? "anonymous" : isAdmin ? "admin_allowed" : "member_or_denied",
+      roleQuery,
+    };
+  }, [isAdmin, loading, primaryRole, roleQuery, rolesLoading, session?.user]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -173,13 +191,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       roles,
       primaryRole,
       roleQuery,
+      roleDiagnostics,
       bootstrapResult,
-      isAdmin: roles.includes("admin") || roles.includes("super_admin"),
+      isAdmin,
+      refreshRoles,
       signOut: async () => {
         await supabase.auth.signOut();
       },
     }),
-    [session, loading, rolesLoading, roles, primaryRole, roleQuery, bootstrapResult],
+    [session, loading, rolesLoading, roles, primaryRole, roleQuery, roleDiagnostics, bootstrapResult, isAdmin, refreshRoles],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
