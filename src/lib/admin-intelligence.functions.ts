@@ -14,34 +14,34 @@ function monthlyFromPriceId(priceId: string | null): number {
 
 async function assertAdmin(
   supabase: any,
-  userId: string
+  userId: string,
 ) {
 
-  const { data, error } =
-    await supabase.rpc(
-      "is_admin",
-      {
-        _user_id: userId,
-      }
-    );
+  const {
+    data,
+    error,
+  } = await supabase.rpc(
+    "is_admin",
+    {
+      _user_id: userId,
+    },
+  );
 
   if (error) {
 
     console.error(
       "ADMIN CHECK ERROR:",
-      error
+      error,
     );
 
-    throw new Error(
-      "admin verification failed"
-    );
+    throw error;
 
   }
 
   if (!data) {
 
     throw new Error(
-      "forbidden"
+      "forbidden",
     );
 
   }
@@ -56,9 +56,7 @@ createServerFn({
   requireSupabaseAuth,
 ])
 .handler(
-async ({
-  context,
-}) => {
+async ({ context }) => {
 
 const {
   supabase,
@@ -70,27 +68,26 @@ await assertAdmin(
   userId,
 );
 
-const now =
-Date.now();
+const now = Date.now();
 
 const since5m =
 new Date(
-now - 5 * 60 * 1000
+now - 5 * 60 * 1000,
 ).toISOString();
 
 const since24h =
 new Date(
-now - 24 * 3600 * 1000
+now - 24 * 3600 * 1000,
 ).toISOString();
 
 const since7d =
 new Date(
-now - 7 * 86400 * 1000
+now - 7 * 86400 * 1000,
 ).toISOString();
 
 const since30d =
 new Date(
-now - 30 * 86400 * 1000
+now - 30 * 86400 * 1000,
 ).toISOString();
 
 const [
@@ -113,16 +110,14 @@ ticketsRes,
 
 commentsRes,
 
-] =
-
-await Promise.all([
+] = await Promise.all([
 
 supabase
 .from("watch_history")
 .select("user_id")
 .gte(
 "last_seen_at",
-since5m
+since5m,
 )
 .limit(500),
 
@@ -133,95 +128,95 @@ supabase
 {
 count:"exact",
 head:true,
-}
+},
 )
 .gte(
 "created_at",
-since24h
+since24h,
 ),
 
 supabase
 .from("watch_history")
 .select(
-"progress_seconds,last_seen_at"
+"progress_seconds,last_seen_at",
 )
 .gte(
 "last_seen_at",
-since24h
+since24h,
 )
 .limit(2000),
 
 supabase
 .from("subscriptions")
 .select(
-"status,price_id,product_id,current_period_end,cancel_at_period_end,created_at"
+"status,price_id,product_id,current_period_end,cancel_at_period_end,created_at",
 ),
 
 supabase
 .from("watch_history")
 .select(
-"content_id,user_id,completed,last_seen_at"
+"content_id,user_id,completed,last_seen_at",
 )
 .gte(
 "last_seen_at",
-since7d
+since7d,
 )
 .limit(5000),
 
 supabase
 .from("content")
 .select(
-"id,slug,title,type,thumbnail_url"
+"id,slug,title,type,thumbnail_url",
 )
 .eq(
 "status",
-"published"
+"published",
 )
 .limit(500),
 
 supabase
 .from("watch_history")
 .select(
-"id,user_id,content_id,progress_seconds,completed,last_seen_at"
+"id,user_id,content_id,progress_seconds,completed,last_seen_at",
 )
 .order(
 "last_seen_at",
 {
 ascending:false,
-}
+},
 )
 .limit(20),
 
 supabase
 .from("support_tickets")
 .select(
-"id,subject,status,priority,user_id,created_at"
+"id,subject,status,priority,user_id,created_at",
 )
 .in(
 "status",
 [
 "open",
 "pending",
-]
+],
 )
 .order(
 "created_at",
 {
 ascending:false,
-}
+},
 )
 .limit(10),
 
 supabase
 .from("comments")
 .select(
-"id,user_id,content_id,body,is_hidden,created_at"
+"id,user_id,content_id,body,is_hidden,created_at",
 )
 .order(
 "created_at",
 {
 ascending:false,
-}
+},
 )
 .limit(10),
 
@@ -232,8 +227,8 @@ new Set(
 (activeRes.data ?? [])
 .map(
 (r:any)=>
-r.user_id
-)
+r.user_id,
+),
 ).size;
 
 const newSignups24h =
@@ -267,6 +262,90 @@ r.progress_seconds
 
 );
 
+const subs =
+subsRes.data
+??
+[];
+
+const activeSubs =
+subs.filter(
+
+(s:any)=>
+
+s.status==="active"
+
+||
+
+s.status==="trialing",
+
+);
+
+const mrrCents =
+activeSubs.reduce(
+
+(
+sum:number,
+s:any,
+
+)=>
+
+sum
++
+monthlyFromPriceId(
+s.price_id,
+),
+
+0,
+
+);
+
+const planMix:
+Record<
+string,
+number
+>={};
+
+activeSubs.forEach(
+
+(s:any)=>{
+
+const key=
+
+s.price_id
+
+??
+
+"unknown";
+
+planMix[key]=
+
+(
+planMix[key]
+
+??
+
+0
+
+)
+
++
+
+1;
+
+},
+
+);
+
+const churnRisk=
+
+subs.filter(
+
+(s:any)=>
+
+s.cancel_at_period_end,
+
+).length;
+
 return {
 
 generatedAt:
@@ -287,12 +366,55 @@ Math.round(
 
 watchSecondsToday
 /
-60
+60,
 
 ),
 
 },
 
+revenue:{
+
+mrrCents,
+
+activeSubs:
+
+activeSubs.length,
+
+churnRisk,
+
+planMix,
+
+},
+
+topContent:[],
+
+userHealth:[],
+
+recentActivity:
+
+historyRecentRes.data
+
+??
+
+[],
+
+moderationQueue:
+
+commentsRes.data
+
+??
+
+[],
+
+supportQueue:
+
+ticketsRes.data
+
+??
+
+[],
+
 };
 
-});
+},
+);
