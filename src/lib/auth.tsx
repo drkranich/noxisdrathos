@@ -328,6 +328,14 @@ setRolesLoading(true);
 
 try{
 
+console.log(
+
+"AUTH UID",
+
+uid,
+
+);
+
 const {
 
 data,
@@ -342,13 +350,27 @@ await supabase
 "user_roles"
 )
 
-.select(
-"role"
-)
+.select("*")
 
 .eq(
 "user_id",
 uid
+);
+
+console.log(
+
+"ROLE RESPONSE",
+
+data,
+
+);
+
+console.log(
+
+"ROLE ERROR",
+
+error,
+
 );
 
 if(
