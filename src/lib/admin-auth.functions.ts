@@ -104,17 +104,11 @@ userId
 
 const authEmail =
 normalizeEmail(
-
 userRes
 .user
 ?.email
-
-??
-
-data
-.observedEmail
-
 );
+
 
 const matched =
 
