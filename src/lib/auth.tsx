@@ -95,9 +95,11 @@ row.role,
 }
 
 return Array
+
 .from(
 unique,
 )
+
 .sort(
 (a,b)=>{
 
@@ -111,9 +113,15 @@ member:1,
 
 };
 
-return priority[b]
+return(
+
+priority[b]
+
 -
-priority[a];
+
+priority[a]
+
+);
 
 },
 );
@@ -236,6 +244,14 @@ await supabase
 
 .getSession();
 
+console.log(
+
+"BOOT SESSION:",
+
+data.session,
+
+);
+
 setSession(
 
 data.session,
@@ -243,7 +259,21 @@ data.session,
 );
 
 }
+catch(
 
+error
+
+){
+
+console.error(
+
+"SESSION ERROR:",
+
+error,
+
+);
+
+}
 finally{
 
 setLoading(
@@ -272,11 +302,27 @@ supabase
 
 (
 
-_event,
+event,
 
 next,
 
 )=>{
+
+console.log(
+
+"AUTH EVENT:",
+
+event,
+
+);
+
+console.log(
+
+"NEXT SESSION:",
+
+next,
+
+);
 
 setSession(
 
@@ -284,9 +330,7 @@ next,
 
 );
 
-queryClient
-
-.clear();
+queryClient.clear();
 
 },
 
@@ -308,9 +352,31 @@ const uid=
 
 session?.user?.id;
 
+console.log(
+
+"SESSION USER:",
+
+session?.user,
+
+);
+
+console.log(
+
+"AUTH UID:",
+
+uid,
+
+);
+
 if(
 !uid
 ){
+
+console.log(
+
+"NO UID FOUND",
+
+);
 
 setRoles([]);
 
@@ -327,14 +393,6 @@ async function hydrate(){
 setRolesLoading(true);
 
 try{
-
-console.log(
-
-"AUTH UID",
-
-uid,
-
-);
 
 const {
 
@@ -359,7 +417,7 @@ uid
 
 console.log(
 
-"ROLE RESPONSE",
+"ROLE RESPONSE:",
 
 data,
 
@@ -367,7 +425,7 @@ data,
 
 console.log(
 
-"ROLE ERROR",
+"ROLE ERROR:",
 
 error,
 
@@ -399,6 +457,14 @@ data
 
 );
 
+console.log(
+
+"NORMALIZED ROLE:",
+
+normalized,
+
+);
+
 setRoles(
 
 normalized,
@@ -406,7 +472,6 @@ normalized,
 );
 
 }
-
 catch(
 
 e
@@ -414,6 +479,8 @@ e
 ){
 
 console.error(
+
+"ROLE PIPELINE ERROR:",
 
 e,
 
@@ -430,7 +497,6 @@ setRoles([]);
 }
 
 }
-
 finally{
 
 if(
@@ -471,6 +537,14 @@ roles[0]
 ??
 
 "none";
+
+console.log(
+
+"PRIMARY ROLE:",
+
+primaryRole,
+
+);
 
 const value=
 
