@@ -555,6 +555,32 @@ roles.data
 
 [],
 
+userRolesRows:
+
+roles.data
+
+??
+
+[],
+
+roleQueryResponse:{
+
+data:
+roles.data
+??
+[],
+
+error:
+roles.error
+?.message
+??
+null,
+
+source:
+"server:user_roles",
+
+},
+
 rolesError:
 
 roles
@@ -589,6 +615,34 @@ authUser
 ??
 
 null,
+
+profileRow:
+
+profile.data,
+
+superAdminEmailSource:
+
+process.env
+.SUPER_ADMIN_EMAIL
+
+?
+
+"env"
+
+:
+
+"app fallback",
+
+authEmailHasNoOuterSpaces:
+
+email ===
+
+(authUser
+.data
+.user
+?.email
+??
+""),
 
 };
 
