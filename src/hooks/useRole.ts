@@ -1,10 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export function useRole(){
+type Role =
+  | "super_admin"
+  | "admin"
+  | "member"
+  | null;
 
-const roleQuery=
-useQuery({
+export function useRole() {
+
+return useQuery<Role>({
 
 queryKey:["user-role"],
 
@@ -12,9 +17,26 @@ queryFn:async()=>{
 
 const {
 
-data:{user},
+data,
+
+error:authError,
 
 }=await supabase.auth.getUser();
+
+if(authError){
+
+console.error(
+"Role auth error:",
+authError,
+);
+
+return null;
+
+}
+
+const user=
+
+data?.user;
 
 if(!user){
 
@@ -22,7 +44,13 @@ return null;
 
 }
 
-const {data,error}=
+const {
+
+data:roleRows,
+
+error,
+
+}=
 
 await supabase
 
@@ -30,18 +58,27 @@ await supabase
 
 .select("role")
 
-.eq("user_id",user.id);
+.eq(
+"user_id",
+user.id,
+);
 
 if(error){
 
-throw error;
+console.error(
+"Role query error:",
+error,
+);
+
+return "member";
 
 }
 
 const roles=
 
-data?.map(
-r=>r.role
+roleRows
+?.map(
+r=>r.role,
 )
 
 ??[];
@@ -74,16 +111,26 @@ return "member";
 
 },
 
-staleTime:0,
+staleTime:
 
-gcTime:0,
+1000*60,
+
+gcTime:
+
+1000*60*5,
+
+retry:1,
+
+refetchOnWindowFocus:false,
+
+refetchOnReconnect:true,
 
 refetchOnMount:true,
 
-refetchOnWindowFocus:true,
+networkMode:
+
+"always",
 
 });
-
-return roleQuery;
 
 }
