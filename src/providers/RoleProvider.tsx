@@ -3,7 +3,15 @@ import {
 createContext,
 useContext,
 
+ReactNode,
+
 } from "react";
+
+import {
+
+UseQueryResult,
+
+} from "@tanstack/react-query";
 
 import {
 
@@ -13,13 +21,43 @@ useRole,
 
 from "@/hooks/useRole";
 
+type Role=
+
+"super_admin"
+
+|
+
+"admin"
+
+|
+
+"member"
+
+|
+
+null;
+
 const RoleContext=
 
-createContext(null);
+createContext<
+
+UseQueryResult<Role>
+
+|
+
+null
+
+>(null);
 
 export function RoleProvider({
 
 children,
+
+}:{
+
+children:
+
+ReactNode;
 
 }){
 
@@ -45,8 +83,22 @@ value={role}
 
 export function useResolvedRole(){
 
-return useContext(
+const context=
+
+useContext(
 RoleContext
 );
+
+if(!context){
+
+throw new Error(
+
+"useResolvedRole must be used inside RoleProvider"
+
+);
+
+}
+
+return context;
 
 }
