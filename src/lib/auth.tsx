@@ -27,239 +27,167 @@ import type {
   SuperAdminBootstrapResult,
 } from "@/lib/admin-auth.functions";
 
-type Role=
+type Role =
+  | "super_admin"
+  | "admin"
+  | "member";
 
-"super_admin"
-
-|
-
-"admin"
-
-|
-
-"member";
-
-type RoleRow={
-
-id?:string;
-
-user_id?:string;
-
-role:string;
-
-created_at?:string;
-
+type RoleRow = {
+  id?: string;
+  user_id?: string;
+  role: string;
+  created_at?: string;
 };
 
-type RoleQueryState={
-
-data:RoleRow[]|null;
-
-error:string|null;
-
-source:string;
-
+type RoleQueryState = {
+  data: RoleRow[] | null;
+  error: string | null;
+  source: string;
 };
 
-type RolePipelineDiagnostics={
+type RolePipelineDiagnostics = {
+  authEmail: string | null;
+  authUid: string | null;
+  hydratedRole:
+    | Role
+    | "none"
+    | "pending";
 
-authEmail:string|null;
+  rawUserRolesRows: RoleRow[];
 
-authUid:string|null;
+  cacheRole:
+    | Role
+    | "none";
 
-hydratedRole:
+  effectiveRole:
+    | Role
+    | "none";
 
-Role
+  guardRole:
+    | "pending"
+    | "admin_allowed"
+    | "member_or_denied"
+    | "anonymous";
 
-|
-
-"none"
-
-|
-
-"pending";
-
-rawUserRolesRows:
-
-RoleRow[];
-
-cacheRole:
-
-Role
-
-|
-
-"none";
-
-effectiveRole:
-
-Role
-
-|
-
-"none";
-
-guardRole:
-
-"pending"
-
-|
-
-"admin_allowed"
-
-|
-
-"member_or_denied"
-
-|
-
-"anonymous";
-
-roleQuery:
-
-RoleQueryState
-
-|
-
-null;
-
+  roleQuery:
+    | RoleQueryState
+    | null;
 };
 
-export type AuthContextValue={
+export type AuthContextValue = {
+  session: Session | null;
 
-session:Session|null;
+  user: User | null;
 
-user:User|null;
+  loading: boolean;
 
-loading:boolean;
+  rolesLoading: boolean;
 
-rolesLoading:boolean;
+  roles: Role[];
 
-roles:Role[];
+  primaryRole:
+    | Role
+    | "none";
 
-primaryRole:
+  roleQuery:
+    | RoleQueryState
+    | null;
 
-Role
+  roleDiagnostics:
+    RolePipelineDiagnostics;
 
-|
+  bootstrapResult:
+    SuperAdminBootstrapResult
+    | null;
 
-"none";
+  isAdmin: boolean;
 
-roleQuery:
+  refreshRoles: () => void;
 
-RoleQueryState
-
-|
-
-null;
-
-roleDiagnostics:
-
-RolePipelineDiagnostics;
-
-bootstrapResult:
-
-SuperAdminBootstrapResult
-
-|
-
-null;
-
-isAdmin:boolean;
-
-refreshRoles:()=>void;
-
-signOut:()=>Promise<void>;
-
+  signOut: () => Promise<void>;
 };
 
-const ROLE_PRIORITY={
+const ROLE_PRIORITY: Record<Role, number> = {
 
-super_admin:3,
+  super_admin: 3,
 
-admin:2,
+  admin: 2,
 
-member:1,
+  member: 1,
 
-} satisfies Record<Role,number>;
+};
 
 function isRole(
+  value: string,
+): value is Role {
 
-value:string,
+  return (
 
-):value is Role{
+    value === "super_admin"
 
-return(
+    ||
 
-value==="super_admin"
+    value === "admin"
 
-||
+    ||
 
-value==="admin"
+    value === "member"
 
-||
-
-value==="member"
-
-);
+  );
 
 }
 
 function normalizeRoles(
+  rows: RoleRow[],
+): Role[] {
 
-rows:RoleRow[],
+  return Array
 
-):Role[]{
+  .from(
 
-return Array
+    new Set(
 
-.from(
+      rows
 
-new Set(
+      .map(
 
-rows
+        r => r.role,
 
-.map(
+      )
 
-r=>r.role,
+      .filter(
 
-)
+        isRole,
 
-.filter(
+      ),
 
-isRole,
+    ),
 
-),
+  )
 
-),
+  .sort(
 
-)
+    (a,b)=>
 
-.sort(
+      ROLE_PRIORITY[b]
 
-(a,b)=>
+      -
 
-ROLE_PRIORITY[b]
+      ROLE_PRIORITY[a],
 
--
-
-ROLE_PRIORITY[a],
-
-);
+  );
 
 }
 
 function resolvePrimaryRole(
-
-roles:Role[],
-
+  roles: Role[],
 ){
 
-return roles[0]
+  return roles[0]
 
-??
+  ??
 
-"none";
+  "none";
 
 }
 
@@ -413,7 +341,7 @@ v=>v+1,
 
 useEffect(()=>{
 
-const{
+const {
 
 data:listener,
 
@@ -439,13 +367,9 @@ nextSession,
 
 );
 
-queryClient
+queryClient.removeQueries();
 
-.removeQueries();
-
-queryClient
-
-.invalidateQueries();
+queryClient.invalidateQueries();
 
 if(
 
@@ -462,6 +386,8 @@ setRolesLoading(true);
 else{
 
 setRoles([]);
+
+setRoleQuery(null);
 
 setRolesLoading(false);
 
@@ -486,6 +412,16 @@ setSession(
 data.session,
 
 );
+
+setLoading(false);
+
+},
+
+)
+
+.catch(
+
+()=>{
 
 setLoading(false);
 
@@ -519,6 +455,8 @@ if(
 
 setRoles([]);
 
+setRoleQuery(null);
+
 setRolesLoading(false);
 
 return;
@@ -526,6 +464,10 @@ return;
 }
 
 let cancelled=false;
+
+async function hydrate(){
+
+try{
 
 setRolesLoading(true);
 
@@ -559,19 +501,9 @@ result,
 
 .catch(
 
-e=>{
-
-console.error(
-
-e,
+console.error,
 
 );
-
-},
-
-);
-
-async function hydrate(){
 
 const response=
 
@@ -649,11 +581,39 @@ source:
 
 });
 
-setRolesLoading(
+}
 
-false,
+catch(
+
+error
+
+){
+
+console.error(
+
+"ROLE ERROR",
+
+error,
 
 );
+
+setRoles([]);
+
+}
+
+finally{
+
+if(
+
+!cancelled
+
+){
+
+setRolesLoading(false);
+
+}
+
+}
 
 }
 
@@ -685,11 +645,11 @@ roles,
 
 const isAdmin=
 
-primaryRole==="admin"
+primaryRole==="super_admin"
 
 ||
 
-primaryRole==="super_admin";
+primaryRole==="admin";
 
 const roleDiagnostics=
 
