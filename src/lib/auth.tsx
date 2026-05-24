@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Session, User } from "@supabase/supabase-js";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,10 +8,28 @@ import type { SuperAdminBootstrapResult } from "@/lib/admin-auth.functions";
 
 type Role = "admin" | "super_admin" | "member";
 
+type RoleRow = {
+  id?: string;
+  user_id?: string;
+  role: string;
+  created_at?: string;
+};
+
 type RoleQueryState = {
-  data: Array<{ role: string }> | null;
+  data: RoleRow[] | null;
   error: string | null;
   source: string;
+};
+
+type RolePipelineDiagnostics = {
+  authEmail: string | null;
+  authUid: string | null;
+  hydratedRole: Role | "none" | "pending";
+  rawUserRolesRows: RoleRow[];
+  cacheRole: Role | "none";
+  effectiveRole: Role | "none";
+  guardRole: "pending" | "admin_allowed" | "member_or_denied" | "anonymous";
+  roleQuery: RoleQueryState | null;
 };
 
 export type AuthContextValue = {
@@ -21,26 +40,58 @@ export type AuthContextValue = {
   roles: Role[];
   primaryRole: Role | "none";
   roleQuery: RoleQueryState | null;
+  roleDiagnostics: RolePipelineDiagnostics;
   bootstrapResult: SuperAdminBootstrapResult | null;
   isAdmin: boolean;
+  refreshRoles: () => void;
   signOut: () => Promise<void>;
 };
+
+const ROLE_PRIORITY: Record<Role, number> = {
+  super_admin: 3,
+  admin: 2,
+  member: 1,
+};
+
+function isRole(value: string): value is Role {
+  return value === "super_admin" || value === "admin" || value === "member";
+}
+
+function normalizeRoles(rows: RoleRow[]): Role[] {
+  return Array.from(new Set(rows.map((row) => row.role).filter(isRole))).sort(
+    (a, b) => ROLE_PRIORITY[b] - ROLE_PRIORITY[a],
+  );
+}
+
+function resolvePrimaryRole(roles: Role[]): Role | "none" {
+  return roles[0] ?? "none";
+}
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState<Role[]>([]);
   const [rolesLoading, setRolesLoading] = useState(true);
   const [roleQuery, setRoleQuery] = useState<RoleQueryState | null>(null);
   const [bootstrapResult, setBootstrapResult] = useState<SuperAdminBootstrapResult | null>(null);
+  const [roleRefreshNonce, setRoleRefreshNonce] = useState(0);
   const bootstrapSuperAdmin = useServerFn(ensureSuperAdminRole);
+  const refreshRoles = useCallback(() => setRoleRefreshNonce((value) => value + 1), []);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+      queryClient.removeQueries({ queryKey: ["auth", "roles"] });
+      queryClient.invalidateQueries();
       setSession(s);
-      if (!s?.user) {
+      if (s?.user) {
+        setRoles([]);
+        setRoleQuery({ data: null, error: null, source: "auth_state_pending_user_roles" });
+        setBootstrapResult(null);
+        setRolesLoading(true);
+      } else {
         setRoles([]);
         setRoleQuery(null);
         setBootstrapResult(null);
@@ -50,12 +101,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);
-      if (!data.session?.user) {
+      if (data.session?.user) {
+        setRolesLoading(true);
+      } else {
         setRolesLoading(false);
       }
     });
     return () => sub.subscription.unsubscribe();
-  }, []);
+  }, [queryClient]);
 
   useEffect(() => {
     const uid = session?.user?.id;
