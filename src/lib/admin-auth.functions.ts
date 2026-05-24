@@ -104,17 +104,11 @@ userId
 
 const authEmail =
 normalizeEmail(
-
 userRes
 .user
 ?.email
-
-??
-
-data
-.observedEmail
-
 );
+
 
 const matched =
 
@@ -136,7 +130,7 @@ userId,
 
 authEmail,
 
-superAdminEmail,
+superAdminEmail: "",
 
 source:
 
@@ -174,7 +168,7 @@ userId,
 
 authEmail,
 
-superAdminEmail,
+superAdminEmail: "",
 
 source:
 
@@ -305,7 +299,7 @@ userId,
 
 authEmail,
 
-superAdminEmail,
+superAdminEmail: "",
 
 source:
 
@@ -339,7 +333,7 @@ userId,
 
 authEmail,
 
-superAdminEmail,
+superAdminEmail: "",
 
 source:
 
@@ -400,6 +394,11 @@ supabase,
 
 context;
 
+const { data: isAdminRpc } = await supabaseAdmin.rpc("is_admin", { _user_id: userId });
+if (!isAdminRpc) {
+  throw new Response("Forbidden", { status: 403 });
+}
+
 const superAdminEmail =
 normalizeEmail(
 
@@ -411,6 +410,7 @@ process.env
 FALLBACK_SUPER_ADMIN_EMAIL
 
 );
+
 
 const [
 
