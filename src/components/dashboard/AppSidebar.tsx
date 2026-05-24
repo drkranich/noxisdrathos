@@ -74,7 +74,7 @@ const groups = [
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, rolesLoading, primaryRole, signOut } = useAuth();
 
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
@@ -128,7 +128,17 @@ export function AppSidebar() {
           </div>
         ))}
 
-        {isAdmin ? (
+        {rolesLoading ? (
+          <div>
+            <p className="px-3 mb-2 font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
+              autorização
+            </p>
+            <div className="px-3 py-2 flex items-center gap-3 text-sm text-muted-foreground">
+              <span className="neon-dot animate-blink" />
+              <span>hidratando role…</span>
+            </div>
+          </div>
+        ) : isAdmin ? (
           <div>
             <p className="px-3 mb-2 font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
               super admin
@@ -183,7 +193,7 @@ export function AppSidebar() {
           <div className="min-w-0 flex-1">
             <p className="text-xs truncate">{user?.user_metadata?.display_name || user?.email}</p>
             <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground">
-              {isAdmin ? "admin" : "membro"}
+              {rolesLoading ? "hidratando" : primaryRole === "none" ? "sem papel" : primaryRole}
             </p>
           </div>
           <NotificationBell compact />
