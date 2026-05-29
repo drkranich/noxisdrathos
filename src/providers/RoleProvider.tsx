@@ -1,104 +1,74 @@
 import {
-
-createContext,
-useContext,
-
-ReactNode,
-
+  createContext,
+  useContext,
+  type ReactNode,
 } from "react";
 
-import {
+import { useRole } from "@/hooks/useRole";
 
-UseQueryResult,
+type Role =
+  | "super_admin"
+  | "admin"
+  | "member"
+  | null;
 
-} from "@tanstack/react-query";
+type RoleContextType = {
 
-import {
+  data: Role;
 
-useRole,
+  isLoading: boolean;
 
-}
+  error: unknown;
 
-from "@/hooks/useRole";
+};
 
-type Role=
-
-"super_admin"
-
-|
-
-"admin"
-
-|
-
-"member"
-
-|
-
-null;
-
-const RoleContext=
-
-createContext<
-
-UseQueryResult<Role>
-
-|
-
-null
-
->(null);
+const RoleContext =
+  createContext<RoleContextType | null>(
+    null,
+  );
 
 export function RoleProvider({
 
-children,
+  children,
 
-}:{
+}: {
 
-children:
+  children: ReactNode;
 
-ReactNode;
+}) {
 
-}){
+  const role =
+    useRole();
 
-const role=
+  return (
 
-useRole();
+    <RoleContext.Provider
+      value={role}
+    >
 
-return(
+      {children}
 
-<RoleContext.Provider
+    </RoleContext.Provider>
 
-value={role}
-
->
-
-{children}
-
-</RoleContext.Provider>
-
-);
+  );
 
 }
 
-export function useResolvedRole(){
+export function useResolvedRole() {
 
-const context=
+  const context =
+    useContext(
+      RoleContext,
+    );
 
-useContext(
-RoleContext
-);
+  if (!context) {
 
-if(!context){
+    throw new Error(
+      "useResolvedRole must be used inside RoleProvider",
+    );
 
-throw new Error(
+  }
 
-"useResolvedRole must be used inside RoleProvider"
-
-);
-
-}
-
-return context;
+  return context;
 
 }
