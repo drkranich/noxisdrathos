@@ -10,7 +10,13 @@ export const Route = createFileRoute("/_authenticated/app/admin")({
 });
 
 function AdminLayout() {
-  const { isAdmin, loading, rolesLoading, user, roleDiagnostics } = useAuth();
+  const {
+  isSuperAdmin,
+  loading,
+  rolesLoading,
+  user,
+  roleDiagnostics,
+} = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -21,20 +27,28 @@ function AdminLayout() {
     if (import.meta.env.DEV) {
       console.log("[admin-guard] decision", {
         currentEmail: user?.email ?? null,
-        isAdmin,
+        isSuperAdmin,
         loading,
         rolesLoading,
         currentPathname: pathname,
         redirectTriggerSource: !user
           ? "missing_user"
-          : !isAdmin
+          : !isSuperAdmin
             ? "role_denied_after_hydration"
             : "admin_allowed",
         redirectTarget: !user ? "/login" : null,
       });
     }
     if (!user) navigate({ to: "/login", replace: true });
-  }, [stillResolving, user, isAdmin, navigate, loading, rolesLoading, pathname]);
+  }, [
+  stillResolving,
+  user,
+  isSuperAdmin,
+  navigate,
+  loading,
+  rolesLoading,
+  pathname,
+]);
 
   if (stillResolving) {
     return (
@@ -47,7 +61,7 @@ function AdminLayout() {
     );
   }
 
-  if (!isAdmin) {
+  if (!isSuperAdmin) {
     return (
       <div className="px-8 lg:px-14 py-16">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
