@@ -1,645 +1,576 @@
+```ts
 import {
-createContext,
-useCallback,
-useContext,
-useEffect,
-useMemo,
-useState,
-type ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
 } from "react";
 
 import {
-useQueryClient,
+  useQueryClient,
 } from "@tanstack/react-query";
 
 import type {
-Session,
-User,
+  Session,
+  User,
 } from "@supabase/supabase-js";
 
 import {
-supabase,
+  supabase,
 } from "@/integrations/supabase/client";
 
-type Role=
-"super_admin"
-|
-"admin"
-|
-"member";
+type Role =
+  | "super_admin"
+  | "admin"
+  | "member";
 
-type RoleRow={
-role:string;
+type RoleRow = {
+  role: string;
 };
 
-export type AuthContextValue={
+export type AuthContextValue = {
 
-session:Session|null;
+  session: Session | null;
 
-user:User|null;
+  user: User | null;
 
-loading:boolean;
+  loading: boolean;
 
-rolesLoading:boolean;
+  rolesLoading: boolean;
 
-roles:Role[];
+  roles: Role[];
 
-primaryRole:
-Role
-|
-"none";
+  primaryRole:
+    Role
+    | "none";
 
-isAdmin:boolean;
+  isAdmin: boolean;
 
-refreshRoles:()=>void;
+  isSuperAdmin: boolean;
 
-signOut:()=>Promise<void>;
+  roleDiagnostics: {
+
+    userId: string | null;
+
+    email: string | null;
+
+    roles: string[];
+
+    primaryRole: string;
+
+    isAdmin: boolean;
+
+    isSuperAdmin: boolean;
+
+    loading: boolean;
+
+    rolesLoading: boolean;
+
+  };
+
+  refreshRoles: () => void;
+
+  signOut: () => Promise<void>;
 
 };
 
-const AuthContext=
-
-createContext<
-AuthContextValue
-|
-null
->(null);
+const AuthContext =
+  createContext<
+    AuthContextValue
+    | null
+  >(null);
 
 function normalizeRoles(
-rows:RoleRow[],
-):Role[]{
+  rows: RoleRow[],
+): Role[] {
 
-const unique=
+  const unique =
+    new Set<Role>();
 
-new Set<Role>();
+  for (const row of rows) {
 
-for(
-const row
-of rows
-){
+    if (
+      row.role === "super_admin"
+      ||
+      row.role === "admin"
+      ||
+      row.role === "member"
+    ) {
 
-if(
-row.role==="super_admin"
-||
-row.role==="admin"
-||
-row.role==="member"
-){
+      unique.add(
+        row.role,
+      );
 
-unique.add(
-row.role,
-);
+    }
 
-}
+  }
 
-}
+  return Array
+    .from(
+      unique,
+    )
+    .sort(
+      (a, b) => {
 
-return Array
+        const priority = {
 
-.from(
-unique,
-)
+          super_admin: 3,
 
-.sort(
-(a,b)=>{
+          admin: 2,
 
-const priority={
+          member: 1,
 
-super_admin:3,
+        };
 
-admin:2,
+        return (
+          priority[b]
+          -
+          priority[a]
+        );
 
-member:1,
-
-};
-
-return(
-
-priority[b]
-
--
-
-priority[a]
-
-);
-
-},
-);
+      },
+    );
 
 }
 
 export function AuthProvider({
 
-children,
+  children,
 
-}:{
+}: {
 
-children:ReactNode;
+  children: ReactNode;
 
-}){
+}) {
 
-const queryClient=
+  const queryClient =
+    useQueryClient();
 
-useQueryClient();
+  const [
 
-const [
+    session,
 
-session,
+    setSession,
 
-setSession,
+  ] =
+    useState<
+      Session
+      | null
+    >(
+      null,
+    );
 
-]=
+  const [
 
-useState<
-Session
-|
-null
->(
-null,
-);
+    loading,
 
-const [
+    setLoading,
 
-loading,
+  ] =
+    useState(
+      true,
+    );
 
-setLoading,
+  const [
 
-]=
+    rolesLoading,
 
-useState(
-true,
-);
+    setRolesLoading,
 
-const [
+  ] =
+    useState(
+      false,
+    );
 
-rolesLoading,
+  const [
 
-setRolesLoading,
+    roles,
 
-]=
+    setRoles,
 
-useState(
-false,
-);
+  ] =
+    useState<
+      Role[]
+    >(
+      [],
+    );
 
-const [
+  const [
 
-roles,
+    refreshNonce,
 
-setRoles,
+    setRefreshNonce,
 
-]=
+  ] =
+    useState(
+      0,
+    );
 
-useState<
-Role[]
->(
-[],
-);
+  const refreshRoles =
+    useCallback(
 
-const [
+      () => {
 
-refreshNonce,
+        setRefreshNonce(
+          v => v + 1,
+        );
 
-setRefreshNonce,
+      },
 
-]=
+      [],
 
-useState(
-0,
-);
+    );
 
-const refreshRoles=
+  useEffect(() => {
 
-useCallback(
+    async function boot() {
 
-()=>{
+      try {
 
-setRefreshNonce(
+        const {
+          data,
+        } =
+          await supabase
+            .auth
+            .getSession();
 
-v=>v+1,
+        console.log(
+          "BOOT SESSION:",
+          data.session,
+        );
 
-);
+        setSession(
+          data.session,
+        );
 
-},
+      } catch (
+        error
+      ) {
 
-[],
+        console.error(
+          "SESSION ERROR:",
+          error,
+        );
 
-);
+      } finally {
 
-useEffect(()=>{
+        setLoading(
+          false,
+        );
 
-async function boot(){
+      }
 
-try{
+    }
 
-const {
+    boot();
 
-data,
+    const {
+      data,
+    } =
+      supabase
+        .auth
+        .onAuthStateChange(
 
-}=
+          (
+            event,
+            next,
+          ) => {
 
-await supabase
+            console.log(
+              "AUTH EVENT:",
+              event,
+            );
 
-.auth
+            console.log(
+              "NEXT SESSION:",
+              next,
+            );
 
-.getSession();
+            setSession(
+              next,
+            );
 
-console.log(
+            queryClient.invalidateQueries();
 
-"BOOT SESSION:",
+          },
 
-data.session,
+        );
 
-);
+    return () => {
 
-setSession(
+      data.subscription.unsubscribe();
 
-data.session,
+    };
 
-);
+  }, [
+    queryClient,
+  ]);
 
-}
-catch(
+  useEffect(() => {
 
-error
+    const uid =
+      session?.user?.id;
 
-){
+    console.log(
+      "SESSION USER:",
+      session?.user,
+    );
 
-console.error(
+    console.log(
+      "AUTH UID:",
+      uid,
+    );
 
-"SESSION ERROR:",
+    if (!uid) {
 
-error,
+      console.log(
+        "NO UID FOUND",
+      );
 
-);
+      setRoles([]);
 
-}
-finally{
+      setRolesLoading(
+        false,
+      );
 
-setLoading(
+      return;
 
-false,
+    }
 
-);
+    let mounted =
+      true;
 
-}
+    async function hydrate() {
 
-}
+      setRolesLoading(
+        true,
+      );
 
-boot();
+      try {
 
-const {
+        const {
 
-data,
+          data,
 
-}=
+          error,
 
-supabase
+        } =
+          await supabase
 
-.auth
+            .from(
+              "user_roles",
+            )
 
-.onAuthStateChange(
+            .select("*")
 
-(
+            .eq(
+              "user_id",
+              uid,
+            );
 
-event,
+        console.log(
+          "ROLE RESPONSE:",
+          data,
+        );
 
-next,
+        console.log(
+          "ROLE ERROR:",
+          error,
+        );
 
-)=>{
+        if (
+          error
+        ) {
 
-console.log(
+          throw error;
 
-"AUTH EVENT:",
+        }
 
-event,
+        if (
+          !mounted
+        ) {
 
-);
+          return;
 
-console.log(
+        }
 
-"NEXT SESSION:",
+        const normalized =
+          normalizeRoles(
+            data ?? [],
+          );
 
-next,
+        console.log(
+          "NORMALIZED ROLE:",
+          normalized,
+        );
 
-);
+        setRoles(
+          normalized,
+        );
 
-setSession(
+      } catch (
+        e
+      ) {
 
-next,
+        console.error(
+          "ROLE PIPELINE ERROR:",
+          e,
+        );
 
-);
+        if (
+          mounted
+        ) {
 
-queryClient.clear();
+          setRoles([]);
 
-},
+        }
 
-);
+      } finally {
 
-return()=>{
+        if (
+          mounted
+        ) {
 
-data.subscription.unsubscribe();
+          setRolesLoading(
+            false,
+          );
 
-};
+        }
 
-},[
-queryClient,
-]);
+      }
 
-useEffect(()=>{
+    }
 
-const uid=
+    hydrate();
 
-session?.user?.id;
+    return () => {
 
-console.log(
+      mounted =
+        false;
 
-"SESSION USER:",
+    };
 
-session?.user,
+  }, [
+    session?.user?.id,
+    refreshNonce,
+  ]);
 
-);
+  const primaryRole =
+    roles[0]
+    ??
+    "none";
 
-console.log(
+  console.log(
+    "PRIMARY ROLE:",
+    primaryRole,
+  );
 
-"AUTH UID:",
+  const value =
+    useMemo(
+      () => ({
 
-uid,
+        session,
 
-);
+        user:
+          session?.user
+          ?? null,
 
-if(
-!uid
-){
+        loading,
 
-console.log(
+        rolesLoading,
 
-"NO UID FOUND",
+        roles,
 
-);
+        primaryRole,
 
-setRoles([]);
+        isAdmin:
+          primaryRole === "admin",
 
-setRolesLoading(false);
+        isSuperAdmin:
+          primaryRole === "super_admin",
 
-return;
+        roleDiagnostics: {
 
-}
+          userId:
+            session?.user?.id
+            ?? null,
 
-let mounted=true;
+          email:
+            session?.user?.email
+            ?? null,
 
-async function hydrate(){
+          roles,
 
-setRolesLoading(true);
+          primaryRole,
 
-try{
+          isAdmin:
+            primaryRole === "admin",
 
-const {
+          isSuperAdmin:
+            primaryRole === "super_admin",
 
-data,
+          loading,
 
-error,
+          rolesLoading,
 
-}=
+        },
 
-await supabase
+        refreshRoles,
 
-.from(
-"user_roles"
-)
+        signOut:
+          async () => {
 
-.select("*")
+            await supabase
+              .auth
+              .signOut();
 
-.eq(
-"user_id",
-uid
-);
+          },
 
-console.log(
+      }),
+      [
+        session,
+        loading,
+        rolesLoading,
+        roles,
+        primaryRole,
+        refreshRoles,
+      ],
+    );
 
-"ROLE RESPONSE:",
+  return (
 
-data,
+    <AuthContext.Provider
+      value={value}
+    >
 
-);
+      {children}
 
-console.log(
+    </AuthContext.Provider>
 
-"ROLE ERROR:",
-
-error,
-
-);
-
-if(
-error
-){
-
-throw error;
-
-}
-
-if(
-!mounted
-){
-
-return;
-
-}
-
-const normalized=
-
-normalizeRoles(
-
-data
-??
-[],
-
-);
-
-console.log(
-
-"NORMALIZED ROLE:",
-
-normalized,
-
-);
-
-setRoles(
-
-normalized,
-
-);
-
-}
-catch(
-
-e
-
-){
-
-console.error(
-
-"ROLE PIPELINE ERROR:",
-
-e,
-
-);
-
-if(
-
-mounted
-
-){
-
-setRoles([]);
-
-}
-
-}
-finally{
-
-if(
-
-mounted
-
-){
-
-setRolesLoading(
-
-false,
-
-);
-
-}
-
-}
-
-}
-
-hydrate();
-
-return()=>{
-
-mounted=false;
-
-};
-
-},[
-session?.user?.id,
-refreshNonce,
-]);
-
-const primaryRole=
-
-roles[0]
-
-??
-
-"none";
-
-console.log(
-
-"PRIMARY ROLE:",
-
-primaryRole,
-
-);
-
-const value=
-
-useMemo(
-
-()=>({
-
-session,
-
-user:
-
-session?.user
-
-??
-null,
-
-loading,
-
-rolesLoading,
-
-roles,
-
-primaryRole,
-
-isAdmin:
-
-primaryRole==="admin"
-
-||
-
-primaryRole==="super_admin",
-
-refreshRoles,
-
-signOut:
-
-async()=>{
-
-await supabase
-
-.auth
-
-.signOut();
-
-},
-
-}),
-
-[
-session,
-loading,
-rolesLoading,
-roles,
-primaryRole,
-refreshRoles,
-],
-
-);
-
-return(
-
-<AuthContext.Provider
-
-value={value}
-
->
-
-{children}
-
-</AuthContext.Provider>
-
-);
+  );
 
 }
 
-export function useAuth(){
+export function useAuth() {
 
-const ctx=
+  const ctx =
+    useContext(
+      AuthContext,
+    );
 
-useContext(
-AuthContext,
-);
+  if (!ctx) {
 
-if(
-!ctx
-){
+    throw new Error(
+      "useAuth requires AuthProvider",
+    );
 
-throw new Error(
+  }
 
-"useAuth requires AuthProvider"
-
-);
-
-}
-
-return ctx;
+  return ctx;
 
 }
+```
+
