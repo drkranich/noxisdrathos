@@ -17,17 +17,15 @@ type Diagnostics = Awaited<ReturnType<typeof getAdminDiagnostics>>;
 function AdminDiagnostics() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const {
-    user,
-    loading,
-    rolesLoading,
-    roles,
-    primaryRole,
-    isAdmin,
-    roleQuery,
-    roleDiagnostics,
-    bootstrapResult,
-    refreshRoles,
-  } = useAuth();
+  user,
+  loading,
+  rolesLoading,
+  roles,
+  primaryRole,
+  isAdmin,
+  roleDiagnostics,
+  refreshRoles,
+} = useAuth();
   const fetchDiagnostics = useServerFn(getAdminDiagnostics);
   const [diagnostics, setDiagnostics] = useState<Diagnostics | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -61,10 +59,6 @@ function AdminDiagnostics() {
   const rows = [
     ["Current email", user?.email ?? d?.currentEmail ?? "—"],
     ["Current auth uid", user?.id ?? d?.currentAuthUid ?? "—"],
-    ["Hydrated role", roleDiagnostics.hydratedRole],
-    ["Cache role", roleDiagnostics.cacheRole],
-    ["Effective role", roleDiagnostics.effectiveRole],
-    ["Guard role", roleDiagnostics.guardRole],
     ["Current role", primaryRole],
     [
       "SUPER_ADMIN_EMAIL env value",
@@ -125,9 +119,8 @@ function AdminDiagnostics() {
           value={d?.userRolesRows ?? roles}
           error={d?.userRolesError}
         />
-        <DiagnosticBlock title="Role query response" value={d?.roleQueryResponse ?? roleQuery} />
-        <DiagnosticBlock title="Frontend role pipeline" value={roleDiagnostics} />
-        <DiagnosticBlock title="Super admin bootstrap" value={bootstrapResult} />
+<DiagnosticBlock title="Role query response" value={d?.roleQueryResponse} />
+<DiagnosticBlock title="Frontend role pipeline" value={roleDiagnostics} />
       </div>
     </div>
   );
