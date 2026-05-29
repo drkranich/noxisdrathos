@@ -74,8 +74,13 @@ const groups = [
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { user, isAdmin, rolesLoading, primaryRole, signOut } = useAuth();
-
+const {
+  user,
+  isSuperAdmin,
+  rolesLoading,
+  primaryRole,
+  signOut,
+} = useAuth();
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
 
@@ -138,7 +143,7 @@ export function AppSidebar() {
               <span>hidratando role…</span>
             </div>
           </div>
-        ) : isAdmin ? (
+        ) : isSuperAdmin ? (
           <div>
             <p className="px-3 mb-2 font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
               super admin
