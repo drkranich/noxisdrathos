@@ -1,87 +1,42 @@
-import {
+import { Link } from "@tanstack/react-router";
+import { useAuth } from "@/lib/auth";
 
-useResolvedRole,
+export function AdminSidebar() {
 
-}
+  const {
+    isSuperAdmin,
+    rolesLoading,
+  } = useAuth();
 
-from "@/providers/RoleProvider";
+  if (rolesLoading) {
+    return null;
+  }
 
-export function AdminSidebar(){
+  if (!isSuperAdmin) {
+    return null;
+  }
 
-const role=
+  return (
+    <>
+      <Link to="/app/admin/content">
+        CMS
+      </Link>
 
-useResolvedRole();
+      <Link to="/app/admin/media">
+        Media
+      </Link>
 
-if(
+      <Link to="/app/admin/uploads">
+        Uploads
+      </Link>
 
-role.data
+      <Link to="/app/admin/members">
+        Members
+      </Link>
 
-!==
-
-"super_admin"
-
-){
-
-return null;
-
-}
-
-return(
-
-<>
-
-<Link
-
-to="/app/admin/content"
-
->
-
-CMS
-
-</Link>
-
-<Link
-
-to="/app/admin/media"
-
->
-
-Media
-
-</Link>
-
-<Link
-
-to="/app/admin/uploads"
-
->
-
-Uploads
-
-</Link>
-
-<Link
-
-to="/app/admin/members"
-
->
-
-Members
-
-</Link>
-
-<Link
-
-to="/app/admin/collections"
-
->
-
-Collections
-
-</Link>
-
-</>
-
-);
-
+      <Link to="/app/admin/collections">
+        Collections
+      </Link>
+    </>
+  );
 }
