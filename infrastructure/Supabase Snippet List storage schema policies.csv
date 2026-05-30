@@ -1,0 +1,113 @@
+schemaname,tablename,policyname,permissive,roles,cmd,qual,with_check
+storage,objects,Admin delete attachments 1mt4rzk_0,PERMISSIVE,{authenticated},DELETE,"((bucket_id = 'attachments'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin delete audio,PERMISSIVE,{authenticated},DELETE,"((bucket_id = 'AUDIO'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin delete content banners 1fwxxtf_0,PERMISSIVE,{authenticated},DELETE,"((bucket_id = 'content-banners'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin delete empty state assets 176gzb3_0,PERMISSIVE,{authenticated},DELETE,"((bucket_id = 'empty-state-assets'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin delete hero images 1vxel63_0,PERMISSIVE,{authenticated},DELETE,"((bucket_id = 'hero-images'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin delete pdfs 21n7l_0,PERMISSIVE,{authenticated},DELETE,"((bucket_id = 'pdfs'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin delete section thumbnails fb65m7_0,PERMISSIVE,{authenticated},DELETE,"((bucket_id = 'section-thumbnails'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin delete videos 1livt5k_0,PERMISSIVE,{authenticated},DELETE,"((bucket_id = 'videos'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin select attachments,PERMISSIVE,{authenticated},SELECT,"((bucket_id = 'attachments'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin select audio,PERMISSIVE,{authenticated},SELECT,"((bucket_id = 'AUDIO'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin select content banners,PERMISSIVE,{authenticated},SELECT,"((bucket_id = 'content-banners'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin select empty state assets,PERMISSIVE,{authenticated},SELECT,"((bucket_id = 'empty-state-assets'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin select hero images,PERMISSIVE,{authenticated},SELECT,"((bucket_id = 'hero-images'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin select pdfs 21n7l_0,PERMISSIVE,{authenticated},SELECT,"((bucket_id = 'pdfs'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin select section thumbnails,PERMISSIVE,{authenticated},SELECT,"((bucket_id = 'section-thumbnails'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin select videos,PERMISSIVE,{authenticated},SELECT,"((bucket_id = 'videos'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin update attachments 1mt4rzk_0,PERMISSIVE,{authenticated},UPDATE,"((bucket_id = 'attachments'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin update audio,PERMISSIVE,{authenticated},UPDATE,"((bucket_id = 'AUDIO'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin update content banners 1fwxxtf_0,PERMISSIVE,{authenticated},UPDATE,"((bucket_id = 'content-banners'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin update empty state assets 176gzb3_0,PERMISSIVE,{authenticated},UPDATE,"((bucket_id = 'empty-state-assets'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin update hero images 1vxel63_0,PERMISSIVE,{authenticated},UPDATE,"((bucket_id = 'hero-images'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin update invoices aj13hi_0,PERMISSIVE,{authenticated},UPDATE,"((bucket_id = 'invoices'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin update pdfs 21n7l_0,PERMISSIVE,{authenticated},UPDATE,"((bucket_id = 'pdfs'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin update section thumbnails fb65m7_0,PERMISSIVE,{authenticated},UPDATE,"((bucket_id = 'section-thumbnails'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin update videos 1livt5k_0,PERMISSIVE,{authenticated},UPDATE,"((bucket_id = 'videos'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))",null
+storage,objects,Admin upload attachments 1mt4rzk_0,PERMISSIVE,{authenticated},INSERT,null,"((bucket_id = 'attachments'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))"
+storage,objects,Admin upload audio,PERMISSIVE,{authenticated},INSERT,null,"((bucket_id = 'AUDIO'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))"
+storage,objects,Admin upload content banners 1fwxxtf_0,PERMISSIVE,{authenticated},INSERT,null,"((bucket_id = 'content-banners'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))"
+storage,objects,Admin upload empty state assets secure,PERMISSIVE,{authenticated},INSERT,null,"((bucket_id = 'empty-state-assets'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))"
+storage,objects,Admin upload hero images 1vxel63_0,PERMISSIVE,{authenticated},INSERT,null,"((bucket_id = 'hero-images'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))"
+storage,objects,Admin upload invoices aj13hi_0,PERMISSIVE,{authenticated},INSERT,null,"((bucket_id = 'invoices'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))"
+storage,objects,Admin upload pdfs 21n7l_0,PERMISSIVE,{authenticated},INSERT,null,"((bucket_id = 'pdfs'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))"
+storage,objects,Admin upload section thumbnails fb65m7_0,PERMISSIVE,{authenticated},INSERT,null,"((bucket_id = 'section-thumbnails'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))"
+storage,objects,Admin upload videos 1livt5k_0,PERMISSIVE,{authenticated},INSERT,null,"((bucket_id = 'videos'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text]))))))"
+storage,objects,Delete own avatar 1oj01fe_0,PERMISSIVE,{authenticated},DELETE,((bucket_id = 'avatars'::text) AND (owner = auth.uid())),null
+storage,objects,Super admin delete invoices aj13hi_0,PERMISSIVE,{authenticated},DELETE,"((bucket_id = 'invoices'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = 'super_admin'::text)))))",null
+storage,objects,Update own avatar 1oj01fe_0,PERMISSIVE,{authenticated},UPDATE,((bucket_id = 'avatars'::text) AND (owner = auth.uid())),null
+storage,objects,Upload own avatar 1oj01fe_0,PERMISSIVE,{authenticated},INSERT,null,((bucket_id = 'avatars'::text) AND (owner = auth.uid()))
+storage,objects,View avatars 1oj01fe_0,PERMISSIVE,{authenticated},SELECT,(bucket_id = 'avatars'::text),null
+storage,objects,View own invoices aj13hi_0,PERMISSIVE,{authenticated},SELECT,"((bucket_id = 'invoices'::text) AND ((owner = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::text, 'super_admin'::text])))))))",null

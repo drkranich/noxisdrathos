@@ -1,0 +1,102 @@
+jobid,schedule,command,nodename,nodeport,database,username,active,jobname
+1,*/10 * * * *,"
+
+update premium_sessions
+
+set active=false
+
+where expires_at < now()
+
+and active=true;
+
+",localhost,5432,postgres,postgres,true,expire-premium
+2,*/5 * * * *,"
+
+select
+
+net.http_post(
+
+url:='https://bobqkaqgxridueuueizh.supabase.co/functions/v1/publish-content',
+
+headers:='{""Content-Type"":""application/json""}'
+
+);
+
+",localhost,5432,postgres,postgres,true,publish-content
+4,0 * * * *,"
+
+select net.http_post(
+
+url:='https://bobqkaqgxridueuueizh.supabase.co/functions/v1/generate-admin-snapshot',
+
+headers:='{""Content-Type"":""application/json""}'
+
+);
+
+",localhost,5432,postgres,postgres,true,platform-snapshot
+8,* * * * *,"
+
+select net.http_post(
+
+url:='https://bobqkaqgxridueuueizh.supabase.co/functions/v1/process-queue',
+
+headers:='{""Content-Type"":""application/json""}'
+
+);
+
+",localhost,5432,postgres,postgres,true,queue-worker
+9,*/15 * * * *,"
+
+select net.http_post(
+
+url:='https://bobqkaqgxridueuueizh.supabase.co/functions/v1/backup-health-check',
+
+headers:='{""Content-Type"":""application/json""}'
+
+);
+
+",localhost,5432,postgres,postgres,true,backup-health
+11,0 * * * *,"
+
+select net.http_post(
+
+url:='https://bobqkaqgxridueuueizh.supabase.co/functions/v1/warehouse-sync',
+
+headers:='{""Content-Type"":""application/json""}'
+
+);
+
+",localhost,5432,postgres,postgres,true,dw-sync
+12,*/2 * * * *,"
+
+select net.http_post(
+
+url:='https://bobqkaqgxridueuueizh.supabase.co/functions/v1/process-ai-jobs',
+
+headers:='{""Content-Type"":""application/json""}'
+
+);
+
+",localhost,5432,postgres,postgres,true,ai-worker
+14,0 */4 * * *,"
+
+select net.http_post(
+
+url:='https://bobqkaqgxridueuueizh.supabase.co/functions/v1/compute-experiment-results',
+
+headers:='{""Content-Type"":""application/json""}'
+
+);
+
+",localhost,5432,postgres,postgres,true,experiment-metrics
+15,*/5 * * * *,"
+
+select net.http_post(
+
+url:='https://bobqkaqgxridueuueizh.supabase.co/functions/v1/observability-heartbeat',
+
+headers:='{""Content-Type"":""application/json""}'
+
+);
+
+",localhost,5432,postgres,postgres,true,observability-heartbeat

@@ -1,0 +1,11 @@
+id,name,owner,created_at,updated_at,public,avif_autodetection,file_size_limit,allowed_mime_types,owner_id,type
+avatars,avatars,null,2026-05-24 18:56:41.394947+00,2026-05-24 18:56:41.394947+00,false,false,null,null,null,STANDARD
+hero-images,hero-images,null,2026-05-24 18:57:05.412212+00,2026-05-24 18:57:05.412212+00,false,false,null,null,null,STANDARD
+section-thumbnails,section-thumbnails,null,2026-05-24 18:57:19.663685+00,2026-05-24 18:57:19.663685+00,false,false,null,null,null,STANDARD
+content-banners,content-banners,null,2026-05-24 18:57:48.84466+00,2026-05-24 18:57:48.84466+00,false,false,null,null,null,STANDARD
+empty-state-assets,empty-state-assets,null,2026-05-24 18:58:00.604503+00,2026-05-24 18:58:00.604503+00,false,false,null,null,null,STANDARD
+pdfs,pdfs,null,2026-05-24 19:55:41.952531+00,2026-05-24 19:55:41.952531+00,false,false,null,null,null,STANDARD
+videos,videos,null,2026-05-24 20:08:05.961396+00,2026-05-24 20:08:05.961396+00,false,false,null,null,null,STANDARD
+audio,audio,null,2026-05-24 20:15:52.450905+00,2026-05-24 20:15:52.450905+00,false,false,null,null,null,STANDARD
+attachments,attachments,null,2026-05-24 20:21:00.565185+00,2026-05-24 20:21:00.565185+00,false,false,null,null,null,STANDARD
+invoices,invoices,null,2026-05-24 20:23:20.995784+00,2026-05-24 20:23:20.995784+00,false,false,null,null,null,STANDARD
