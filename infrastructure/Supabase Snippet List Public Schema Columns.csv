@@ -1,0 +1,101 @@
+table_name,column_name,data_type
+abuse_events,id,uuid
+abuse_events,user_id,uuid
+abuse_events,ip_address,text
+abuse_events,endpoint,text
+abuse_events,event_type,text
+abuse_events,metadata,jsonb
+abuse_events,created_at,timestamp with time zone
+access_expirations,id,uuid
+access_expirations,user_id,uuid
+access_expirations,resource_type,text
+access_expirations,resource_path,text
+access_expirations,expires_at,timestamp with time zone
+access_expirations,active,boolean
+access_expirations,revoked,boolean
+access_expirations,created_at,timestamp with time zone
+access_policies,id,uuid
+access_policies,policy_name,text
+access_policies,resource_type,text
+access_policies,action_type,text
+access_policies,effect,text
+access_policies,conditions,jsonb
+access_policies,enabled,boolean
+access_policies,created_at,timestamp with time zone
+account_risk_scores,id,uuid
+account_risk_scores,user_id,uuid
+account_risk_scores,risk_score,integer
+account_risk_scores,simultaneous_sessions,integer
+account_risk_scores,countries_24h,integer
+account_risk_scores,devices_24h,integer
+account_risk_scores,flagged,boolean
+account_risk_scores,updated_at,timestamp with time zone
+admin_alerts,id,uuid
+admin_alerts,severity,text
+admin_alerts,title,text
+admin_alerts,body,text
+admin_alerts,resolved,boolean
+admin_alerts,metadata,jsonb
+admin_alerts,created_at,timestamp with time zone
+admin_events,id,uuid
+admin_events,admin_id,uuid
+admin_events,event_type,text
+admin_events,target_type,text
+admin_events,target_id,text
+admin_events,notes,text
+admin_events,created_at,timestamp with time zone
+admin_queue,id,uuid
+admin_queue,queue_type,text
+admin_queue,priority,text
+admin_queue,entity_type,text
+admin_queue,entity_id,text
+admin_queue,status,text
+admin_queue,payload,jsonb
+admin_queue,assigned_to,uuid
+admin_queue,created_at,timestamp with time zone
+ai_briefings,id,uuid
+ai_briefings,user_id,uuid
+ai_briefings,title,text
+ai_briefings,summary,text
+ai_briefings,source_metadata,jsonb
+ai_briefings,created_at,timestamp with time zone
+ai_generated_insights,id,uuid
+ai_generated_insights,content_id,uuid
+ai_generated_insights,insight_type,text
+ai_generated_insights,value,text
+ai_generated_insights,confidence,numeric
+ai_generated_insights,generated_by,text
+ai_generated_insights,created_at,timestamp with time zone
+ai_jobs,id,uuid
+ai_jobs,job_type,text
+ai_jobs,entity_type,text
+ai_jobs,entity_id,uuid
+ai_jobs,input_payload,jsonb
+ai_jobs,output_payload,jsonb
+ai_jobs,model_name,text
+ai_jobs,status,text
+ai_jobs,retries,integer
+ai_jobs,started_at,timestamp with time zone
+ai_jobs,completed_at,timestamp with time zone
+ai_jobs,error_message,text
+ai_jobs,created_at,timestamp with time zone
+ai_operational_memory,id,uuid
+ai_operational_memory,memory_scope,text
+ai_operational_memory,memory_key,text
+ai_operational_memory,memory_value,jsonb
+ai_operational_memory,expires_at,timestamp with time zone
+ai_operational_memory,updated_at,timestamp with time zone
+ai_trend_detection,id,uuid
+ai_trend_detection,trend_name,text
+ai_trend_detection,trend_score,numeric
+ai_trend_detection,metadata,jsonb
+ai_trend_detection,detected_at,timestamp with time zone
+ai_user_profiles,id,uuid
+ai_user_profiles,user_id,uuid
+ai_user_profiles,embedding,USER-DEFINED
+ai_user_profiles,interests,jsonb
+ai_user_profiles,profile_summary,text
+ai_user_profiles,updated_at,timestamp with time zone
+analytics_events,id,uuid
+analytics_events,user_id,uuid
+analytics_events,event_name,text

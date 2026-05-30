@@ -1,0 +1,1216 @@
+proname,pg_get_functiondef
+array_to_halfvec,"CREATE OR REPLACE FUNCTION public.array_to_halfvec(double precision[], integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_halfvec$function$
+"
+array_to_halfvec,"CREATE OR REPLACE FUNCTION public.array_to_halfvec(integer[], integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_halfvec$function$
+"
+array_to_halfvec,"CREATE OR REPLACE FUNCTION public.array_to_halfvec(real[], integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_halfvec$function$
+"
+array_to_halfvec,"CREATE OR REPLACE FUNCTION public.array_to_halfvec(numeric[], integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_halfvec$function$
+"
+array_to_sparsevec,"CREATE OR REPLACE FUNCTION public.array_to_sparsevec(integer[], integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_sparsevec$function$
+"
+array_to_sparsevec,"CREATE OR REPLACE FUNCTION public.array_to_sparsevec(double precision[], integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_sparsevec$function$
+"
+array_to_sparsevec,"CREATE OR REPLACE FUNCTION public.array_to_sparsevec(numeric[], integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_sparsevec$function$
+"
+array_to_sparsevec,"CREATE OR REPLACE FUNCTION public.array_to_sparsevec(real[], integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_sparsevec$function$
+"
+array_to_vector,"CREATE OR REPLACE FUNCTION public.array_to_vector(integer[], integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_vector$function$
+"
+array_to_vector,"CREATE OR REPLACE FUNCTION public.array_to_vector(numeric[], integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_vector$function$
+"
+array_to_vector,"CREATE OR REPLACE FUNCTION public.array_to_vector(double precision[], integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_vector$function$
+"
+array_to_vector,"CREATE OR REPLACE FUNCTION public.array_to_vector(real[], integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_vector$function$
+"
+binary_quantize,"CREATE OR REPLACE FUNCTION public.binary_quantize(halfvec)
+ RETURNS bit
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_binary_quantize$function$
+"
+binary_quantize,"CREATE OR REPLACE FUNCTION public.binary_quantize(vector)
+ RETURNS bit
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$binary_quantize$function$
+"
+cosine_distance,"CREATE OR REPLACE FUNCTION public.cosine_distance(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$cosine_distance$function$
+"
+cosine_distance,"CREATE OR REPLACE FUNCTION public.cosine_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_cosine_distance$function$
+"
+cosine_distance,"CREATE OR REPLACE FUNCTION public.cosine_distance(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_cosine_distance$function$
+"
+detect_concurrent_access,"CREATE OR REPLACE FUNCTION public.detect_concurrent_access()
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+
+declare
+
+concurrent_found boolean;
+
+begin
+
+select
+
+(
+
+count(
+
+distinct fingerprint
+
+)
+
+>1
+
+)
+
+or
+
+(
+
+count(
+
+distinct session_id
+
+)
+
+>1
+
+)
+
+into concurrent_found
+
+from public.concurrent_access_events
+
+where
+
+user_id=auth.uid()
+
+and created_at>
+
+now()
+
+- interval '10 minutes';
+
+return coalesce(
+
+concurrent_found,
+
+false
+
+);
+
+end;
+
+$function$
+"
+finalize_pdf_access,"CREATE OR REPLACE FUNCTION public.finalize_pdf_access(session_uuid uuid)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+
+declare
+
+session_exists boolean;
+
+begin
+
+update
+
+public.pdf_reading_sessions
+
+set
+
+closed_at=now(),
+
+seconds_viewed=
+
+greatest(
+
+extract(
+
+epoch
+
+from
+
+(
+
+now()
+
+-
+
+opened_at
+
+)
+
+)::integer,
+
+0
+
+)
+
+where
+
+id=session_uuid
+
+and user_id=auth.uid()
+
+and closed_at is null;
+
+select exists(
+
+select 1
+
+from public.pdf_reading_sessions
+
+where
+
+id=session_uuid
+
+and user_id=auth.uid()
+
+and closed_at is not null
+
+)
+
+into session_exists;
+
+return session_exists;
+
+end;
+
+$function$
+"
+generate_secure_asset,"CREATE OR REPLACE FUNCTION public.generate_secure_asset(bucket_input text, path_input text, minutes_expire integer DEFAULT 15)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+
+declare
+
+registry_uuid uuid;
+
+begin
+
+insert into
+
+public.signed_url_registry(
+
+bucket_name,
+
+asset_path,
+
+user_id,
+
+expires_at,
+
+revoked,
+
+access_count
+
+)
+
+values(
+
+bucket_input,
+
+path_input,
+
+auth.uid(),
+
+now()
+
++
+
+make_interval(
+
+mins => minutes_expire
+
+),
+
+false,
+
+0
+
+)
+
+returning id
+
+into registry_uuid;
+
+return registry_uuid;
+
+end;
+
+$function$
+"
+get_user_permissions,"CREATE OR REPLACE FUNCTION public.get_user_permissions()
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+
+declare
+
+result jsonb;
+
+begin
+
+select jsonb_build_object(
+
+'roles',
+
+coalesce(
+
+(
+
+select jsonb_agg(role)
+
+from public.user_roles
+
+where user_id=auth.uid()
+
+),
+
+'[]'::jsonb
+
+),
+
+'premium',
+
+exists(
+
+select 1
+
+from public.subscriptions
+
+where
+
+user_id=auth.uid()
+
+and status='active'
+
+),
+
+'admin',
+
+public.is_admin(),
+
+'super_admin',
+
+public.is_super_admin(),
+
+'trial',
+
+exists(
+
+select 1
+
+from public.trial_access
+
+where
+
+user_id=auth.uid()
+
+and converted=false
+
+and ends_at > now()
+
+)
+
+)
+
+into result;
+
+return result;
+
+end;
+
+$function$
+"
+halfvec,"CREATE OR REPLACE FUNCTION public.halfvec(halfvec, integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec$function$
+"
+halfvec_accum,"CREATE OR REPLACE FUNCTION public.halfvec_accum(double precision[], halfvec)
+ RETURNS double precision[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_accum$function$
+"
+halfvec_add,"CREATE OR REPLACE FUNCTION public.halfvec_add(halfvec, halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_add$function$
+"
+halfvec_avg,"CREATE OR REPLACE FUNCTION public.halfvec_avg(double precision[])
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_avg$function$
+"
+halfvec_cmp,"CREATE OR REPLACE FUNCTION public.halfvec_cmp(halfvec, halfvec)
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_cmp$function$
+"
+halfvec_combine,"CREATE OR REPLACE FUNCTION public.halfvec_combine(double precision[], double precision[])
+ RETURNS double precision[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_combine$function$
+"
+halfvec_concat,"CREATE OR REPLACE FUNCTION public.halfvec_concat(halfvec, halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_concat$function$
+"
+halfvec_eq,"CREATE OR REPLACE FUNCTION public.halfvec_eq(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_eq$function$
+"
+halfvec_ge,"CREATE OR REPLACE FUNCTION public.halfvec_ge(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_ge$function$
+"
+halfvec_gt,"CREATE OR REPLACE FUNCTION public.halfvec_gt(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_gt$function$
+"
+halfvec_in,"CREATE OR REPLACE FUNCTION public.halfvec_in(cstring, oid, integer)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_in$function$
+"
+halfvec_l2_squared_distance,"CREATE OR REPLACE FUNCTION public.halfvec_l2_squared_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l2_squared_distance$function$
+"
+halfvec_le,"CREATE OR REPLACE FUNCTION public.halfvec_le(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_le$function$
+"
+halfvec_lt,"CREATE OR REPLACE FUNCTION public.halfvec_lt(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_lt$function$
+"
+halfvec_mul,"CREATE OR REPLACE FUNCTION public.halfvec_mul(halfvec, halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_mul$function$
+"
+halfvec_ne,"CREATE OR REPLACE FUNCTION public.halfvec_ne(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_ne$function$
+"
+halfvec_negative_inner_product,"CREATE OR REPLACE FUNCTION public.halfvec_negative_inner_product(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_negative_inner_product$function$
+"
+halfvec_out,"CREATE OR REPLACE FUNCTION public.halfvec_out(halfvec)
+ RETURNS cstring
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_out$function$
+"
+halfvec_recv,"CREATE OR REPLACE FUNCTION public.halfvec_recv(internal, oid, integer)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_recv$function$
+"
+halfvec_send,"CREATE OR REPLACE FUNCTION public.halfvec_send(halfvec)
+ RETURNS bytea
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_send$function$
+"
+halfvec_spherical_distance,"CREATE OR REPLACE FUNCTION public.halfvec_spherical_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_spherical_distance$function$
+"
+halfvec_sub,"CREATE OR REPLACE FUNCTION public.halfvec_sub(halfvec, halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_sub$function$
+"
+halfvec_to_float4,"CREATE OR REPLACE FUNCTION public.halfvec_to_float4(halfvec, integer, boolean)
+ RETURNS real[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_to_float4$function$
+"
+halfvec_to_sparsevec,"CREATE OR REPLACE FUNCTION public.halfvec_to_sparsevec(halfvec, integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_to_sparsevec$function$
+"
+halfvec_to_vector,"CREATE OR REPLACE FUNCTION public.halfvec_to_vector(halfvec, integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_to_vector$function$
+"
+halfvec_typmod_in,"CREATE OR REPLACE FUNCTION public.halfvec_typmod_in(cstring[])
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_typmod_in$function$
+"
+hamming_distance,"CREATE OR REPLACE FUNCTION public.hamming_distance(bit, bit)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$hamming_distance$function$
+"
+has_premium,"CREATE OR REPLACE FUNCTION public.has_premium()
+ RETURNS boolean
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+
+select exists(
+
+select 1
+
+from public.subscriptions
+
+where
+
+user_id=auth.uid()
+
+and status='active'
+
+);
+
+$function$
+"
+hnsw_bit_support,"CREATE OR REPLACE FUNCTION public.hnsw_bit_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$hnsw_bit_support$function$
+"
+hnsw_halfvec_support,"CREATE OR REPLACE FUNCTION public.hnsw_halfvec_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$hnsw_halfvec_support$function$
+"
+hnsw_sparsevec_support,"CREATE OR REPLACE FUNCTION public.hnsw_sparsevec_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$hnsw_sparsevec_support$function$
+"
+hnswhandler,"CREATE OR REPLACE FUNCTION public.hnswhandler(internal)
+ RETURNS index_am_handler
+ LANGUAGE c
+AS '$libdir/vector', $function$hnswhandler$function$
+"
+increment_cache_hit,"CREATE OR REPLACE FUNCTION public.increment_cache_hit(cache_key text)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+
+begin
+
+update cache_entries
+
+set
+
+hit_count=
+
+hit_count+1,
+
+updated_at=
+
+now()
+
+where
+
+cache_entries.cache_key=
+
+increment_cache_hit.cache_key;
+
+end;
+
+$function$
+"
+inner_product,"CREATE OR REPLACE FUNCTION public.inner_product(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_inner_product$function$
+"
+inner_product,"CREATE OR REPLACE FUNCTION public.inner_product(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$inner_product$function$
+"
+inner_product,"CREATE OR REPLACE FUNCTION public.inner_product(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_inner_product$function$
+"
+is_admin,"CREATE OR REPLACE FUNCTION public.is_admin()
+ RETURNS boolean
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+
+select exists(
+
+select 1
+
+from public.user_roles
+
+where user_id = auth.uid()
+
+and role in (
+
+'admin',
+
+'super_admin'
+
+)
+
+);
+
+$function$
+"
+is_admin,"CREATE OR REPLACE FUNCTION public.is_admin(_user_id uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+
+select exists(
+
+select 1
+
+from public.user_roles
+
+where user_id = _user_id
+
+and role in (
+
+'admin',
+'super_admin'
+
+)
+
+)
+
+$function$
+"
+is_owner,"CREATE OR REPLACE FUNCTION public.is_owner(owner_id uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+
+select owner_id=auth.uid();
+
+$function$
+"
+is_super_admin,"CREATE OR REPLACE FUNCTION public.is_super_admin()
+ RETURNS boolean
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+
+select exists(
+
+select 1
+
+from public.user_roles
+
+where user_id = auth.uid()
+
+and role='super_admin'
+
+);
+
+$function$
+"
+ivfflat_bit_support,"CREATE OR REPLACE FUNCTION public.ivfflat_bit_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$ivfflat_bit_support$function$
+"
+ivfflat_halfvec_support,"CREATE OR REPLACE FUNCTION public.ivfflat_halfvec_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$ivfflat_halfvec_support$function$
+"
+ivfflathandler,"CREATE OR REPLACE FUNCTION public.ivfflathandler(internal)
+ RETURNS index_am_handler
+ LANGUAGE c
+AS '$libdir/vector', $function$ivfflathandler$function$
+"
+jaccard_distance,"CREATE OR REPLACE FUNCTION public.jaccard_distance(bit, bit)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$jaccard_distance$function$
+"
+l1_distance,"CREATE OR REPLACE FUNCTION public.l1_distance(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l1_distance$function$
+"
+l1_distance,"CREATE OR REPLACE FUNCTION public.l1_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l1_distance$function$
+"
+l1_distance,"CREATE OR REPLACE FUNCTION public.l1_distance(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$l1_distance$function$
+"
+l2_distance,"CREATE OR REPLACE FUNCTION public.l2_distance(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$l2_distance$function$
+"
+l2_distance,"CREATE OR REPLACE FUNCTION public.l2_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l2_distance$function$
+"
+l2_distance,"CREATE OR REPLACE FUNCTION public.l2_distance(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l2_distance$function$
+"
+l2_norm,"CREATE OR REPLACE FUNCTION public.l2_norm(sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l2_norm$function$
+"
+l2_norm,"CREATE OR REPLACE FUNCTION public.l2_norm(halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l2_norm$function$
+"
+l2_normalize,"CREATE OR REPLACE FUNCTION public.l2_normalize(sparsevec)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l2_normalize$function$
+"
+l2_normalize,"CREATE OR REPLACE FUNCTION public.l2_normalize(halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l2_normalize$function$
+"
+l2_normalize,"CREATE OR REPLACE FUNCTION public.l2_normalize(vector)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$l2_normalize$function$
+"
+platform_kpis,"CREATE OR REPLACE FUNCTION public.platform_kpis()
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+
+declare
+
+result jsonb;
+
+begin
+
+select jsonb_build_object(
+
+'total_users',
+
+(
+
+select count(*)
+
+from public.profiles
+
+),
+
+'active_subscriptions',
+
+(
+
+select count(*)
+
+from public.subscriptions
+
+where status='active'
+
+),
+
+'total_revenue',
+
+coalesce(
+
+(
+
+select sum(amount)
+
+from public.payments
+
+where status='paid'
+
+),
+
+0
+
+),
+
+'revenue_last_30_days',
+
+coalesce(
+
+(
+
+select sum(amount)
+
+from public.payments
+
+where
+
+status='paid'
+
+and paid_at>
+
+now()
+
+- interval '30 days'
+
+),
+
+0
+
+),
+
+'published_content',
+
+(
+
+select count(*)
+
+from public.content
+
+where published=true
+
+),
+
+'total_downloads',
+
+(
+
+select count(*)
+
+from public.downloads
+
+)
+
+)
+
+into result;
+
+return result;
+
+end;
+
+$function$
+"
+recommend_content,"CREATE OR REPLACE FUNCTION public.recommend_content(limit_count integer DEFAULT 20)
+ RETURNS TABLE(content_id uuid, score numeric, reason text, shown boolean, clicked boolean)
+ LANGUAGE sql
+ SECURITY DEFINER
+AS $function$
+
+select
+
+rf.content_id,
+
+rf.score,
+
+rf.reason,
+
+rf.shown,
+
+rf.clicked
+
+from
+
+public.recommendation_feed rf
+
+where
+
+rf.user_id=auth.uid()
+
+order by
+
+rf.shown asc,
+
+rf.score desc,
+
+rf.created_at desc
+
+limit limit_count;
+
+$function$
+"
+secure_video_permission,"CREATE OR REPLACE FUNCTION public.secure_video_permission(content_uuid uuid)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+
+declare
+
+allowed boolean;
+
+begin
+
+select
+
+case
+
+when c.content_type<>'video'
+
+then false
+
+when c.published=false
+
+then false
+
+when c.release_at is not null
+
+and c.release_at>now()
+
+then false
+
+when public.is_admin()
+
+then true
+
+when public.validate_content_access(
+
+content_uuid
+
+)
+
+then true
+
+else false
+
+end
+
+into allowed
+
+from public.content c
+
+where c.id=content_uuid;
+
+return coalesce(
+
+allowed,
+
+false
+
+);
+
+end;
+
+$function$
+"
+sparsevec,"CREATE OR REPLACE FUNCTION public.sparsevec(sparsevec, integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec$function$
+"
+sparsevec_cmp,"CREATE OR REPLACE FUNCTION public.sparsevec_cmp(sparsevec, sparsevec)
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_cmp$function$
+"
+sparsevec_eq,"CREATE OR REPLACE FUNCTION public.sparsevec_eq(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_eq$function$
+"
+sparsevec_ge,"CREATE OR REPLACE FUNCTION public.sparsevec_ge(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_ge$function$
+"
+sparsevec_gt,"CREATE OR REPLACE FUNCTION public.sparsevec_gt(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_gt$function$
+"
+sparsevec_in,"CREATE OR REPLACE FUNCTION public.sparsevec_in(cstring, oid, integer)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_in$function$
+"
+sparsevec_l2_squared_distance,"CREATE OR REPLACE FUNCTION public.sparsevec_l2_squared_distance(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l2_squared_distance$function$
+"
+sparsevec_le,"CREATE OR REPLACE FUNCTION public.sparsevec_le(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_le$function$
+"
+sparsevec_lt,"CREATE OR REPLACE FUNCTION public.sparsevec_lt(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_lt$function$
+"
+sparsevec_ne,"CREATE OR REPLACE FUNCTION public.sparsevec_ne(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_ne$function$
+"
+sparsevec_negative_inner_product,"CREATE OR REPLACE FUNCTION public.sparsevec_negative_inner_product(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_negative_inner_product$function$
+"
+sparsevec_out,"CREATE OR REPLACE FUNCTION public.sparsevec_out(sparsevec)
+ RETURNS cstring
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_out$function$
+"
+sparsevec_recv,"CREATE OR REPLACE FUNCTION public.sparsevec_recv(internal, oid, integer)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_recv$function$
+"
+sparsevec_send,"CREATE OR REPLACE FUNCTION public.sparsevec_send(sparsevec)
+ RETURNS bytea
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_send$function$
+"
+sparsevec_to_halfvec,"CREATE OR REPLACE FUNCTION public.sparsevec_to_halfvec(sparsevec, integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_to_halfvec$function$
+"
+sparsevec_to_vector,"CREATE OR REPLACE FUNCTION public.sparsevec_to_vector(sparsevec, integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_to_vector$function$
+"
+sparsevec_typmod_in,"CREATE OR REPLACE FUNCTION public.sparsevec_typmod_in(cstring[])
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_typmod_in$function$
+"
+subvector,"CREATE OR REPLACE FUNCTION public.subvector(vector, integer, integer)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$subvector$function$
+"
+subvector,"CREATE OR REPLACE FUNCTION public.subvector(halfvec, integer, integer)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_subvector$function$
+"
+trial_eligibility,"CREATE OR REPLACE FUNCTION public.trial_eligibility()
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+
+declare
+
+eligible boolean;
+
+begin
+
+select not exists(
+
+select 1
+
+from public.trial_access
+
+where
+
+user_id=auth.uid()
+
+)
+
+into eligible;
+
+return coalesce(
+
+eligible,
+
+false
+
+);
+
+end;
+
+$function$
+"
+trigger_admin_event,"CREATE OR REPLACE FUNCTION public.trigger_admin_event()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+
+begin
+
+insert into
+
+public.admin_events(
+
+event_type,
+
+created_at
+
+)
+
+values(
+
+tg_table_name,
+
+now()
+
+);
+
+return new;
+
+end;
+
+$function$
+"

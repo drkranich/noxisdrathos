@@ -1,0 +1,101 @@
+conname,table_name,pg_get_constraintdef
+access_expirations_user_id_fkey,access_expirations,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+account_risk_scores_user_id_fkey,account_risk_scores,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+admin_events_admin_id_fkey,admin_events,FOREIGN KEY (admin_id) REFERENCES auth.users(id)
+admin_queue_assigned_to_fkey,admin_queue,FOREIGN KEY (assigned_to) REFERENCES auth.users(id)
+ai_briefings_user_id_fkey,ai_briefings,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+ai_generated_insights_content_id_fkey,ai_generated_insights,FOREIGN KEY (content_id) REFERENCES content(id)
+ai_user_profiles_user_id_fkey,ai_user_profiles,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+analytics_events_user_id_fkey,analytics_events,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+announcements_created_by_fkey,announcements,FOREIGN KEY (created_by) REFERENCES auth.users(id)
+asset_access_logs_user_id_fkey,asset_access_logs,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+audit_logs_actor_user_id_fkey,audit_logs,FOREIGN KEY (actor_user_id) REFERENCES auth.users(id)
+audit_logs_target_user_id_fkey,audit_logs,FOREIGN KEY (target_user_id) REFERENCES auth.users(id)
+identities_user_id_fkey,auth.identities,FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+mfa_amr_claims_session_id_fkey,auth.mfa_amr_claims,FOREIGN KEY (session_id) REFERENCES auth.sessions(id) ON DELETE CASCADE
+mfa_challenges_auth_factor_id_fkey,auth.mfa_challenges,FOREIGN KEY (factor_id) REFERENCES auth.mfa_factors(id) ON DELETE CASCADE
+mfa_factors_user_id_fkey,auth.mfa_factors,FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+oauth_authorizations_client_id_fkey,auth.oauth_authorizations,FOREIGN KEY (client_id) REFERENCES auth.oauth_clients(id) ON DELETE CASCADE
+oauth_authorizations_user_id_fkey,auth.oauth_authorizations,FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+oauth_consents_client_id_fkey,auth.oauth_consents,FOREIGN KEY (client_id) REFERENCES auth.oauth_clients(id) ON DELETE CASCADE
+oauth_consents_user_id_fkey,auth.oauth_consents,FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+one_time_tokens_user_id_fkey,auth.one_time_tokens,FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+refresh_tokens_session_id_fkey,auth.refresh_tokens,FOREIGN KEY (session_id) REFERENCES auth.sessions(id) ON DELETE CASCADE
+saml_providers_sso_provider_id_fkey,auth.saml_providers,FOREIGN KEY (sso_provider_id) REFERENCES auth.sso_providers(id) ON DELETE CASCADE
+saml_relay_states_flow_state_id_fkey,auth.saml_relay_states,FOREIGN KEY (flow_state_id) REFERENCES auth.flow_state(id) ON DELETE CASCADE
+saml_relay_states_sso_provider_id_fkey,auth.saml_relay_states,FOREIGN KEY (sso_provider_id) REFERENCES auth.sso_providers(id) ON DELETE CASCADE
+sessions_user_id_fkey,auth.sessions,FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+sessions_oauth_client_id_fkey,auth.sessions,FOREIGN KEY (oauth_client_id) REFERENCES auth.oauth_clients(id) ON DELETE CASCADE
+sso_domains_sso_provider_id_fkey,auth.sso_domains,FOREIGN KEY (sso_provider_id) REFERENCES auth.sso_providers(id) ON DELETE CASCADE
+webauthn_challenges_user_id_fkey,auth.webauthn_challenges,FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+webauthn_credentials_user_id_fkey,auth.webauthn_credentials,FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+automation_jobs_workflow_id_fkey,automation_jobs,FOREIGN KEY (workflow_id) REFERENCES automation_workflows(id)
+automation_jobs_trigger_id_fkey,automation_jobs,FOREIGN KEY (trigger_id) REFERENCES automation_triggers(id)
+automation_logs_job_id_fkey,automation_logs,FOREIGN KEY (job_id) REFERENCES automation_jobs(id)
+automation_logs_workflow_id_fkey,automation_logs,FOREIGN KEY (workflow_id) REFERENCES automation_workflows(id)
+automation_triggers_workflow_id_fkey,automation_triggers,FOREIGN KEY (workflow_id) REFERENCES automation_workflows(id) ON DELETE CASCADE
+automation_workflows_created_by_fkey,automation_workflows,FOREIGN KEY (created_by) REFERENCES auth.users(id)
+billing_customers_user_id_fkey,billing_customers,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+calendar_events_created_by_fkey,calendar_events,FOREIGN KEY (created_by) REFERENCES auth.users(id)
+captcha_events_user_id_fkey,captcha_events,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+churn_predictions_user_id_fkey,churn_predictions,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+circle_members_user_id_fkey,circle_members,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+circle_members_circle_id_fkey,circle_members,FOREIGN KEY (circle_id) REFERENCES private_circles(id)
+collection_items_collection_id_fkey,collection_items,FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE
+collection_items_content_id_fkey,collection_items,FOREIGN KEY (content_id) REFERENCES content(id) ON DELETE CASCADE
+comment_likes_comment_id_fkey,comment_likes,FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE
+comment_likes_user_id_fkey,comment_likes,FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+comment_reactions_user_id_fkey,comment_reactions,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+comment_reactions_comment_id_fkey,comment_reactions,FOREIGN KEY (comment_id) REFERENCES comments(id)
+comments_user_id_fkey,comments,FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+comments_parent_comment_id_fkey,comments,FOREIGN KEY (parent_comment_id) REFERENCES comments(id)
+comments_content_id_fkey,comments,FOREIGN KEY (content_id) REFERENCES content(id) ON DELETE CASCADE
+community_posts_circle_id_fkey,community_posts,FOREIGN KEY (circle_id) REFERENCES private_circles(id)
+community_posts_author_id_fkey,community_posts,FOREIGN KEY (author_id) REFERENCES auth.users(id)
+concurrent_access_events_user_id_fkey,concurrent_access_events,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+content_workspace_id_fkey,content,FOREIGN KEY (workspace_id) REFERENCES workspaces(id)
+content_author_id_fkey,content,FOREIGN KEY (author_id) REFERENCES auth.users(id)
+content_category_id_fkey,content,FOREIGN KEY (category_id) REFERENCES content_categories(id)
+content_access_rules_content_id_fkey,content_access_rules,FOREIGN KEY (content_id) REFERENCES content(id)
+content_analytics_content_id_fkey,content_analytics,FOREIGN KEY (content_id) REFERENCES content(id) ON DELETE CASCADE
+content_embeddings_content_id_fkey,content_embeddings,FOREIGN KEY (content_id) REFERENCES content(id)
+content_heatmaps_content_id_fkey,content_heatmaps,FOREIGN KEY (content_id) REFERENCES content(id)
+content_leaks_source_user_fkey,content_leaks,FOREIGN KEY (source_user) REFERENCES auth.users(id)
+content_schedule_content_id_fkey,content_schedule,FOREIGN KEY (content_id) REFERENCES content(id)
+content_schedule_created_by_fkey,content_schedule,FOREIGN KEY (created_by) REFERENCES auth.users(id)
+content_similarity_recommended_content_id_fkey,content_similarity,FOREIGN KEY (recommended_content_id) REFERENCES content(id)
+content_similarity_source_content_id_fkey,content_similarity,FOREIGN KEY (source_content_id) REFERENCES content(id)
+content_tag_relations_content_id_fkey,content_tag_relations,FOREIGN KEY (content_id) REFERENCES content(id) ON DELETE CASCADE
+content_tag_relations_tag_id_fkey,content_tag_relations,FOREIGN KEY (tag_id) REFERENCES content_tags(id) ON DELETE CASCADE
+content_upload_logs_uploader_id_fkey,content_upload_logs,FOREIGN KEY (uploader_id) REFERENCES auth.users(id)
+content_versions_created_by_fkey,content_versions,FOREIGN KEY (created_by) REFERENCES auth.users(id)
+content_versions_content_id_fkey,content_versions,FOREIGN KEY (content_id) REFERENCES content(id) ON DELETE CASCADE
+curated_collection_items_content_id_fkey,curated_collection_items,FOREIGN KEY (content_id) REFERENCES content(id)
+curated_collection_items_collection_id_fkey,curated_collection_items,FOREIGN KEY (collection_id) REFERENCES curated_collections(id)
+curated_collections_created_by_fkey,curated_collections,FOREIGN KEY (created_by) REFERENCES auth.users(id)
+data_anonymization_logs_executed_by_fkey,data_anonymization_logs,FOREIGN KEY (executed_by) REFERENCES auth.users(id)
+data_requests_processed_by_fkey,data_requests,FOREIGN KEY (processed_by) REFERENCES auth.users(id)
+data_requests_user_id_fkey,data_requests,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+deploy_history_deployed_by_fkey,deploy_history,FOREIGN KEY (deployed_by) REFERENCES auth.users(id)
+downloads_user_id_fkey,downloads,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+downloads_content_id_fkey,downloads,FOREIGN KEY (content_id) REFERENCES content(id)
+dynamic_watermarks_user_id_fkey,dynamic_watermarks,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+editorial_logs_content_id_fkey,editorial_logs,FOREIGN KEY (content_id) REFERENCES content(id)
+editorial_logs_editor_id_fkey,editorial_logs,FOREIGN KEY (editor_id) REFERENCES auth.users(id)
+experiment_events_variant_id_fkey,experiment_events,FOREIGN KEY (variant_id) REFERENCES experiment_variants(id)
+experiment_events_user_id_fkey,experiment_events,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+experiment_events_experiment_id_fkey,experiment_events,FOREIGN KEY (experiment_id) REFERENCES experiments(id)
+experiment_results_experiment_id_fkey,experiment_results,FOREIGN KEY (experiment_id) REFERENCES experiments(id)
+experiment_results_variant_id_fkey,experiment_results,FOREIGN KEY (variant_id) REFERENCES experiment_variants(id)
+experiment_variants_experiment_id_fkey,experiment_variants,FOREIGN KEY (experiment_id) REFERENCES experiments(id) ON DELETE CASCADE
+experiments_created_by_fkey,experiments,FOREIGN KEY (created_by) REFERENCES auth.users(id)
+feature_flag_logs_changed_by_fkey,feature_flag_logs,FOREIGN KEY (changed_by) REFERENCES auth.users(id)
+feature_flag_logs_feature_flag_id_fkey,feature_flag_logs,FOREIGN KEY (feature_flag_id) REFERENCES feature_flags(id)
+feature_flags_created_by_fkey,feature_flags,FOREIGN KEY (created_by) REFERENCES auth.users(id)
+feature_segments_feature_flag_id_fkey,feature_segments,FOREIGN KEY (feature_flag_id) REFERENCES feature_flags(id)
+funnel_events_user_id_fkey,funnel_events,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+generated_invoices_user_id_fkey,generated_invoices,FOREIGN KEY (user_id) REFERENCES auth.users(id)
+generated_invoices_transaction_id_fkey,generated_invoices,FOREIGN KEY (transaction_id) REFERENCES payment_transactions(id)
+home_hero_created_by_fkey,home_hero,FOREIGN KEY (created_by) REFERENCES auth.users(id)
+home_section_content_content_id_fkey,home_section_content,FOREIGN KEY (content_id) REFERENCES content(id)
+home_section_content_section_id_fkey,home_section_content,FOREIGN KEY (section_id) REFERENCES home_sections(id)

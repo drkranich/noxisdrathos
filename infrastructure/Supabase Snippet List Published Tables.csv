@@ -1,0 +1,5 @@
+pubname,schemaname,tablename
+supabase_realtime,public,comments
+supabase_realtime,public,live_events
+supabase_realtime,public,online_presence
+supabase_realtime,public,realtime_notifications

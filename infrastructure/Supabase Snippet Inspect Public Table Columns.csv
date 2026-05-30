@@ -1,0 +1,101 @@
+table_name,column_name,data_type,is_nullable,column_default
+abuse_events,id,uuid,NO,gen_random_uuid()
+abuse_events,user_id,uuid,YES,null
+abuse_events,ip_address,text,YES,null
+abuse_events,endpoint,text,YES,null
+abuse_events,event_type,text,YES,null
+abuse_events,metadata,jsonb,YES,null
+abuse_events,created_at,timestamp with time zone,YES,now()
+access_expirations,id,uuid,NO,gen_random_uuid()
+access_expirations,user_id,uuid,YES,null
+access_expirations,resource_type,text,NO,null
+access_expirations,resource_path,text,YES,null
+access_expirations,expires_at,timestamp with time zone,NO,null
+access_expirations,active,boolean,YES,true
+access_expirations,revoked,boolean,YES,false
+access_expirations,created_at,timestamp with time zone,YES,now()
+access_policies,id,uuid,NO,gen_random_uuid()
+access_policies,policy_name,text,NO,null
+access_policies,resource_type,text,NO,null
+access_policies,action_type,text,NO,null
+access_policies,effect,text,NO,'allow'::text
+access_policies,conditions,jsonb,YES,'{}'::jsonb
+access_policies,enabled,boolean,YES,true
+access_policies,created_at,timestamp with time zone,YES,now()
+account_risk_scores,id,uuid,NO,gen_random_uuid()
+account_risk_scores,user_id,uuid,YES,null
+account_risk_scores,risk_score,integer,YES,0
+account_risk_scores,simultaneous_sessions,integer,YES,0
+account_risk_scores,countries_24h,integer,YES,0
+account_risk_scores,devices_24h,integer,YES,0
+account_risk_scores,flagged,boolean,YES,false
+account_risk_scores,updated_at,timestamp with time zone,YES,now()
+admin_alerts,id,uuid,NO,gen_random_uuid()
+admin_alerts,severity,text,YES,null
+admin_alerts,title,text,YES,null
+admin_alerts,body,text,YES,null
+admin_alerts,resolved,boolean,YES,false
+admin_alerts,metadata,jsonb,YES,null
+admin_alerts,created_at,timestamp with time zone,YES,now()
+admin_events,id,uuid,NO,gen_random_uuid()
+admin_events,admin_id,uuid,YES,null
+admin_events,event_type,text,NO,null
+admin_events,target_type,text,YES,null
+admin_events,target_id,text,YES,null
+admin_events,notes,text,YES,null
+admin_events,created_at,timestamp with time zone,YES,now()
+admin_queue,id,uuid,NO,gen_random_uuid()
+admin_queue,queue_type,text,YES,null
+admin_queue,priority,text,YES,'normal'::text
+admin_queue,entity_type,text,YES,null
+admin_queue,entity_id,text,YES,null
+admin_queue,status,text,YES,'pending'::text
+admin_queue,payload,jsonb,YES,null
+admin_queue,assigned_to,uuid,YES,null
+admin_queue,created_at,timestamp with time zone,YES,now()
+ai_briefings,id,uuid,NO,gen_random_uuid()
+ai_briefings,user_id,uuid,YES,null
+ai_briefings,title,text,YES,null
+ai_briefings,summary,text,YES,null
+ai_briefings,source_metadata,jsonb,YES,null
+ai_briefings,created_at,timestamp with time zone,YES,now()
+ai_generated_insights,id,uuid,NO,gen_random_uuid()
+ai_generated_insights,content_id,uuid,YES,null
+ai_generated_insights,insight_type,text,YES,null
+ai_generated_insights,value,text,YES,null
+ai_generated_insights,confidence,numeric,YES,null
+ai_generated_insights,generated_by,text,YES,null
+ai_generated_insights,created_at,timestamp with time zone,YES,now()
+ai_jobs,id,uuid,NO,gen_random_uuid()
+ai_jobs,job_type,text,NO,null
+ai_jobs,entity_type,text,YES,null
+ai_jobs,entity_id,uuid,YES,null
+ai_jobs,input_payload,jsonb,YES,null
+ai_jobs,output_payload,jsonb,YES,null
+ai_jobs,model_name,text,YES,null
+ai_jobs,status,text,YES,'pending'::text
+ai_jobs,retries,integer,YES,0
+ai_jobs,started_at,timestamp with time zone,YES,null
+ai_jobs,completed_at,timestamp with time zone,YES,null
+ai_jobs,error_message,text,YES,null
+ai_jobs,created_at,timestamp with time zone,YES,now()
+ai_operational_memory,id,uuid,NO,gen_random_uuid()
+ai_operational_memory,memory_scope,text,YES,null
+ai_operational_memory,memory_key,text,YES,null
+ai_operational_memory,memory_value,jsonb,YES,null
+ai_operational_memory,expires_at,timestamp with time zone,YES,null
+ai_operational_memory,updated_at,timestamp with time zone,YES,now()
+ai_trend_detection,id,uuid,NO,gen_random_uuid()
+ai_trend_detection,trend_name,text,YES,null
+ai_trend_detection,trend_score,numeric,YES,null
+ai_trend_detection,metadata,jsonb,YES,null
+ai_trend_detection,detected_at,timestamp with time zone,YES,now()
+ai_user_profiles,id,uuid,NO,gen_random_uuid()
+ai_user_profiles,user_id,uuid,YES,null
+ai_user_profiles,embedding,USER-DEFINED,YES,null
+ai_user_profiles,interests,jsonb,YES,null
+ai_user_profiles,profile_summary,text,YES,null
+ai_user_profiles,updated_at,timestamp with time zone,YES,now()
+analytics_events,id,uuid,NO,gen_random_uuid()
+analytics_events,user_id,uuid,YES,null
+analytics_events,event_name,text,NO,null
