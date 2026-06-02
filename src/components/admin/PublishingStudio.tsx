@@ -144,7 +144,7 @@ export function PublishingStudio({
       setTrailerBucket(data.trailer_bucket as PublishingBucket | null); setTrailerPath(data.trailer_path); setBannerPath(data.banner_path);
       if (data.attachment_paths && Array.isArray(data.attachment_paths)) setAttachments(data.attachment_paths as Array<{ bucket: PublishingBucket; path: string; name: string }>);
       supabase.from("collection_items").select("collection_id").eq("content_id", id).limit(1).maybeSingle().then(({ data }) => setCollectionId(data?.collection_id ?? null));
-      if (data.thumbnail_url) { setThumbPath(data.thumbnail_url); try { setThumbPreview(await getSignedUrl(data.thumbnail_bucket || "thumbnails", data.thumbnail_url, 3600)); } catch {} }
+      if (data.thumbnail_url) { setThumbPath(data.thumbnail_url); try { setThumbPreview(await getSignedUrl(data.thumbnail_bucket || "section-thumbnails", data.thumbnail_url, 3600)); } catch {} }
       if (data.banner_path && data.banner_bucket) { try { setBannerPreview(await getSignedUrl(data.banner_bucket, data.banner_path, 3600)); } catch {} }
       setLoading(false); slugDirty.current = true;
     });
@@ -179,8 +179,8 @@ export function PublishingStudio({
     }
   }
 
-  async function uploadThumbnail(file: File) { const a = await doUpload("thumbnails", file, "thumbnail"); setThumbPath(a.path); setThumbPreview(await getSignedUrl("thumbnails", a.path, 3600)); }
-  async function uploadBanner(file: File) { const a = await doUpload("banners", file, "banner"); setBannerPath(a.path); setBannerPreview(await getSignedUrl("banners", a.path, 3600)); }
+  async function uploadThumbnail(file: File) { const a = await doUpload("section-thumbnails", file, "thumbnail"); setThumbPath(a.path); setThumbPreview(await getSignedUrl("section-thumbnails", a.path, 3600)); }
+  async function uploadBanner(file: File) { const a = await doUpload("content-banners", file, "banner"); setBannerPath(a.path); setBannerPreview(await getSignedUrl("content-banners", a.path, 3600)); }
   async function uploadPrimary(file: File) { const bucket = bucketForType(type); const a = await doUpload(bucket, file, "primary"); setStorageBucket(bucket); setStoragePath(a.path); }
   async function uploadTrailer(file: File) { const a = await doUpload("videos", file, "trailer"); setTrailerBucket("videos"); setTrailerPath(a.path); }
   async function uploadAttachment(file: File) { const a = await doUpload("attachments", file, "attachment"); setAttachments((prev) => [...prev, { bucket: "attachments", path: a.path, name: a.fileName }]); }
@@ -197,7 +197,7 @@ export function PublishingStudio({
       title: title.trim(), slug: slug.trim() || slugify(title), subtitle: subtitle.trim() || null, description: description.trim() || null,
       preview_md: previewMd.trim() || null, body_md: bodyMd || null, type, content_kind: contentKind, visibility, required_plan_id: requiredPlan,
       status: finalStatus, category_id: categoryId, tags: tags.split(",").map((t) => t.trim()).filter(Boolean), is_featured: featured,
-      publish_at: publishTs, thumbnail_bucket: "thumbnails", thumbnail_url: thumbPath, banner_bucket: bannerPath ? "banners" : null, banner_path: bannerPath,
+      publish_at: publishTs, thumbnail_bucket: "section-thumbnails", thumbnail_url: thumbPath, banner_bucket: bannerPath ? "content-banners" : null, banner_path: bannerPath,
       storage_bucket: storageBucket, storage_path: storagePath, trailer_bucket: trailerBucket, trailer_path: trailerPath, attachment_paths: attachments,
       external_url: externalUrl.trim() || null, duration_seconds: duration ? Number(duration) : null, reading_minutes: readingMin ? Number(readingMin) : null,
       sort_order: Number(sortOrder) || 0, media_metadata: { attachments: attachments.length, hasTrailer: !!trailerPath, collectionId, metadata: metadataNote.trim() || null }, created_by: user.id,
