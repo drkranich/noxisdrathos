@@ -69,7 +69,7 @@ export function useContent(filter: Filter = {}) {
           try {
             return {
               ...row,
-              thumbnail_url: await getSignedUrl(row.thumbnail_bucket || "thumbnails", row.thumbnail_url, 3600),
+              thumbnail_url: await getSignedUrl(row.thumbnail_bucket || "section-thumbnails", row.thumbnail_url, 3600),
             };
           } catch {
             return row;
