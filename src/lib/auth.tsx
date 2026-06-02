@@ -1,4 +1,3 @@
-```ts
 import {
   createContext,
   useCallback,
@@ -538,4 +537,3 @@ export function useAuth() {
 
 }
 ```
-
