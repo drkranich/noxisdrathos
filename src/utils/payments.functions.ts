@@ -83,7 +83,23 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 
 export const createPortalSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { returnUrl?: string; environment: StripeEnv }) => data)
+  .inputValidator((data: { returnUrl?: string; environment: StripeEnv }) => {
+    if (data.returnUrl !== undefined) {
+      if (typeof data.returnUrl !== "string") throw new Error("Invalid returnUrl");
+      try {
+        const u = new URL(data.returnUrl);
+        const allowedOrigin = typeof window !== "undefined" ? window.location.origin : process.env.VITE_SUPABASE_URL?.replace(/\/storage.*/, "") ?? "";
+        if (u.protocol !== "https:" && u.protocol !== "http:") throw new Error("bad protocol");
+        // Only allow same-origin return URLs
+        const originOk = allowedOrigin ? u.origin === allowedOrigin : true;
+        if (!originOk) throw new Error("returnUrl must point to the same origin");
+      } catch (e: unknown) {
+        if (e instanceof Error && e.message.startsWith("returnUrl")) throw e;
+        throw new Error("Invalid returnUrl");
+      }
+    }
+    return data;
+  })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
