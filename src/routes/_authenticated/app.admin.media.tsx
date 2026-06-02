@@ -27,7 +27,7 @@ type Asset = {
   content?: { title: string | null; visibility: string | null; status: string | null; type: string | null } | null;
 };
 
-const BUCKETS: PublishingBucket[] = ["videos", "pdfs", "audio", "thumbnails", "banners", "attachments"];
+const BUCKETS: PublishingBucket[] = ["videos", "pdfs", "audio", "section-thumbnails", "content-banners", "attachments"];
 
 function isPublishingBucket(bucket: string): bucket is PublishingBucket {
   return BUCKETS.includes(bucket as PublishingBucket);

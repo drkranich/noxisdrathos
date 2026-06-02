@@ -30,7 +30,7 @@ function MemberContentDetail() {
     async function sign() {
       const next: AssetState = { locked: false, error: null };
       try {
-        if (c.thumbnail_url) next.thumb = await getSignedUrl(c.thumbnail_bucket || "thumbnails", c.thumbnail_url, 3600);
+        if (c.thumbnail_url) next.thumb = await getSignedUrl(c.thumbnail_bucket || "section-thumbnails", c.thumbnail_url, 3600);
         if (c.banner_path && c.banner_bucket) next.banner = await getSignedUrl(c.banner_bucket, c.banner_path, 3600);
         if (c.trailer_path && c.trailer_bucket) next.trailer = await getSignedUrl(c.trailer_bucket, c.trailer_path, 3600);
         if (c.storage_path && c.storage_bucket) next.primary = await getSignedUrl(c.storage_bucket, c.storage_path, 3600);

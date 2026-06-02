@@ -62,9 +62,9 @@ function AdminDiagnostics() {
     ["Current role", primaryRole],
     [
       "SUPER_ADMIN_EMAIL env value",
-      d?.superAdminEmail ?? bootstrapResult?.superAdminEmail ?? "carregando",
+      d?.superAdminEmail ?? "carregando",
     ],
-    ["SUPER_ADMIN_EMAIL source", d?.superAdminEmailSource ?? bootstrapResult?.source ?? "—"],
+    ["SUPER_ADMIN_EMAIL source", d?.superAdminEmailSource ?? "—"],
     ["Session hydrated", loading ? "não" : "sim"],
     ["Role hydrated", rolesLoading ? "não" : "sim"],
     ["Admin access result", isAdmin ? "permitido" : "negado"],

@@ -70,7 +70,7 @@ function AdminContentStudio() {
     const signed: Record<string, string> = {};
     await Promise.all(next.map(async (row) => {
       if (!row.thumbnail_url) return;
-      try { signed[row.id] = await getSignedUrl(row.thumbnail_bucket || "thumbnails", row.thumbnail_url, 1800) ?? ""; } catch {}
+      try { signed[row.id] = await getSignedUrl(row.thumbnail_bucket || "section-thumbnails", row.thumbnail_url, 1800) ?? ""; } catch {}
     }));
     setThumbs(signed);
   }

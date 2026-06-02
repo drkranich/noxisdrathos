@@ -30,7 +30,7 @@ function HomePage() {
     return Promise.all(items.map(async (item) => {
       if (!item.thumbnail_url) return item;
       try {
-        return { ...item, thumbnail_url: await getSignedUrl(item.thumbnail_bucket || "thumbnails", item.thumbnail_url, 3600) };
+        return { ...item, thumbnail_url: await getSignedUrl(item.thumbnail_bucket || "section-thumbnails", item.thumbnail_url, 3600) };
       } catch {
         return item;
       }

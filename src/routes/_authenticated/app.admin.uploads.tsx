@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_authenticated/app/admin/uploads")({
   component: UploadsPage,
 });
 
-const BUCKETS: PublishingBucket[] = ["videos", "pdfs", "audio", "thumbnails", "banners", "attachments"];
+const BUCKETS: PublishingBucket[] = ["videos", "pdfs", "audio", "section-thumbnails", "content-banners", "attachments"];
 
 type UploadState = { bucket: PublishingBucket; name: string; progress: number; status: "enviando" | "sincronizado" | "falhou"; error?: string };
 

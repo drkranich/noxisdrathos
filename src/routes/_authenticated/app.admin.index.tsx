@@ -33,7 +33,7 @@ function AdminDashboard() {
       supabase.from("content").select("id", { count: "exact", head: true }),
       supabase.from("media_assets").select("id", { count: "exact", head: true }),
       supabase.from("collections").select("id", { count: "exact", head: true }),
-      supabase.storage.from("thumbnails").createSignedUploadUrl(`diagnostics/${user.id}/${Date.now()}.txt`, { upsert: false }),
+      supabase.storage.from("section-thumbnails").createSignedUploadUrl(`diagnostics/${user.id}/${Date.now()}.txt`, { upsert: false }),
     ]).then(([content, media, collections, storage]) => {
       setDiag([
         { label: "role", value: roles.join(" · ") || "sem papel", ok: isAdmin },

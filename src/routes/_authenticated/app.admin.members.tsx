@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { setMemberAdminRole } from "@/lib/admin-auth.functions";
 import { Input } from "@/components/ui/input";
 import { Search, Shield, ShieldOff, Pause, Play } from "lucide-react";
 
@@ -29,6 +31,8 @@ function AdminMembers() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
+  const callSetAdminRole = useServerFn(setMemberAdminRole);
+
   async function load() {
     setLoading(true);
     const [{ data: profiles }, { data: roles }, { data: memberships }] = await Promise.all([
@@ -55,14 +59,12 @@ function AdminMembers() {
 
   async function toggleAdmin(r: Row) {
     setErr(null);
-    if (r.isAdmin) {
-      const { error } = await supabase.from("user_roles").delete().eq("user_id", r.id).eq("role", "admin");
-      if (error) return setErr(error.message);
-    } else {
-      const { error } = await supabase.from("user_roles").insert({ user_id: r.id, role: "admin" });
-      if (error) return setErr(error.message);
+    try {
+      await callSetAdminRole({ data: { targetUserId: r.id, grant: !r.isAdmin } });
+      load();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Erro ao alterar papel.");
     }
-    load();
   }
 
   async function toggleSuspend(r: Row) {
