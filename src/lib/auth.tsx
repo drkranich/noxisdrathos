@@ -237,10 +237,7 @@ export function AuthProvider({
             .auth
             .getSession();
 
-        console.log(
-          "BOOT SESSION:",
-          data.session,
-        );
+        if (import.meta.env.DEV) console.log("BOOT SESSION:", data.session);
 
         setSession(
           data.session,
@@ -279,15 +276,7 @@ export function AuthProvider({
             next,
           ) => {
 
-            console.log(
-              "AUTH EVENT:",
-              event,
-            );
-
-            console.log(
-              "NEXT SESSION:",
-              next,
-            );
+            if (import.meta.env.DEV) { console.log("AUTH EVENT:", event); console.log("NEXT SESSION:", next); }
 
             setSession(
               next,
@@ -314,21 +303,11 @@ export function AuthProvider({
     const uid =
       session?.user?.id;
 
-    console.log(
-      "SESSION USER:",
-      session?.user,
-    );
-
-    console.log(
-      "AUTH UID:",
-      uid,
-    );
+    if (import.meta.env.DEV) { console.log("SESSION USER:", session?.user); console.log("AUTH UID:", uid); }
 
     if (!uid) {
 
-      console.log(
-        "NO UID FOUND",
-      );
+      if (import.meta.env.DEV) console.log("NO UID FOUND");
 
       setRoles([]);
 
@@ -371,15 +350,7 @@ export function AuthProvider({
               uid,
             );
 
-        console.log(
-          "ROLE RESPONSE:",
-          data,
-        );
-
-        console.log(
-          "ROLE ERROR:",
-          error,
-        );
+        if (import.meta.env.DEV) { console.log("ROLE RESPONSE:", data); console.log("ROLE ERROR:", error); }
 
         if (
           error
@@ -402,10 +373,7 @@ export function AuthProvider({
             data ?? [],
           );
 
-        console.log(
-          "NORMALIZED ROLE:",
-          normalized,
-        );
+        if (import.meta.env.DEV) console.log("NORMALIZED ROLE:", normalized);
 
         setRoles(
           normalized,
@@ -463,10 +431,7 @@ export function AuthProvider({
     ??
     "none";
 
-  console.log(
-    "PRIMARY ROLE:",
-    primaryRole,
-  );
+  if (import.meta.env.DEV) console.log("PRIMARY ROLE:", primaryRole);
 
   const value =
     useMemo(
