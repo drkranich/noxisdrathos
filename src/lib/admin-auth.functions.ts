@@ -175,3 +175,56 @@ export const getAdminDiagnostics = createServerFn({ method: "GET" })
       authError: authUser.error?.message ?? null,
     };
   });
+
+
+export const setMemberAdminRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        targetUserId: z.string().uuid(),
+        grant: z.boolean(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    const { userId } = context;
+
+    // Caller must be super_admin
+    const { data: callerIsSuperAdmin } = await supabaseAdmin.rpc("is_admin", { _user_id: userId });
+    if (!callerIsSuperAdmin) {
+      throw new Response("Forbidden", { status: 403 });
+    }
+
+    // Do not allow downgrading a super_admin via this fn
+    const { data: targetRoles } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.targetUserId);
+
+    const isSuperAdmin = (targetRoles ?? []).some((r) => r.role === "super_admin");
+    if (isSuperAdmin) {
+      throw new Response("Cannot modify a super_admin via this endpoint", { status: 403 });
+    }
+
+    if (data.grant) {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .insert({ user_id: data.targetUserId, role: "admin" });
+      if (error && error.code !== "23505") {
+        // 23505 = unique violation (already admin) — safe to ignore
+        throw new Response(error.message, { status: 500 });
+      }
+    } else {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .delete()
+        .eq("user_id", data.targetUserId)
+        .eq("role", "admin");
+      if (error) {
+        throw new Response(error.message, { status: 500 });
+      }
+    }
+
+    return { ok: true, targetUserId: data.targetUserId, grant: data.grant };
+  });

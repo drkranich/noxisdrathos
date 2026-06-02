@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type PublishingBucket = "videos" | "pdfs" | "audio" | "thumbnails" | "banners" | "attachments";
+export type PublishingBucket = "videos" | "pdfs" | "audio" | "section-thumbnails" | "content-banners" | "attachments";
 
 export type UploadOpts = {
   bucket: PublishingBucket;
@@ -17,8 +17,8 @@ export const BUCKET_RULES: Record<PublishingBucket, Rule> = {
   videos: { maxBytes: 1024 * MB, accept: /^video\//, label: "vídeo" },
   pdfs: { maxBytes: 80 * MB, accept: /^application\/pdf$/, label: "PDF" },
   audio: { maxBytes: 250 * MB, accept: /^audio\//, label: "áudio" },
-  thumbnails: { maxBytes: 15 * MB, accept: /^image\//, label: "thumbnail" },
-  banners: { maxBytes: 25 * MB, accept: /^image\//, label: "banner" },
+  "section-thumbnails": { maxBytes: 15 * MB, accept: /^image\//, label: "thumbnail" },
+  "content-banners": { maxBytes: 25 * MB, accept: /^image\//, label: "banner" },
   attachments: { maxBytes: 120 * MB, accept: /^(application\/pdf|image\/|text\/|application\/zip|application\/json)/, label: "anexo" },
 };
 

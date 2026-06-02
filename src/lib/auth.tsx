@@ -487,7 +487,7 @@ export function AuthProvider({
         primaryRole,
 
         isAdmin:
-          primaryRole === "admin",
+          primaryRole === "admin" || primaryRole === "super_admin",
 
         isSuperAdmin:
           primaryRole === "super_admin",
@@ -507,7 +507,7 @@ export function AuthProvider({
           primaryRole,
 
           isAdmin:
-            primaryRole === "admin",
+            primaryRole === "admin" || primaryRole === "super_admin",
 
           isSuperAdmin:
             primaryRole === "super_admin",
