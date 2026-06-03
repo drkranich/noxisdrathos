@@ -4,21 +4,22 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const FALLBACK_URL = "https://bobqkaqgxridueuueizh.supabase.co";
+const SUPABASE_URL = "https://bobqkaqgxridueuueizh.supabase.co";
 
 function createSupabaseAdminClient() {
-  const SUPABASE_URL = process.env.SUPABASE_URL || FALLBACK_URL;
-  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // EXTERNAL_SERVICE_ROLE_KEY aponta para bobqkaqgxridueuueizh (projeto real)
+  // SUPABASE_SERVICE_ROLE_KEY é injetado pelo Lovable Cloud mas aponta para projeto antigo
+  const SERVICE_ROLE_KEY =
+    process.env.EXTERNAL_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!SUPABASE_SERVICE_ROLE_KEY) {
-    // Em desenvolvimento local sem service role key, lança erro claro
-    // Em produção Lovable Cloud, esta key deve estar nos secrets
-    const message = "Missing SUPABASE_SERVICE_ROLE_KEY. Add it to Supabase Edge Functions secrets.";
+  if (!SERVICE_ROLE_KEY) {
+    const message = "Missing EXTERNAL_SERVICE_ROLE_KEY. Add it to Lovable secrets.";
     console.error(`[Supabase Admin] ${message}`);
     throw new Error(message);
   }
 
-  return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  return createClient<Database>(SUPABASE_URL, SERVICE_ROLE_KEY, {
     auth: {
       storage: undefined,
       persistSession: false,
