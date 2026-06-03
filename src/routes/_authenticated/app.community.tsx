@@ -88,7 +88,7 @@ function CommunityPage() {
     const { error } = await supabase.from("comments").insert({
       user_id: user.id,
       body: body.trim(),
-      content_id: null, // comentário geral da comunidade
+      content_id: null as unknown as string, // comentário geral da comunidade (coluna nullable)
       is_hidden: false,
     });
     setSending(false);

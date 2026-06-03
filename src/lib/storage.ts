@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type PublishingBucket = "videos" | "pdfs" | "audio" | "section-thumbnails" | "content-banners" | "attachments";
+export type PublishingBucket = "videos" | "pdfs" | "audio" | "section-thumbnails" | "content-banners" | "attachments" | "avatars";
 
 export type UploadOpts = {
   bucket: PublishingBucket;
@@ -20,6 +20,7 @@ export const BUCKET_RULES: Record<PublishingBucket, Rule> = {
   "section-thumbnails": { maxBytes: 15 * MB, accept: /^image\//, label: "thumbnail" },
   "content-banners": { maxBytes: 25 * MB, accept: /^image\//, label: "banner" },
   attachments: { maxBytes: 120 * MB, accept: /^(application\/pdf|image\/|text\/|application\/zip|application\/json)/, label: "anexo" },
+  avatars: { maxBytes: 5 * MB, accept: /^image\//, label: "avatar" },
 };
 
 export function slugifyName(name: string) {

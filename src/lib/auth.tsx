@@ -346,7 +346,7 @@ export function AuthProvider({
 
             .eq(
               "user_id",
-              uid,
+              uid!,
             );
 
         if (import.meta.env.DEV) { console.log("ROLE RESPONSE:", data); console.log("ROLE ERROR:", error); }
