@@ -44,11 +44,13 @@ export function useNotifications(limit = 30) {
     };
   }, [user?.id, limit]);
 
-  // realtime subscription
+  // realtime subscription — usa nome único por mount para evitar conflito de canal
   useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel(`notifications:${user.id}`)
+    if (!user?.id) return;
+    const channelName = `realtime:notifications:${user.id}:${Date.now()}`;
+    let channel = supabase.channel(channelName);
+
+    channel = channel
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
@@ -70,8 +72,10 @@ export function useNotifications(limit = 30) {
           const old = payload.old as { id: string };
           setItems((prev) => prev.filter((n) => n.id !== old.id));
         },
-      )
-      .subscribe();
+      );
+
+    channel.subscribe();
+
     return () => {
       supabase.removeChannel(channel);
     };
