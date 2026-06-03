@@ -346,74 +346,76 @@ s.cancel_at_period_end,
 
 ).length;
 
+const contentById = new Map<string, any>(
+  (contentRes.data ?? []).map((c: any) => [c.id, c]),
+);
+
+const watchByContent = new Map<string, { views: Set<string>; completed: number }>();
+for (const w of (watch7dRes.data ?? []) as any[]) {
+  const entry = watchByContent.get(w.content_id) ?? { views: new Set<string>(), completed: 0 };
+  entry.views.add(w.user_id);
+  if (w.completed) entry.completed += 1;
+  watchByContent.set(w.content_id, entry);
+}
+
+const topContent = Array.from(watchByContent.entries())
+  .map(([content_id, agg]) => {
+    const c = contentById.get(content_id);
+    const views = agg.views.size;
+    return {
+      id: content_id,
+      slug: (c?.slug as string | null) ?? null,
+      title: (c?.title as string | null) ?? "conteúdo removido",
+      type: (c?.type as string | null) ?? "—",
+      completion: views > 0 ? agg.completed / views : 0,
+      views,
+    };
+  })
+  .sort((a, b) => b.views - a.views)
+  .slice(0, 10);
+
+type UserHealth = {
+  id: string;
+  name: string;
+  events: number;
+  completed: number;
+  lastSeen: string | null;
+  dormant: boolean;
+  risk: boolean;
+  score: number;
+};
+const userHealth: UserHealth[] = [];
+
+const recentActivity = ((historyRecentRes.data ?? []) as any[]).map((r) => ({
+  id: r.id as string,
+  title: (contentById.get(r.content_id)?.title as string | null) ?? "conteúdo",
+  at: (r.last_seen_at as string | null) ?? new Date().toISOString(),
+  completed: Boolean(r.completed),
+}));
+
+const moderationQueue = ((commentsRes.data ?? []) as any[]).map((c) => ({
+  id: c.id as string,
+  body: (c.body as string | null) ?? "",
+  hidden: Boolean(c.is_hidden),
+  at: (c.created_at as string | null) ?? new Date().toISOString(),
+}));
+
+const supportQueue = ((ticketsRes.data ?? []) as any[]).map((t) => ({
+  id: t.id as string,
+  subject: (t.subject as string | null) ?? "—",
+  priority: (t.priority as string | null) ?? "—",
+  at: (t.created_at as string | null) ?? new Date().toISOString(),
+}));
+
 return {
-
-generatedAt:
-
-new Date()
-
-.toISOString(),
-
-realtime:{
-
-activeNow,
-
-newSignups24h,
-
-watchMinutesToday:
-
-Math.round(
-
-watchSecondsToday
-/
-60,
-
-),
-
-},
-
-revenue:{
-
-mrrCents,
-
-activeSubs:
-
-activeSubs.length,
-
-churnRisk,
-
-planMix,
-
-},
-
-topContent:[],
-
-userHealth:[],
-
-recentActivity:
-
-historyRecentRes.data
-
-??
-
-[],
-
-moderationQueue:
-
-commentsRes.data
-
-??
-
-[],
-
-supportQueue:
-
-ticketsRes.data
-
-??
-
-[],
-
+  generatedAt: new Date().toISOString(),
+  realtime: { activeNow, newSignups24h, watchMinutesToday: Math.round(watchSecondsToday / 60) },
+  revenue: { mrrCents, activeSubs: activeSubs.length, churnRisk, planMix },
+  topContent,
+  userHealth,
+  recentActivity,
+  moderationQueue,
+  supportQueue,
 };
 
 },
