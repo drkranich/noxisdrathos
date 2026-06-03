@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import {
@@ -52,8 +52,10 @@ function typeIcon(type: string) {
 
 export function CommandPalette() {
   const { isSuperAdmin } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
+  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ResultItem[]>([]);
   const [selected, setSelected] = useState(0);
@@ -61,10 +63,10 @@ export function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
-  const navigate = useCallback((path: string) => {
-    router.navigate({ to: path });
+  const go = useCallback((path: string) => {
+    void navigate({ to: path });
     setOpen(false);
-  }, [router]);
+  }, [navigate]);
 
   // Abre com ⌘K ou Ctrl+K
   useEffect(() => {
@@ -100,12 +102,12 @@ export function CommandPalette() {
       .filter((r) => !query || r.label.toLowerCase().includes(query.toLowerCase()))
       .map((r): ResultItem => ({
         ...r,
-        action: () => navigate(ROUTE_TO_PATH[r.id] ?? "/app"),
+        action: () => go(ROUTE_TO_PATH[r.id] ?? "/app"),
       }));
 
     // Admin routes
     const adminRoutes: ResultItem[] = isSuperAdmin && (!query || "admin painel cms".includes(query.toLowerCase()))
-      ? [{ id: "admin", kind: "route", label: "Painel Admin", sublabel: "super admin", icon: Shield, action: () => navigate("/app/admin") }]
+      ? [{ id: "admin", kind: "route", label: "Painel Admin", sublabel: "super admin", icon: Shield, action: () => go("/app/admin") }]
       : [];
 
     if (!query.trim()) {
@@ -129,7 +131,7 @@ export function CommandPalette() {
         label: c.title,
         sublabel: c.subtitle ?? c.type,
         icon: typeIcon(c.type),
-        action: () => navigate(`/app/content/${c.slug}`),
+        action: () => go(`/app/content/${c.slug}`),
       }));
 
       setResults([...adminRoutes, ...routes, ...contentResults]);
@@ -145,7 +147,7 @@ export function CommandPalette() {
     if (e.key === "Enter" && results[selected]) { results[selected].action(); }
   };
 
-  if (!open) return null;
+  if (!mounted || !open) return null;
 
   return (
     <div
