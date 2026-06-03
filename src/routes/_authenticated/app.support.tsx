@@ -53,7 +53,7 @@ function SupportPage() {
   useEffect(refresh, [user?.id]);
 
   async function loadMessages(ticketId: string) {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("ticket_messages")
       .select("id,ticket_id,sender_id,message,created_at")
       .eq("ticket_id", ticketId)
@@ -74,7 +74,7 @@ function SupportPage() {
     const msg = replyBody[ticketId]?.trim();
     if (!user || !msg) return;
     setSendingReply((p) => ({ ...p, [ticketId]: true }));
-    await supabase.from("ticket_messages").insert({
+    await (supabase as any).from("ticket_messages").insert({
       ticket_id: ticketId,
       sender_id: user.id,
       message: msg,
