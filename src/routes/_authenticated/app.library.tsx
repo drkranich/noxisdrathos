@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { CinematicHero } from "@/components/CinematicHero";
 import { ContentGrid, useContent } from "@/components/ContentGrid";
 
@@ -23,8 +23,19 @@ function LibraryPage() {
   const { category } = Route.useSearch();
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("all");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
   const active = TABS.find((t) => t.key === tab)!;
-  const { items } = useContent({ types: active.types, search: search || undefined, limit: 60, categoryId: category });
+  const { items, hasMore } = useContent({
+    types: active.types,
+    search: search || undefined,
+    limit: 24,
+    categoryId: category,
+    page,
+  });
+
+  // Reset page when tab, search or category changes
+  const handleTab = useCallback((key: string) => { setTab(key); setPage(0); }, []);
+  const handleSearch = useCallback((v: string) => { setSearch(v); setPage(0); }, []);
 
   return (
     <div className="pb-24">
@@ -41,7 +52,7 @@ function LibraryPage() {
             {TABS.map((t) => (
               <button
                 key={t.key}
-                onClick={() => setTab(t.key)}
+                onClick={() => handleTab(t.key)}
                 className={`font-mono text-[11px] uppercase tracking-[0.3em] pb-1 border-b transition ${
                   tab === t.key ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
@@ -52,7 +63,7 @@ function LibraryPage() {
           </div>
           <input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
             placeholder="buscar no acervo"
             className="bg-transparent border-b border-border focus:border-foreground outline-none font-mono text-[11px] uppercase tracking-[0.25em] py-1 w-64"
           />
@@ -65,6 +76,30 @@ function LibraryPage() {
           emptyDescription="Nada corresponde a esta seleção ainda. Ajuste os filtros ou aguarde a próxima edição."
           emptyIcon="archive"
         />
+
+        <div className="flex items-center justify-center gap-6 pt-4 pb-8">
+          {page > 0 && (
+            <button
+              onClick={() => setPage((p) => p - 1)}
+              className="font-mono text-[11px] uppercase tracking-[0.3em] border border-border px-5 py-2.5 hover:bg-accent transition"
+            >
+              ← anterior
+            </button>
+          )}
+          {hasMore && (
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              className="font-mono text-[11px] uppercase tracking-[0.3em] border border-border px-5 py-2.5 hover:bg-accent transition"
+            >
+              próximos →
+            </button>
+          )}
+          {!hasMore && page > 0 && (
+            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+              fim do acervo
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

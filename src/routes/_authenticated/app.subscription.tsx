@@ -23,9 +23,18 @@ type SubscriptionRow = {
   environment: string;
 };
 
+type MembershipRow = {
+  plan: string;
+  status: string;
+  current_period_end: string | null;
+  cancel_at: string | null;
+  stripe_subscription_id: string | null;
+};
+
 function SubscriptionPage() {
   const { user } = useAuth();
   const [sub, setSub] = useState<SubscriptionRow | null>(null);
+  const [membership, setMembership] = useState<MembershipRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,16 +45,24 @@ function SubscriptionPage() {
     let active = true;
     (async () => {
       const env = getStripeEnvironment();
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("id,status,price_id,current_period_end,cancel_at_period_end,environment")
-        .eq("user_id", user.id)
-        .eq("environment", env)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const [{ data: subData }, { data: memData }] = await Promise.all([
+        supabase
+          .from("subscriptions")
+          .select("id,status,price_id,current_period_end,cancel_at_period_end,environment")
+          .eq("user_id", user.id)
+          .eq("environment", env)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from("memberships")
+          .select("plan,status,current_period_end,cancel_at,stripe_subscription_id")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+      ]);
       if (active) {
-        setSub((data as SubscriptionRow | null) ?? null);
+        setSub((subData as SubscriptionRow | null) ?? null);
+        setMembership((memData as MembershipRow | null) ?? null);
         setLoading(false);
       }
     })();
@@ -58,15 +75,25 @@ function SubscriptionPage() {
         { event: "*", schema: "public", table: "subscriptions", filter: `user_id=eq.${user.id}` },
         async () => {
           const env = getStripeEnvironment();
-          const { data } = await supabase
-            .from("subscriptions")
-            .select("id,status,price_id,current_period_end,cancel_at_period_end,environment")
-            .eq("user_id", user.id)
-            .eq("environment", env)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          if (active) setSub((data as SubscriptionRow | null) ?? null);
+          const [{ data: subData }, { data: memData }] = await Promise.all([
+            supabase
+              .from("subscriptions")
+              .select("id,status,price_id,current_period_end,cancel_at_period_end,environment")
+              .eq("user_id", user.id)
+              .eq("environment", env)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+            supabase
+              .from("memberships")
+              .select("plan,status,current_period_end,cancel_at,stripe_subscription_id")
+              .eq("user_id", user.id)
+              .maybeSingle(),
+          ]);
+          if (active) {
+            setSub((subData as SubscriptionRow | null) ?? null);
+            setMembership((memData as MembershipRow | null) ?? null);
+          }
         },
       )
       .subscribe();
@@ -104,8 +131,18 @@ function SubscriptionPage() {
     }
   }
 
-  const currentPlan = sub ? PLANS.find((p) => p.stripePriceId === sub.price_id) : null;
-  const isActive = sub && ["active", "trialing", "past_due"].includes(sub.status);
+  // Usa memberships como fonte primária (atualizada pelo webhook), subscriptions como fallback
+  const activeMembership = membership && ["active","trialing","past_due"].includes(membership.status) ? membership : null;
+  const currentPlan = activeMembership
+    ? PLANS.find((p) => p.id === activeMembership.plan)
+    : sub ? PLANS.find((p) => p.stripePriceId === sub.price_id) : null;
+  const isActive = !!(activeMembership || (sub && ["active","trialing","past_due"].includes(sub.status)));
+  // Dados de exibição: preferir membership (mais recente via webhook)
+  const displayStatus = activeMembership?.status ?? sub?.status ?? null;
+  const displayPeriodEnd = activeMembership?.current_period_end ?? sub?.current_period_end ?? null;
+  const displayCancelScheduled = activeMembership?.cancel_at
+    ? new Date(activeMembership.cancel_at) > new Date()
+    : sub?.cancel_at_period_end ?? false;
 
   if (isOpen) {
     return (
@@ -140,9 +177,9 @@ function SubscriptionPage() {
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">status</p>
             <p className="font-display text-3xl mt-2 capitalize">
-              {loading ? "…" : sub?.status ?? "inativo"}
+              {loading ? "…" : displayStatus ?? "inativo"}
             </p>
-            {sub?.cancel_at_period_end ? (
+            {displayCancelScheduled ? (
               <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.25em] text-amber-500">
                 cancelamento agendado
               </p>
@@ -151,8 +188,8 @@ function SubscriptionPage() {
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">próxima renovação</p>
             <p className="font-display text-xl mt-2">
-              {sub?.current_period_end
-                ? new Date(sub.current_period_end).toLocaleDateString("pt-BR")
+              {displayPeriodEnd
+                ? new Date(displayPeriodEnd).toLocaleDateString("pt-BR")
                 : "—"}
             </p>
           </div>
