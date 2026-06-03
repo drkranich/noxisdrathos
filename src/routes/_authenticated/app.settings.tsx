@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToBucket } from "@/lib/storage";
 import { useAuth } from "@/lib/auth";
 import { CinematicHero } from "@/components/CinematicHero";
 
@@ -16,6 +17,7 @@ function SettingsPage() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -32,6 +34,29 @@ function SettingsPage() {
         }
       });
   }, [user?.id]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setUploadingAvatar(true);
+    setMsg(null);
+    try {
+      const result = await uploadToBucket({
+        bucket: "avatars",
+        file,
+        pathPrefix: user.id,
+      });
+      // Gera URL pública para o avatar (bucket avatars é público)
+      const { data } = supabase.storage.from("avatars").getPublicUrl(result.path);
+      setAvatarUrl(data.publicUrl);
+      setMsg("Avatar enviado.");
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : "Falha no upload.");
+    } finally {
+      setUploadingAvatar(false);
+      setTimeout(() => setMsg(null), 2500);
+    }
+  };
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,12 +110,35 @@ function SettingsPage() {
               maxLength={500}
             />
           </Field>
-          <Field label="url do avatar">
-            <input
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              className="w-full bg-transparent border-b border-border focus:border-foreground outline-none py-2 text-sm"
-            />
+          <Field label="avatar">
+            <div className="flex items-center gap-4 mt-2">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="avatar" className="h-14 w-14 rounded-full object-cover border border-border shrink-0" />
+              ) : (
+                <div className="h-14 w-14 rounded-full bg-muted border border-border shrink-0" />
+              )}
+              <div className="flex-1 space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer font-mono text-[11px] uppercase tracking-[0.25em] border border-border px-3 py-2 hover:bg-accent transition w-fit">
+                  {uploadingAvatar ? "enviando…" : "escolher foto"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    disabled={uploadingAvatar}
+                    onChange={handleAvatarUpload}
+                  />
+                </label>
+                {avatarUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setAvatarUrl("")}
+                    className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground hover:text-destructive"
+                  >
+                    remover
+                  </button>
+                )}
+              </div>
+            </div>
           </Field>
           <div className="flex items-center gap-4">
             <button

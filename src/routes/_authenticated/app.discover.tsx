@@ -197,6 +197,7 @@ function DiscoverPage() {
                       <Link
                         key={c.id}
                         to="/app/library"
+                        search={{ category: c.id }}
                         className="group relative aspect-[5/3] border border-border p-4 flex flex-col justify-between hover:border-foreground/40 hover:bg-accent/30 transition-all duration-500 focus-ring"
                       >
                         <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">

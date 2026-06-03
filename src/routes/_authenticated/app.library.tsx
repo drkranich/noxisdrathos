@@ -5,6 +5,9 @@ import { ContentGrid, useContent } from "@/components/ContentGrid";
 
 export const Route = createFileRoute("/_authenticated/app/library")({
   head: () => ({ meta: [{ title: "Biblioteca — Observatório" }, { name: "robots", content: "noindex" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    category: typeof search.category === "string" ? search.category : undefined,
+  }),
   component: LibraryPage,
 });
 
@@ -17,10 +20,11 @@ const TABS = [
 ];
 
 function LibraryPage() {
+  const { category } = Route.useSearch();
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("all");
   const [search, setSearch] = useState("");
   const active = TABS.find((t) => t.key === tab)!;
-  const { items } = useContent({ types: active.types, search: search || undefined, limit: 60 });
+  const { items } = useContent({ types: active.types, search: search || undefined, limit: 60, categoryId: category });
 
   return (
     <div className="pb-24">

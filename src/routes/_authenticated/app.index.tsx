@@ -21,6 +21,20 @@ type Rails = Awaited<ReturnType<typeof getPersonalizedRails>>;
 
 function HomePage() {
   const { user } = useAuth();
+  const [profileDisplayName, setProfileDisplayName] = useState<string | null>(null);
+
+  // Lê display_name da tabela profiles (atualizado pelo settings)
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.display_name) setProfileDisplayName(data.display_name);
+      });
+  }, [user?.id]);
   const fetchRails = useServerFn(getPersonalizedRails);
   const [rails, setRails] = useState<Rails | null>(null);
   const [featured, setFeatured] = useState<RecContent | null>(null);
@@ -80,7 +94,7 @@ function HomePage() {
     };
   }, [user?.id]);
 
-  const greeting = (user?.user_metadata?.display_name || user?.email?.split("@")[0] || "membro").toString();
+  const greeting = (profileDisplayName || user?.user_metadata?.display_name || user?.email?.split("@")[0] || "membro").toString();
 
   return (
     <div className="pb-24">

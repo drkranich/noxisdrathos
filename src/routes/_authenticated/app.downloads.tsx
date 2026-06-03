@@ -14,7 +14,7 @@ function DownloadsPage() {
   const { user } = useAuth();
   const [items, setItems] = useState<ContentRow[] | null>(null);
 
-  // "Downloads" = PDFs marcados via bookmark kind=download (futuro: tabela própria)
+  // "Downloads" = PDFs/conteúdo marcado com kind="later" (salvar para depois)
   useEffect(() => {
     if (!user) return;
     (async () => {
@@ -22,7 +22,7 @@ function DownloadsPage() {
         .from("bookmarks")
         .select("content_id")
         .eq("user_id", user.id)
-        .eq("kind", "download");
+        .eq("kind", "later");
       const ids = (bm ?? []).map((b) => b.content_id);
       if (ids.length === 0) {
         setItems([]);
@@ -31,7 +31,8 @@ function DownloadsPage() {
       const { data } = await supabase
         .from("content")
         .select("id,slug,title,subtitle,type,thumbnail_url,duration_seconds,reading_minutes,tags,is_featured,created_at")
-        .in("id", ids);
+        .in("id", ids)
+        .in("type", ["pdf", "article"]); // foco em conteúdo legível offline
       setItems((data ?? []) as ContentRow[]);
     })();
   }, [user?.id]);
@@ -41,15 +42,15 @@ function DownloadsPage() {
       <CinematicHero
         eyebrow="acervo offline"
         title="Downloads."
-        lead="Documentos baixados para leitura privada. Acesso protegido por sessão."
+        lead="Documentos salvos para leitura privada. Marque qualquer conteúdo com 'salvar para depois' para acessar aqui."
         height="sm"
       />
       <div className="px-8 lg:px-14 pt-10">
         <ContentGrid
           items={items}
           emptyEyebrow="acervo offline · vazio"
-          emptyTitle="Nenhum download por enquanto."
-          emptyDescription="Marque dossiês para tê-los disponíveis em sessões posteriores."
+          emptyTitle="Nenhum item salvo por enquanto."
+          emptyDescription="Use o botão 'salvar para depois' em qualquer conteúdo para tê-lo disponível aqui."
           emptyIcon="archive"
           emptyAction={
             <Link to="/app/pdfs" className="font-mono text-[11px] uppercase tracking-[0.3em] underline-offset-8 hover:underline">
