@@ -32,6 +32,7 @@ type Filter = {
   search?: string;
   limit?: number;
   categoryId?: string;
+  page?: number;
 };
 
 const SELECT = "id,slug,title,subtitle,type,content_kind,thumbnail_url,thumbnail_bucket,duration_seconds,reading_minutes,tags,is_featured,required_plan_id,created_at";
@@ -39,8 +40,11 @@ const SELECT = "id,slug,title,subtitle,type,content_kind,thumbnail_url,thumbnail
 export function useContent(filter: Filter = {}) {
   const [items, setItems] = useState<ContentRow[] | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [hasMore, setHasMore] = useState(false);
   const [version, setVersion] = useState(0);
   const key = JSON.stringify(filter);
+  const pageSize = filter.limit ?? 24;
+  const page = filter.page ?? 0;
 
   useEffect(() => {
     let cancelled = false;
@@ -51,7 +55,7 @@ export function useContent(filter: Filter = {}) {
       .eq("status", "published")
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false })
-      .limit(filter.limit ?? 60);
+      .range(page * pageSize, (page + 1) * pageSize);
     if (filter.types?.length) q = q.in("type", filter.types);
     if (filter.kinds?.length) q = q.in("content_kind", filter.kinds);
     if (filter.categoryId) q = q.eq("category_id", filter.categoryId);
@@ -63,8 +67,10 @@ export function useContent(filter: Filter = {}) {
       if (error) {
         setError(error);
         setItems([]);
+        setHasMore(false);
         return;
       }
+      setHasMore((data?.length ?? 0) >= pageSize);
       const signed = await Promise.all(
         ((data ?? []) as ContentRow[]).map(async (row) => {
           if (!row.thumbnail_url) return row;
@@ -97,7 +103,7 @@ export function useContent(filter: Filter = {}) {
     };
   }, [key]);
 
-  return { items, error };
+  return { items, error, hasMore, refresh: () => setVersion((v) => v + 1) };
 }
 
 export function ContentGrid({
