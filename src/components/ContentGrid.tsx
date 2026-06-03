@@ -31,6 +31,7 @@ type Filter = {
   ids?: string[];
   search?: string;
   limit?: number;
+  categoryId?: string;
 };
 
 const SELECT = "id,slug,title,subtitle,type,content_kind,thumbnail_url,thumbnail_bucket,duration_seconds,reading_minutes,tags,is_featured,required_plan_id,created_at";
@@ -53,6 +54,7 @@ export function useContent(filter: Filter = {}) {
       .limit(filter.limit ?? 60);
     if (filter.types?.length) q = q.in("type", filter.types);
     if (filter.kinds?.length) q = q.in("content_kind", filter.kinds);
+    if (filter.categoryId) q = q.eq("category_id", filter.categoryId);
     if (filter.featured) q = q.eq("is_featured", true);
     if (filter.ids?.length) q = q.in("id", filter.ids);
     if (filter.search) q = q.ilike("title", `%${filter.search}%`);
