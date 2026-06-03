@@ -78,6 +78,8 @@ const ADMIN_ITEMS = [
 ];
 
 export function MobileNav() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, isSuperAdmin, primaryRole, rolesLoading, signOut } = useAuth();
   const [open, setOpen] = useState(false);
@@ -107,6 +109,8 @@ export function MobileNav() {
     (user?.user_metadata?.display_name || user?.email || "")
       .toString().split(" ").map((p: string) => p[0])
       .filter(Boolean).slice(0, 2).join("").toUpperCase() || "·";
+
+  if (!mounted) return null;
 
   return (
     <>
