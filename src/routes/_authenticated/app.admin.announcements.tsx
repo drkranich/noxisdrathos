@@ -68,9 +68,11 @@ function AnnouncementsPage() {
       if (!res.ok) throw new Error(result.error ?? "Erro ao enviar.");
 
       if (channel === "signal" || channel === "both") {
-        // Signal não tem API de broadcast — abre link do grupo/canal
-        toast.info("Signal: o link do grupo foi aberto em nova aba.");
-        window.open(`https://signal.group/#`, "_blank");
+        // Signal não tem API — copia mensagem e abre app
+        await navigator.clipboard.writeText(message).catch(() => {});
+        toast.info("Signal: mensagem copiada! Cole no seu grupo do Signal.", { duration: 5000 });
+        // Abre Signal se disponível (mobile)
+        window.open("https://signal.me", "_blank");
       }
 
       if (result.telegram?.sent > 0) {
