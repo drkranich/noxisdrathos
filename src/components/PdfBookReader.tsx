@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Download, X, ZoomIn, ZoomOut } from "lucide-react";
 
 // Carrega pdf.js via CDN
@@ -108,7 +109,7 @@ export function PdfBookReader({ url, title, onClose }: Props) {
     setTimeout(() => { setPage(p => p - 1); setAnimDir(null); }, 180);
   }
 
-  return (
+  const reader = (
     <div
       ref={containerRef}
       style={{
@@ -274,4 +275,6 @@ export function PdfBookReader({ url, title, onClose }: Props) {
       </div>
     </div>
   );
+
+  return createPortal(reader, document.body);
 }
