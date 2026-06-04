@@ -26,6 +26,7 @@ function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+  const [channel, setChannel] = useState<"none"|"telegram"|"signal"|"both">("none");
 
   useEffect(() => {
     if (!loading && session) navigate({ to: "/app" });
@@ -47,6 +48,13 @@ function SignupPage() {
     if (error) {
       setError(error.message);
     } else {
+      // Salva preferência de canal no profile (criado pelo trigger)
+      if (channel !== "none" && data?.user?.id) {
+        await supabase.from("profiles").update({
+          contact_channel: channel,
+          contact_opt_in: true,
+        }).eq("id", data.user.id);
+      }
       setSent(true);
     }
   }
@@ -130,7 +138,24 @@ function SignupPage() {
         {error ? (
           <p className="font-mono text-[11px] text-destructive">{error}</p>
         ) : null}
-        <Button type="submit" disabled={submitting} className="w-full mt-2">
+        {/* Canal preferido */}
+        <div className="space-y-2 mt-2">
+          <label className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+            canal de contato <span className="opacity-50">(opcional)</span>
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {(["none","telegram","signal","both"] as const).map((opt) => (
+              <button key={opt} type="button" onClick={() => setChannel(opt)}
+                className={`border py-2 px-3 font-mono text-[10px] uppercase tracking-[0.2em] rounded transition text-left ${
+                  channel === opt ? "border-foreground text-foreground bg-accent" : "border-border text-muted-foreground hover:text-foreground"
+                }`}>
+                {opt === "none" ? "Nenhum" : opt === "both" ? "Ambos" : opt.charAt(0).toUpperCase() + opt.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <Button type="submit" disabled={submitting} className="w-full mt-4">
           {submitting ? "abrindo entrada…" : "solicitar acesso →"}
         </Button>
       </form>
