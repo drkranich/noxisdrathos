@@ -25,6 +25,7 @@ function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [sent, setSent] = useState(false);
 
   useEffect(() => {
     if (!loading && session) navigate({ to: "/app" });
@@ -43,7 +44,40 @@ function SignupPage() {
       },
     });
     setSubmitting(false);
-    if (error) setError(error.message);
+    if (error) {
+      setError(error.message);
+    } else {
+      setSent(true);
+    }
+  }
+
+  if (sent) {
+    return (
+      <AuthLayout
+        eyebrow="acesso · confirmação"
+        title="Verifique seu email."
+        subtitle="O acesso ao observatório está quase garantido."
+      >
+        <div className="space-y-6">
+          <div className="border border-border bg-card/40 p-6 space-y-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--neon)]">email enviado</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Enviamos um link de confirmação para <strong className="text-foreground">{email}</strong>.
+              Clique no link para ativar seu acesso.
+            </p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+              Verifique também sua caixa de spam.
+            </p>
+          </div>
+          <p className="text-center font-mono text-[11px] text-muted-foreground">
+            já confirmou?{" "}
+            <Link to="/login" className="text-foreground underline-offset-4 hover:underline">
+              entrar
+            </Link>
+          </p>
+        </div>
+      </AuthLayout>
+    );
   }
 
   return (

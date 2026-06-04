@@ -11,8 +11,14 @@ function useTime() {
   useEffect(() => {
     const fmt = () => {
       const d = new Date();
-      const utc = d.toISOString().slice(11, 19);
-      setT(`${utc} UTC`);
+      const brt = d.toLocaleTimeString("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      });
+      setT(`${brt} BRT`);
     };
     fmt();
     const id = setInterval(fmt, 1000);
