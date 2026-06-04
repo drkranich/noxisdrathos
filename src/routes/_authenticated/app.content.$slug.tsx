@@ -414,175 +414,173 @@ function MediaBlock({
     );
   }
 
-  // ── PDF — modal imersivo ────────────────────────────────────────────────
+  // ── PDF — card + modal popup estilo assessment ──────────────────────────
   if (type === "pdf") {
     return (
       <>
-        {/* Card de preview — abre o modal */}
+        {/* Card compacto na página */}
         <div
           style={{
-            background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
+            background: "rgba(255,255,255,0.03)",
             border: "1px solid rgba(255,255,255,0.08)",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)",
+            borderRadius: 16,
           }}
-          className="rounded-2xl overflow-hidden"
+          className="flex items-center justify-between px-6 py-5"
         >
-          {/* Preview miniatura do PDF */}
-          <div className="relative" style={{ height: 320, background: "rgba(0,0,0,0.3)" }}>
-            <iframe
-              src={`${url}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
-              title={title}
-              className="w-full h-full border-0 pointer-events-none"
-              style={{ opacity: 0.85 }}
-            />
-            {/* Overlay com gradiente para preview */}
-            <div
-              style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.9) 100%)" }}
-              className="absolute inset-0"
-            />
-            {/* Botão central de abertura */}
-            <div className="absolute inset-0 flex items-end justify-center pb-8">
-              <button
-                onClick={() => setFullscreen(true)}
-                style={{
-                  background: "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.06) 100%)",
-                  backdropFilter: "blur(20px)",
-                  WebkitBackdropFilter: "blur(20px)",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)",
-                }}
-                className="flex items-center gap-3 px-7 py-3.5 rounded-full font-mono text-[11px] uppercase tracking-[0.3em] hover:brightness-125 transition-all duration-200"
-              >
-                <Maximize2 className="w-4 h-4" />
-                abrir leitura
-              </button>
+          <div className="flex items-center gap-4">
+            <div style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 12,
+              width: 44, height: 44,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <FileText className="w-5 h-5 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="text-sm font-medium truncate max-w-xs">{title}</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-0.5">documento pdf</p>
             </div>
           </div>
-          {/* Info bar */}
-          <div
-            style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
-            className="flex items-center justify-between px-5 py-3"
+          <button
+            onClick={() => setFullscreen(true)}
+            style={{
+              background: "rgba(255,255,255,0.08)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 10,
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.25em] hover:brightness-125 transition"
           >
-            <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-muted-foreground" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">documento pdf</span>
-            </div>
-            <a
-              href={url}
-              download
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8 }}
-              className="flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition"
-            >
-              <Download className="w-3 h-3" /> baixar
-            </a>
-          </div>
+            <Maximize2 className="w-3.5 h-3.5" />
+            ler documento
+          </button>
         </div>
 
-        {/* Modal de leitura imersiva */}
+        {/* Modal popup — mesmo estilo do assessment */}
         {fullscreen && (
-          <div
-            style={{ position: "fixed", inset: 0, zIndex: 100 }}
-            className="flex flex-col"
-          >
-            {/* Backdrop blur overlay */}
+          <>
+            {/* Overlay backdrop embaçado */}
             <div
-              style={{
-                position: "absolute", inset: 0,
-                background: "rgba(4,4,6,0.92)",
-                backdropFilter: "blur(40px)",
-                WebkitBackdropFilter: "blur(40px)",
-              }}
               onClick={() => setFullscreen(false)}
+              style={{
+                position: "fixed", inset: 0, zIndex: 50,
+                background: "rgba(0,0,0,0.75)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+              }}
             />
 
-            {/* Modal container */}
+            {/* Modal centralizado */}
             <div
               style={{
-                position: "relative",
-                margin: "auto",
-                width: "calc(100vw - 48px)",
-                maxWidth: 1100,
-                height: "calc(100vh - 48px)",
+                position: "fixed",
+                top: "50%", left: "50%",
+                transform: "translate(-50%, -50%)",
+                zIndex: 51,
+                width: "min(92vw, 900px)",
+                height: "min(90vh, 860px)",
                 display: "flex",
                 flexDirection: "column",
-                background: "linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%)",
-                backdropFilter: "blur(32px)",
-                WebkitBackdropFilter: "blur(32px)",
+                background: "rgba(14,14,18,0.96)",
+                backdropFilter: "blur(40px)",
+                WebkitBackdropFilter: "blur(40px)",
                 border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 20,
-                boxShadow: "0 40px 120px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.12)",
+                borderRadius: 18,
+                boxShadow: "0 32px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08)",
                 overflow: "hidden",
               }}
             >
-              {/* Toolbar do modal */}
+              {/* Header do modal */}
               <div
                 style={{
-                  background: "rgba(255,255,255,0.04)",
                   borderBottom: "1px solid rgba(255,255,255,0.07)",
+                  padding: "14px 20px",
                   flexShrink: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
                 }}
-                className="flex items-center gap-3 px-5 py-3"
               >
-                {/* Título */}
-                <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground flex-1 truncate">
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 10,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.3em",
+                    color: "var(--color-text-secondary)",
+                    flex: 1,
+                  }}
+                >
                   {title}
                 </span>
 
                 {/* Zoom */}
-                <div
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10 }}
-                  className="flex items-center gap-1 px-1"
-                >
+                <div style={{
+                  display: "flex", alignItems: "center",
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: 8,
+                }}>
                   <button onClick={() => setZoom(z => Math.max(60, z - 10))}
-                    className="p-1.5 text-muted-foreground hover:text-foreground transition">
+                    style={{ padding: "6px 8px", color: "var(--color-text-secondary)" }}
+                    className="hover:text-white transition">
                     <ZoomOut className="w-3.5 h-3.5" />
                   </button>
-                  <span className="font-mono text-[10px] text-muted-foreground w-10 text-center">{zoom}%</span>
+                  <span style={{
+                    fontFamily: "var(--font-mono)", fontSize: 10,
+                    color: "var(--color-text-secondary)", minWidth: 36, textAlign: "center",
+                  }}>{zoom}%</span>
                   <button onClick={() => setZoom(z => Math.min(200, z + 10))}
-                    className="p-1.5 text-muted-foreground hover:text-foreground transition">
+                    style={{ padding: "6px 8px", color: "var(--color-text-secondary)" }}
+                    className="hover:text-white transition">
                     <ZoomIn className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
-                <button onClick={() => setZoom(100)}
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8 }}
-                  className="p-1.5 text-muted-foreground hover:text-foreground transition">
-                  <RotateCcw className="w-3.5 h-3.5" />
-                </button>
-
                 <a href={url} download
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8 }}
-                  className="p-1.5 text-muted-foreground hover:text-foreground transition">
+                  style={{
+                    padding: "6px 8px",
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 8,
+                    color: "var(--color-text-secondary)",
+                    display: "flex", alignItems: "center",
+                  }}
+                  className="hover:text-white transition">
                   <Download className="w-3.5 h-3.5" />
                 </a>
 
-                {/* Fechar */}
+                {/* X fechar */}
                 <button
                   onClick={() => setFullscreen(false)}
                   style={{
-                    background: "rgba(226,75,74,0.12)",
-                    border: "1px solid rgba(226,75,74,0.25)",
+                    width: 28, height: 28,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.1)",
                     borderRadius: 8,
+                    color: "var(--color-text-secondary)",
+                    fontSize: 14,
+                    fontWeight: 300,
+                    lineHeight: 1,
+                    flexShrink: 0,
                   }}
-                  className="p-1.5 hover:brightness-125 transition ml-1"
+                  className="hover:text-white hover:bg-white/10 transition"
                 >
-                  <Minimize2 className="w-3.5 h-3.5" style={{ color: "rgba(226,75,74,0.8)" }} />
+                  ×
                 </button>
               </div>
 
-              {/* Viewer */}
-              <div className="flex-1 overflow-auto" style={{ background: "rgba(255,255,255,0.01)" }}>
+              {/* PDF Viewer */}
+              <div style={{ flex: 1, overflow: "hidden", background: "#fafafa" }}>
                 <iframe
-                  src={`${url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH&zoom=${zoom}`}
+                  src={`${url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
                   title={title}
-                  className="w-full border-0"
-                  style={{ height: "100%", minHeight: 600 }}
+                  className="w-full h-full border-0"
                 />
               </div>
             </div>
-          </div>
+          </>
         )}
       </>
     );
