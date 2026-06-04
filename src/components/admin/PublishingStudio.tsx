@@ -279,11 +279,39 @@ export function PublishingStudio({
           </Panel>
 
           <Panel title="Publishing Controls">
-            <Field label="Category"><Select value={categoryId ?? "none"} onValueChange={(v) => setCategoryId(v === "none" ? null : v)}><SelectTrigger className="bg-card border-border"><SelectValue placeholder="Category" /></SelectTrigger><SelectContent><SelectItem value="none">No Category</SelectItem>{categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select></Field>
+            <Field label="Category">
+  <select value={categoryId ?? "none"} onChange={(e) => setCategoryId(e.target.value === "none" ? null : e.target.value)}
+    className="w-full bg-card border border-border px-3 py-2 text-sm outline-none focus:border-foreground">
+    <option value="none">No Category</option>
+    {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+  </select>
+</Field>
             <Field label="Tags"><Input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="strategy, ai, brief" className="bg-card border-border" /></Field>
-            <Field label="Collection"><Select value={collectionId ?? "none"} onValueChange={(v) => setCollectionId(v === "none" ? null : v)}><SelectTrigger className="bg-card border-border"><SelectValue placeholder="Collection" /></SelectTrigger><SelectContent><SelectItem value="none">No Collection</SelectItem>{collections.map((c) => <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>)}</SelectContent></Select></Field>
-            <Field label="Visibility"><Select value={visibility} onValueChange={(v) => setVisibility(v as Visibility)}><SelectTrigger className="bg-card border-border"><SelectValue /></SelectTrigger><SelectContent>{VISIBILITIES.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent></Select></Field>
-            <Field label="Plano mínimo de acesso"><Select value={requiredPlan} onValueChange={(v) => setRequiredPlan(v as typeof requiredPlan)}><SelectTrigger className="bg-card border-border"><SelectValue /></SelectTrigger><SelectContent>{PLANS.map((p) => <SelectItem key={p} value={p}>{p === "free" ? "Livre (todos)" : p === "circle" ? "Círculo — R$97/mês" : p === "vault" ? "Cofre — R$297/mês" : "Conselho — R$1490/ano"}</SelectItem>)}</SelectContent></Select></Field>
+            <Field label="Collection">
+  <select value={collectionId ?? "none"} onChange={(e) => setCollectionId(e.target.value === "none" ? null : e.target.value)}
+    className="w-full bg-card border border-border px-3 py-2 text-sm outline-none focus:border-foreground">
+    <option value="none">No Collection</option>
+    {collections.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+  </select>
+</Field>
+            <Field label="Visibility">
+  <select value={visibility} onChange={(e) => setVisibility(e.target.value as Visibility)}
+    className="w-full bg-card border border-border px-3 py-2 text-sm outline-none focus:border-foreground">
+    {VISIBILITIES.map((v) => <option key={v} value={v}>{v}</option>)}
+  </select>
+</Field>
+            <Field label="Plano mínimo de acesso">
+  <select
+    value={requiredPlan}
+    onChange={(e) => setRequiredPlan(e.target.value as typeof requiredPlan)}
+    className="w-full bg-card border border-border px-3 py-2 text-sm outline-none focus:border-foreground"
+  >
+    <option value="free">Livre (todos)</option>
+    <option value="circle">Círculo — R$97/mês</option>
+    <option value="vault">Cofre — R$297/mês</option>
+    <option value="council">Conselho — R$1490/ano</option>
+  </select>
+</Field>
             <Field label="Draft / Publish"><div className="grid grid-cols-2 gap-2">{(["draft", "published"] as const).map((mode) => <button key={mode} type="button" onClick={() => setPublishMode(mode)} className={(publishMode === mode ? "bg-accent text-foreground border-foreground/30" : "bg-card/40 text-muted-foreground border-border hover:text-foreground") + " border px-3 py-2 font-mono text-[10px] uppercase tracking-[0.25em]"}>{mode === "draft" ? "Draft" : "Publish"}</button>)}</div></Field>
             <Field label="Schedule"><div className="flex items-center justify-between border border-border bg-card/40 px-3 py-2"><span className="text-sm text-muted-foreground">Schedule publish time</span><Switch checked={scheduled} onCheckedChange={setScheduled} /></div>{scheduled ? <Input type="datetime-local" value={publishAt} onChange={(e) => setPublishAt(e.target.value)} className="bg-card border-border" /> : null}</Field>
             <Field label="Operations"><Input value={sortOrder} onChange={(e) => setSortOrder(e.target.value.replace(/[^0-9-]/g, ""))} placeholder="Sort order" className="bg-card border-border" /><div className="flex items-center justify-between border border-border bg-card/40 px-3 py-2"><span className="text-sm text-muted-foreground">Featured</span><Switch checked={featured} onCheckedChange={setFeatured} /></div></Field>
