@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { uploadToBucket } from "@/lib/storage";
 import { useAuth } from "@/lib/auth";
 import { CinematicHero } from "@/components/CinematicHero";
@@ -17,6 +18,10 @@ function SettingsPage() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [telegramToken, setTelegramToken] = useState<string | null>(null);
+  const [signalPhone, setSignalPhone] = useState("");
+  const [contactChannel, setContactChannel] = useState("none");
+  const [savingContact, setSavingContact] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => {
@@ -38,6 +43,15 @@ function SettingsPage() {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    if (!file.type.startsWith("image/")) { setMsg("Formato inválido. Use JPG, PNG ou WebP."); return; }
+    if (file.size > 5 * 1024 * 1024) { setMsg("Imagem muito grande. Máximo 5MB."); return; }
+    const dims = await new Promise<{w:number;h:number}>((res) => {
+      const img = new Image(); const url = URL.createObjectURL(file);
+      img.onload = () => { res({w:img.width,h:img.height}); URL.revokeObjectURL(url); };
+      img.onerror = () => { res({w:999,h:999}); URL.revokeObjectURL(url); };
+      img.src = url;
+    });
+    if (dims.w < 100 || dims.h < 100) { setMsg("Imagem muito pequena. Mínimo 100×100px."); return; }
     setUploadingAvatar(true);
     setMsg(null);
     try {
@@ -177,6 +191,101 @@ function SettingsPage() {
             </button>
           </div>
         </section>
+      </div>
+
+      {/* Seção de canais de comunicação */}
+      <div className="border border-border p-6 space-y-6 mt-8">
+        <div>
+          <h3 className="font-display text-xl">Canais de contato</h3>
+          <p className="text-sm text-muted-foreground mt-1">Receba novidades do Observatório no seu celular.</p>
+        </div>
+
+        {/* Seletor de canal */}
+        <div className="space-y-2">
+          <label className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">canal preferido</label>
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { value: "none", label: "Nenhum" },
+              { value: "telegram", label: "Telegram" },
+              { value: "signal", label: "Signal" },
+              { value: "both", label: "Ambos" },
+            ].map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setContactChannel(opt.value)}
+                style={contactChannel === opt.value ? {
+                  background: "rgba(var(--neon-rgb,100,220,100),0.12)",
+                  border: "1px solid rgba(var(--neon-rgb,100,220,100),0.4)",
+                  color: "var(--neon,#64dc64)",
+                } : {}}
+                className="border border-border py-2 font-mono text-[10px] uppercase tracking-[0.2em] hover:bg-accent transition rounded"
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Telegram */}
+        {(contactChannel === "telegram" || contactChannel === "both") && (
+          <div className="space-y-3 border border-border/50 p-4 rounded">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">telegram</p>
+            {telegramToken ? (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Envie este comando para o bot <strong className="text-foreground">@ObservatorioBot</strong>:
+                </p>
+                <div className="bg-card border border-border p-3 rounded font-mono text-sm select-all">
+                  /start {telegramToken}
+                </div>
+                <p className="font-mono text-[10px] text-muted-foreground">Token expira em 15 minutos.</p>
+                <button onClick={generateTelegramToken}
+                  className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground hover:text-foreground underline-offset-4 hover:underline">
+                  gerar novo token
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Conecte sua conta ao bot do Telegram para receber conteúdos diretamente no celular.
+                </p>
+                <button
+                  onClick={generateTelegramToken}
+                  style={{
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    borderRadius: 8,
+                  }}
+                  className="flex items-center gap-2 px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.25em] hover:brightness-125 transition"
+                >
+                  conectar telegram →
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Signal */}
+        {(contactChannel === "signal" || contactChannel === "both") && (
+          <div className="space-y-3 border border-border/50 p-4 rounded">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">signal</p>
+            <p className="text-sm text-muted-foreground">Informe seu número com DDD e código do país para receber mensagens via Signal.</p>
+            <input
+              value={signalPhone}
+              onChange={(e) => setSignalPhone(e.target.value)}
+              placeholder="+55 11 99999-9999"
+              className="w-full bg-transparent border-b border-border focus:border-foreground outline-none py-2 text-sm"
+            />
+          </div>
+        )}
+
+        <button
+          onClick={saveContactPrefs}
+          disabled={savingContact}
+          className="font-mono text-[11px] uppercase tracking-[0.3em] bg-foreground text-background px-5 py-3 disabled:opacity-50"
+        >
+          {savingContact ? "salvando…" : "salvar preferências →"}
+        </button>
       </div>
     </div>
   );
