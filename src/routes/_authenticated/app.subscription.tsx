@@ -284,7 +284,7 @@ function SubscriptionPage() {
 
         <div className="mt-12 flex items-center gap-6">
           <Link to="/pricing" className="font-mono text-[11px] uppercase tracking-[0.3em] border-b border-foreground/40 pb-1 inline-flex items-center gap-2">
-            ver detalhes públicos dos planos <ExternalLink className="w-3 h-3" />
+            
           </Link>
         </div>
       </div>
