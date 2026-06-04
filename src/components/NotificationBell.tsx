@@ -44,7 +44,7 @@ export function NotificationBell({ compact = false }: { compact?: boolean }) {
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-40"
           />
-          <div className="fixed left-1/2 -translate-x-1/2 bottom-20 md:absolute md:left-auto md:translate-x-0 md:right-0 md:bottom-full md:mb-2 w-[calc(100vw-2rem)] max-w-[400px] md:w-[380px] max-h-[min(75vh,560px)] flex flex-col bg-card border border-border shadow-2xl z-50 backdrop-blur-xl rounded-xl">
+          <div className="fixed left-1/2 -translate-x-1/2 bottom-24 w-[min(92vw,400px)] max-h-[70vh] flex flex-col bg-card border border-border shadow-2xl z-[9999] backdrop-blur-xl rounded-xl overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
                 inbox · {unread} não lidas
