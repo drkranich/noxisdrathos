@@ -4,7 +4,6 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { createPortalSession } from "@/utils/payments.functions";
-import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 // PaymentTestModeBanner intentionally not shown to members; admin diagnostics only.
 import { PLANS, type Plan } from "@/lib/billing/plans";
 import { Check, ExternalLink, Sparkles } from "lucide-react";
@@ -159,20 +158,7 @@ function SubscriptionPage() {
     ? new Date(activeMembership.cancel_at) > new Date()
     : sub?.cancel_at_period_end ?? false;
 
-  if (isOpen) {
-    return (
-      <div className="px-6 lg:px-14 py-10 max-w-3xl mx-auto">
-        {/* test-mode banner suppressed for members */}
-        <button
-          onClick={closeCheckout}
-          className="mt-6 mb-4 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground"
-        >
-          ← voltar
-        </button>
 
-      </div>
-    );
-  }
 
   return (
     <div>
