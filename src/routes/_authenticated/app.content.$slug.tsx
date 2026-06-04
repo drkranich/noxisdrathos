@@ -322,9 +322,33 @@ function MediaBlock({
   contentId: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const { tick } = useWatchProgress(locked ? null : contentId, type as "video" | "audio" | "pdf" | "article");
   const [fullscreen, setFullscreen] = useState(false);
   const [zoom, setZoom] = useState(100);
+
+  // Fullscreen API — fecha ao pressionar ESC
+  useEffect(() => {
+    const handler = () => {
+      if (!document.fullscreenElement) setFullscreen(false);
+    };
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
+
+  function openReader() {
+    const el = containerRef.current;
+    if (!el) return;
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if ((el as any).webkitRequestFullscreen) (el as any).webkitRequestFullscreen();
+    setFullscreen(true);
+  }
+
+  function closeReader() {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    setFullscreen(false);
+  }
 
   if (locked) {
     return (
@@ -416,34 +440,6 @@ function MediaBlock({
 
   // ── PDF — leitor imersivo via Fullscreen API ────────────────────────────
   if (type === "pdf") {
-    const iframeRef = useRef<HTMLIFrameElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    function openReader() {
-      // Usa a Fullscreen API nativa — única forma de cobrir 100% da tela
-      const el = containerRef.current;
-      if (!el) return;
-      if (el.requestFullscreen) el.requestFullscreen();
-      else if ((el as any).webkitRequestFullscreen) (el as any).webkitRequestFullscreen();
-      setFullscreen(true);
-    }
-
-    function closeReader() {
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => {});
-      }
-      setFullscreen(false);
-    }
-
-    // Fecha ao pressionar ESC nativo
-    useEffect(() => {
-      const handler = () => {
-        if (!document.fullscreenElement) setFullscreen(false);
-      };
-      document.addEventListener("fullscreenchange", handler);
-      return () => document.removeEventListener("fullscreenchange", handler);
-    }, []);
-
     return (
       <>
         {/* Card entrada */}
