@@ -234,47 +234,70 @@ export function PdfBookReader({ url, title, onClose }: Props) {
         </button>
 
         {/* Canvas com animação de virada */}
-        <div style={{
-          transition: "opacity 0.22s ease, transform 0.22s ease",
-          opacity: animDir ? 0 : 1,
-          transform: animDir === "left" ? "translateX(-40px) scale(0.97)" : animDir === "right" ? "translateX(40px) scale(0.97)" : "translateX(0) scale(1)",
-          overflow: "hidden",
-          borderRadius: 8,
-          boxShadow: "0 40px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.07), 0 0 60px rgba(255,255,255,0.02)",
-        }}>
-          {loading && (
-            <div style={{
-              width: "min(80vw, 600px)", height: "min(80vh, 800px)",
-              background: "rgba(255,255,255,0.04)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              borderRadius: 12,
-            }}>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(255,255,255,0.3)", letterSpacing: "0.3em", textTransform: "uppercase" }}>
-                carregando…
-              </span>
-            </div>
-          )}
-          {error && (
-            <div style={{
-              width: 400, height: 300, background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12,
-              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12,
-            }}>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontFamily: "var(--font-mono)", fontSize: 11 }}>{error}</p>
-              <a href={url} target="_blank" rel="noreferrer" style={{
-                padding: "8px 16px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: 8, color: "rgba(255,255,255,0.6)", textDecoration: "none",
-                fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.2em",
+        <>
+          {/* CSS para scrollbar neon */}
+          <style>{`
+            .pdf-scroll-area::-webkit-scrollbar { width: 4px; }
+            .pdf-scroll-area::-webkit-scrollbar-track { background: transparent; }
+            .pdf-scroll-area::-webkit-scrollbar-thumb {
+              background: linear-gradient(to bottom, rgba(100,220,100,0.6), rgba(100,220,100,0.2));
+              border-radius: 4px;
+              box-shadow: 0 0 6px rgba(100,220,100,0.4);
+            }
+            .pdf-scroll-area::-webkit-scrollbar-thumb:hover {
+              background: linear-gradient(to bottom, rgba(100,220,100,0.9), rgba(100,220,100,0.5));
+            }
+          `}</style>
+
+          <div
+            className="pdf-scroll-area"
+            style={{
+              transition: "opacity 0.22s ease, transform 0.22s ease",
+              opacity: animDir ? 0 : 1,
+              transform: animDir === "left" ? "translateX(-40px) scale(0.97)" : animDir === "right" ? "translateX(40px) scale(0.97)" : "translateX(0) scale(1)",
+              overflowY: "auto",
+              overflowX: "hidden",
+              maxHeight: "calc(100vh - 100px)",
+              borderRadius: 8,
+              boxShadow: "0 40px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.07)",
+              scrollbarWidth: "thin",
+              scrollbarColor: "rgba(100,220,100,0.5) transparent",
+            }}
+          >
+            {loading && (
+              <div style={{
+                width: "min(80vw, 600px)", height: "min(80vh, 800px)",
+                background: "rgba(255,255,255,0.04)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                borderRadius: 12,
               }}>
-                abrir no browser
-              </a>
-            </div>
-          )}
-          {!loading && !error && <canvas ref={canvasRef} style={{ display: "block", maxWidth: "100%", maxHeight: "calc(100vh - 100px)" }} />}
-        </div>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(255,255,255,0.3)", letterSpacing: "0.3em", textTransform: "uppercase" }}>
+                  carregando…
+                </span>
+              </div>
+            )}
+            {error && (
+              <div style={{
+                width: 400, height: 300, background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12,
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12,
+              }}>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontFamily: "var(--font-mono)", fontSize: 11 }}>{error}</p>
+                <a href={url} target="_blank" rel="noreferrer" style={{
+                  padding: "8px 16px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: 8, color: "rgba(255,255,255,0.6)", textDecoration: "none",
+                  fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.2em",
+                }}>
+                  abrir no browser
+                </a>
+              </div>
+            )}
+            {!loading && !error && <canvas ref={canvasRef} style={{ display: "block" }} />}
+          </div>
+        </>
 
         {/* Seta direita */}
         <button
