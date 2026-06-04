@@ -159,12 +159,10 @@ function AdminMembers() {
             ) : null}
           </tbody>
         </table>
-      </div>
-    </div>
-}
+      </div>}
 
-    {/* Aba de contatos */}
-    {tab === "contacts" && (
+      {/* Aba de contatos */}
+      {tab === "contacts" && (
       <div className="mt-6 space-y-4">
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
@@ -225,6 +223,7 @@ function AdminMembers() {
           </table>
         </div>
       </div>
-    )}
+      )}
+    </div>
   );
 }
