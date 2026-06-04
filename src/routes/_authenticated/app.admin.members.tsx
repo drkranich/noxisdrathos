@@ -159,7 +159,7 @@ function AdminMembers() {
             ) : null}
           </tbody>
         </table>
-      </div>
+      </div>}
 
       {/* Aba de contatos */}
       {tab === "contacts" && (
