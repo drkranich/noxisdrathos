@@ -414,175 +414,61 @@ function MediaBlock({
     );
   }
 
-  // ── PDF — card + modal popup estilo assessment ──────────────────────────
+  // ── PDF — leitura inline + botão nova aba ───────────────────────────────
   if (type === "pdf") {
     return (
-      <>
-        {/* Card compacto na página */}
-        <div
-          style={{
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 16,
-          }}
-          className="flex items-center justify-between px-6 py-5"
-        >
-          <div className="flex items-center gap-4">
-            <div style={{
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 12,
-              width: 44, height: 44,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <FileText className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <div>
-              <p className="text-sm font-medium truncate max-w-xs">{title}</p>
-              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-0.5">documento pdf</p>
-            </div>
+      <div className="space-y-3">
+        {/* Barra de ações */}
+        <div style={{
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: 12,
+        }} className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            <FileText className="w-4 h-4 text-muted-foreground" />
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground truncate max-w-[200px]">{title}</span>
           </div>
-          <button
-            onClick={() => setFullscreen(true)}
-            style={{
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              borderRadius: 10,
-            }}
-            className="flex items-center gap-2 px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.25em] hover:brightness-125 transition"
-          >
-            <Maximize2 className="w-3.5 h-3.5" />
-            ler documento
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setZoom(z => Math.max(60, z - 10))}
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8 }}
+              className="p-2 text-muted-foreground hover:text-foreground transition">
+              <ZoomOut className="w-3.5 h-3.5" />
+            </button>
+            <span className="font-mono text-[10px] text-muted-foreground w-10 text-center">{zoom}%</span>
+            <button onClick={() => setZoom(z => Math.min(200, z + 10))}
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8 }}
+              className="p-2 text-muted-foreground hover:text-foreground transition">
+              <ZoomIn className="w-3.5 h-3.5" />
+            </button>
+            <a href={url} target="_blank" rel="noreferrer"
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8 }}
+              className="p-2 text-muted-foreground hover:text-foreground transition ml-1">
+              <Maximize2 className="w-3.5 h-3.5" />
+            </a>
+            <a href={url} download
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8 }}
+              className="p-2 text-muted-foreground hover:text-foreground transition">
+              <Download className="w-3.5 h-3.5" />
+            </a>
+          </div>
         </div>
 
-        {/* Modal popup — mesmo estilo do assessment */}
-        {fullscreen && (
-          <>
-            {/* Overlay backdrop embaçado */}
-            <div
-              onClick={() => setFullscreen(false)}
-              style={{
-                position: "fixed", inset: 0, zIndex: 50,
-                background: "rgba(0,0,0,0.75)",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
-              }}
-            />
-
-            {/* Modal centralizado */}
-            <div
-              style={{
-                position: "fixed",
-                top: "50%", left: "50%",
-                transform: "translate(-50%, -50%)",
-                zIndex: 51,
-                width: "min(92vw, 900px)",
-                height: "min(90vh, 860px)",
-                display: "flex",
-                flexDirection: "column",
-                background: "rgba(14,14,18,0.96)",
-                backdropFilter: "blur(40px)",
-                WebkitBackdropFilter: "blur(40px)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 18,
-                boxShadow: "0 32px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08)",
-                overflow: "hidden",
-              }}
-            >
-              {/* Header do modal */}
-              <div
-                style={{
-                  borderBottom: "1px solid rgba(255,255,255,0.07)",
-                  padding: "14px 20px",
-                  flexShrink: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 10,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.3em",
-                    color: "var(--color-text-secondary)",
-                    flex: 1,
-                  }}
-                >
-                  {title}
-                </span>
-
-                {/* Zoom */}
-                <div style={{
-                  display: "flex", alignItems: "center",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: 8,
-                }}>
-                  <button onClick={() => setZoom(z => Math.max(60, z - 10))}
-                    style={{ padding: "6px 8px", color: "var(--color-text-secondary)" }}
-                    className="hover:text-white transition">
-                    <ZoomOut className="w-3.5 h-3.5" />
-                  </button>
-                  <span style={{
-                    fontFamily: "var(--font-mono)", fontSize: 10,
-                    color: "var(--color-text-secondary)", minWidth: 36, textAlign: "center",
-                  }}>{zoom}%</span>
-                  <button onClick={() => setZoom(z => Math.min(200, z + 10))}
-                    style={{ padding: "6px 8px", color: "var(--color-text-secondary)" }}
-                    className="hover:text-white transition">
-                    <ZoomIn className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                <a href={url} download
-                  style={{
-                    padding: "6px 8px",
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: 8,
-                    color: "var(--color-text-secondary)",
-                    display: "flex", alignItems: "center",
-                  }}
-                  className="hover:text-white transition">
-                  <Download className="w-3.5 h-3.5" />
-                </a>
-
-                {/* X fechar */}
-                <button
-                  onClick={() => setFullscreen(false)}
-                  style={{
-                    width: 28, height: 28,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: 8,
-                    color: "var(--color-text-secondary)",
-                    fontSize: 14,
-                    fontWeight: 300,
-                    lineHeight: 1,
-                    flexShrink: 0,
-                  }}
-                  className="hover:text-white hover:bg-white/10 transition"
-                >
-                  ×
-                </button>
-              </div>
-
-              {/* PDF Viewer */}
-              <div style={{ flex: 1, overflow: "hidden", background: "#fafafa" }}>
-                <iframe
-                  src={`${url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
-                  title={title}
-                  className="w-full h-full border-0"
-                />
-              </div>
-            </div>
-          </>
-        )}
-      </>
+        {/* Viewer inline — sem dependência de modal */}
+        <div style={{
+          background: "rgba(0,0,0,0.3)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          borderRadius: 16,
+          overflow: "hidden",
+          height: "80vh",
+        }}>
+          <iframe
+            src={`${url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
+            title={title}
+            className="w-full h-full border-0"
+            style={{ background: "#fff" }}
+          />
+        </div>
+      </div>
     );
   }
 
