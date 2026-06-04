@@ -56,6 +56,9 @@ export function PdfBookReader({ url, title, onClose }: Props) {
     }
   }
 
+  // Dimensão fixa do canvas — calculada uma vez e nunca muda
+  const fixedSize = useRef<{w: number; h: number} | null>(null);
+
   const renderPage = useCallback(async (pageNum: number, sc: number) => {
     if (!pdfRef.current || !canvasRef.current || renderingRef.current) return;
     renderingRef.current = true;
@@ -65,22 +68,43 @@ export function PdfBookReader({ url, title, onClose }: Props) {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      // Calcula scale para caber na tela sem scroll
-      const baseViewport = pg.getViewport({ scale: 1 });
-      const availW = window.innerWidth - 120;   // margens das setas
-      const availH = window.innerHeight - 100;  // margens do HUD e footer
-      const scaleW = availW / baseViewport.width;
-      const scaleH = availH / baseViewport.height;
-      const autoScale = Math.min(scaleW, scaleH) * sc; // sc é multiplicador do zoom
+      const availW = window.innerWidth - 140;
+      const availH = window.innerHeight - 110;
 
-      const viewport = pg.getViewport({ scale: autoScale });
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      await pg.render({ canvasContext: ctx, viewport }).promise;
+      // Calcula tamanho fixo uma só vez — canvas nunca muda de tamanho
+      if (!fixedSize.current) {
+        const baseVp = pg.getViewport({ scale: 1 });
+        const autoScale = Math.min(availW / baseVp.width, availH / baseVp.height);
+        fixedSize.current = {
+          w: Math.floor(baseVp.width * autoScale),
+          h: Math.floor(baseVp.height * autoScale),
+        };
+      }
+
+      const { w, h } = fixedSize.current;
+      canvas.width = w;
+      canvas.height = h;
+
+      // Fundo branco
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, w, h);
+
+      // Renderiza a página centralizada no canvas fixo
+      const baseVp = pg.getViewport({ scale: 1 });
+      const fitScale = Math.min((w * sc) / baseVp.width, (h * sc) / baseVp.height);
+      const viewport = pg.getViewport({ scale: fitScale });
+      const offsetX = Math.max(0, (w - viewport.width) / 2);
+      const offsetY = Math.max(0, (h - viewport.height) / 2);
+
+      await pg.render({
+        canvasContext: ctx,
+        viewport,
+        transform: [1, 0, 0, 1, offsetX, offsetY],
+      }).promise;
     } finally {
       renderingRef.current = false;
     }
-  }, []);
+  }, []);;
 
   useEffect(() => {
     if (!loading && pdfRef.current) renderPage(page, scale);
@@ -144,11 +168,11 @@ export function PdfBookReader({ url, title, onClose }: Props) {
           color: "rgba(255,255,255,0.35)", flex: 1,
         }}>{title}</span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button onClick={() => setScale(s => Math.max(0.7, s - 0.2))}
+          <button onClick={() => { fixedSize.current = null; setScale(s => Math.max(0.7, s - 0.2)); }}
             style={{ padding: "5px 8px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 7, color: "rgba(255,255,255,0.5)", cursor: "pointer" }}>
             <ZoomOut className="w-3.5 h-3.5" />
           </button>
-          <button onClick={() => setScale(s => Math.min(2.5, s + 0.2))}
+          <button onClick={() => { fixedSize.current = null; setScale(s => Math.min(2.5, s + 0.2)); }}
             style={{ padding: "5px 8px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 7, color: "rgba(255,255,255,0.5)", cursor: "pointer" }}>
             <ZoomIn className="w-3.5 h-3.5" />
           </button>
