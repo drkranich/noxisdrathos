@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Bell } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -15,11 +16,104 @@ function timeAgo(iso: string) {
 export function NotificationBell({ compact = false }: { compact?: boolean }) {
   const { items, unread, markRead, markAllRead } = useNotifications(30);
   const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState({ bottom: 0, left: 0 });
+  const btnRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
+
+  // Calcula posição do painel relativa ao botão
+  useEffect(() => {
+    if (!open || !btnRef.current) return;
+    const rect = btnRef.current.getBoundingClientRect();
+    setPos({
+      bottom: window.innerHeight - rect.top + 8,
+      left: Math.min(rect.left, window.innerWidth - 292),
+    });
+  }, [open]);
+
+  const panel = open ? (
+    <>
+      {/* Backdrop */}
+      <div
+        style={{ position: "fixed", inset: 0, zIndex: 9998 }}
+        onClick={() => setOpen(false)}
+      />
+      {/* Painel */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: pos.bottom,
+          left: pos.left,
+          width: 284,
+          maxHeight: 340,
+          zIndex: 9999,
+          display: "flex",
+          flexDirection: "column",
+          background: "rgba(14,14,18,0.98)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: 10,
+          boxShadow: "0 -8px 32px rgba(0,0,0,0.4), 0 24px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)",
+          overflow: "hidden",
+        }}
+      >
+        {/* Header */}
+        <div style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", flexShrink: 0 }}
+          className="flex items-center justify-between px-4 py-2.5">
+          <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
+            {unread > 0 ? `${unread} não lidas` : "notificações"}
+          </p>
+          <button onClick={markAllRead} disabled={unread === 0}
+            className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground disabled:opacity-30 transition">
+            marcar tudo
+          </button>
+        </div>
+
+        {/* Lista */}
+        <div className="flex-1 overflow-y-auto overscroll-contain">
+          {items.length === 0 ? (
+            <div className="px-4 py-8 text-center">
+              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground mb-2">silêncio</p>
+              <p className="text-xs text-muted-foreground">Nenhuma notificação ainda.</p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-border/50">
+              {items.map((n) => {
+                const content = (
+                  <div className={cn("px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer", !n.read_at && "bg-white/[0.03]")}>
+                    <div className="flex items-start gap-2.5">
+                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0"
+                        style={{ background: !n.read_at ? "var(--neon,#64dc64)" : "transparent" }} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium leading-snug">{n.title}</p>
+                        {n.body ? <p className="mt-0.5 text-[11px] text-muted-foreground line-clamp-2">{n.body}</p> : null}
+                        <p className="mt-1 font-mono text-[9px] text-muted-foreground">{timeAgo(n.created_at)}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+                return (
+                  <li key={n.id} onClick={() => markRead(n.id)}>
+                    {n.link ? (
+                      <button onClick={() => { markRead(n.id); setOpen(false); void navigate({ to: n.link as string }); }}
+                        className="block w-full text-left">
+                        {content}
+                      </button>
+                    ) : content}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </div>
+    </>
+  ) : null;
 
   return (
     <div className="relative">
       <button
+        ref={btnRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label="Notificações"
@@ -36,114 +130,9 @@ export function NotificationBell({ compact = false }: { compact?: boolean }) {
         ) : null}
       </button>
 
-      {open ? (
-        <>
-          {/* Backdrop */}
-          <button
-            type="button"
-            aria-hidden
-            onClick={() => setOpen(false)}
-            className="fixed inset-0 z-40"
-          />
-
-          {/* Painel — posicionado relativo ao botão, para cima */}
-          <div
-            style={{
-              position: "absolute",
-              bottom: "calc(100% + 10px)",
-              right: 0,
-              width: 300,
-              maxHeight: 360,
-              zIndex: 9999,
-              display: "flex",
-              flexDirection: "column",
-              background: "rgba(14,14,18,0.97)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 12,
-              boxShadow: "0 16px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.07)",
-              overflow: "hidden",
-            }}
-          >
-            {/* Header */}
-            <div
-              style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", flexShrink: 0 }}
-              className="flex items-center justify-between px-4 py-2.5"
-            >
-              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
-                {unread > 0 ? `${unread} não lidas` : "notificações"}
-              </p>
-              <button
-                onClick={markAllRead}
-                disabled={unread === 0}
-                className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground disabled:opacity-30 transition"
-              >
-                marcar tudo
-              </button>
-            </div>
-
-            {/* Lista */}
-            <div className="flex-1 overflow-y-auto overscroll-contain">
-              {items.length === 0 ? (
-                <div className="px-4 py-8 text-center">
-                  <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground mb-2">
-                    silêncio
-                  </p>
-                  <p className="text-xs text-muted-foreground">Nenhuma notificação ainda.</p>
-                </div>
-              ) : (
-                <ul className="divide-y divide-border/50">
-                  {items.map((n) => {
-                    const content = (
-                      <div
-                        className={cn(
-                          "px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer",
-                          !n.read_at && "bg-white/[0.03]",
-                        )}
-                      >
-                        <div className="flex items-start gap-2.5">
-                          <span
-                            className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0"
-                            style={{ background: !n.read_at ? "var(--neon,#64dc64)" : "transparent" }}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium leading-snug">{n.title}</p>
-                            {n.body ? (
-                              <p className="mt-0.5 text-[11px] text-muted-foreground line-clamp-2">{n.body}</p>
-                            ) : null}
-                            <p className="mt-1 font-mono text-[9px] text-muted-foreground">
-                              {timeAgo(n.created_at)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                    return (
-                      <li key={n.id} onClick={() => markRead(n.id)}>
-                        {n.link ? (
-                          <button
-                            onClick={() => {
-                              markRead(n.id);
-                              setOpen(false);
-                              void navigate({ to: n.link as string });
-                            }}
-                            className="block w-full text-left"
-                          >
-                            {content}
-                          </button>
-                        ) : (
-                          content
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          </div>
-        </>
-      ) : null}
+      {typeof document !== "undefined" && panel
+        ? createPortal(panel, document.body)
+        : null}
     </div>
   );
 }
