@@ -24,7 +24,7 @@ export function PdfBookReader({ url, title, onClose }: Props) {
 
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [scale, setScale] = useState(1.3);
+  const [scale, setScale] = useState(1.0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [animDir, setAnimDir] = useState<"left" | "right" | null>(null);
@@ -61,10 +61,19 @@ export function PdfBookReader({ url, title, onClose }: Props) {
     renderingRef.current = true;
     try {
       const pg = await pdfRef.current.getPage(pageNum);
-      const viewport = pg.getViewport({ scale: sc });
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
+
+      // Calcula scale para caber na tela sem scroll
+      const baseViewport = pg.getViewport({ scale: 1 });
+      const availW = window.innerWidth - 120;   // margens das setas
+      const availH = window.innerHeight - 100;  // margens do HUD e footer
+      const scaleW = availW / baseViewport.width;
+      const scaleH = availH / baseViewport.height;
+      const autoScale = Math.min(scaleW, scaleH) * sc; // sc é multiplicador do zoom
+
+      const viewport = pg.getViewport({ scale: autoScale });
       canvas.width = viewport.width;
       canvas.height = viewport.height;
       await pg.render({ canvasContext: ctx, viewport }).promise;
@@ -165,6 +174,7 @@ export function PdfBookReader({ url, title, onClose }: Props) {
       <div style={{
         flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
         position: "relative", overflow: "hidden",
+        padding: "0 60px",
       }}>
         {/* Seta esquerda */}
         <button
@@ -186,22 +196,24 @@ export function PdfBookReader({ url, title, onClose }: Props) {
 
         {/* Canvas com animação de virada */}
         <div style={{
-          transition: "opacity 0.18s ease, transform 0.18s ease",
+          transition: "opacity 0.22s ease, transform 0.22s ease",
           opacity: animDir ? 0 : 1,
-          transform: animDir === "left" ? "translateX(-30px)" : animDir === "right" ? "translateX(30px)" : "translateX(0)",
-          maxWidth: "calc(100vw - 120px)",
-          maxHeight: "calc(100vh - 100px)",
-          overflow: "auto",
-          borderRadius: 4,
-          boxShadow: "0 32px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.06)",
+          transform: animDir === "left" ? "translateX(-40px) scale(0.97)" : animDir === "right" ? "translateX(40px) scale(0.97)" : "translateX(0) scale(1)",
+          overflow: "hidden",
+          borderRadius: 8,
+          boxShadow: "0 40px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.07), 0 0 60px rgba(255,255,255,0.02)",
         }}>
           {loading && (
             <div style={{
-              width: 600, height: 800, background: "#fff",
+              width: "min(80vw, 600px)", height: "min(80vh, 800px)",
+              background: "rgba(255,255,255,0.04)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid rgba(255,255,255,0.08)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              borderRadius: 4,
+              borderRadius: 12,
             }}>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#999", letterSpacing: "0.3em", textTransform: "uppercase" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(255,255,255,0.3)", letterSpacing: "0.3em", textTransform: "uppercase" }}>
                 carregando…
               </span>
             </div>
@@ -222,7 +234,7 @@ export function PdfBookReader({ url, title, onClose }: Props) {
               </a>
             </div>
           )}
-          {!loading && !error && <canvas ref={canvasRef} style={{ display: "block" }} />}
+          {!loading && !error && <canvas ref={canvasRef} style={{ display: "block", maxWidth: "100%", maxHeight: "calc(100vh - 100px)" }} />}
         </div>
 
         {/* Seta direita */}
