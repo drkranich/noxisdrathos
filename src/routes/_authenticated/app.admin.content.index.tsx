@@ -8,7 +8,7 @@ import { getSignedUrl } from "@/lib/storage";
 import { Input } from "@/components/ui/input";
 import { PublishingStudio } from "@/components/admin/PublishingStudio";
 
-export const Route = createFileRoute("/_authenticated/app/admin/content/")({
+export const Route = createFileRoute("/_authenticated/app/admin/content")({
   head: () => ({ meta: [{ title: "Content Studio — CMS" }, { name: "robots", content: "noindex" }] }),
   component: AdminContentStudio,
 });
