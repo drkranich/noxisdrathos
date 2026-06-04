@@ -38,49 +38,82 @@ export function NotificationBell({ compact = false }: { compact?: boolean }) {
 
       {open ? (
         <>
+          {/* Backdrop */}
           <button
             type="button"
             aria-hidden
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-40"
           />
-          <div className="fixed left-1/2 -translate-x-1/2 bottom-24 w-[min(92vw,400px)] max-h-[70vh] flex flex-col bg-card border border-border shadow-2xl z-[9999] backdrop-blur-xl rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-                inbox · {unread} não lidas
+
+          {/* Painel — posicionado relativo ao botão, para cima */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: "calc(100% + 10px)",
+              right: 0,
+              width: 300,
+              maxHeight: 360,
+              zIndex: 9999,
+              display: "flex",
+              flexDirection: "column",
+              background: "rgba(14,14,18,0.97)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 12,
+              boxShadow: "0 16px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.07)",
+              overflow: "hidden",
+            }}
+          >
+            {/* Header */}
+            <div
+              style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", flexShrink: 0 }}
+              className="flex items-center justify-between px-4 py-2.5"
+            >
+              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
+                {unread > 0 ? `${unread} não lidas` : "notificações"}
               </p>
               <button
                 onClick={markAllRead}
                 disabled={unread === 0}
-                className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground hover:text-foreground disabled:opacity-30"
+                className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground disabled:opacity-30 transition"
               >
                 marcar tudo
               </button>
             </div>
-            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+
+            {/* Lista */}
+            <div className="flex-1 overflow-y-auto overscroll-contain">
               {items.length === 0 ? (
-                <div className="px-6 py-12 text-center text-sm text-muted-foreground">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.3em] mb-3">silêncio</p>
-                  Nenhuma notificação ainda.
+                <div className="px-4 py-8 text-center">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground mb-2">
+                    silêncio
+                  </p>
+                  <p className="text-xs text-muted-foreground">Nenhuma notificação ainda.</p>
                 </div>
               ) : (
                 <ul className="divide-y divide-border/50">
                   {items.map((n) => {
                     const content = (
-                      <div className={cn("px-4 py-3 hover:bg-accent/50 transition-colors cursor-pointer", !n.read_at && "bg-foreground/[0.025]")}>
-                        <div className="flex items-start gap-3">
-                          {!n.read_at ? (
-                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--neon)] shrink-0" />
-                          ) : (
-                            <span className="mt-1.5 w-1.5 h-1.5 shrink-0" />
-                          )}
+                      <div
+                        className={cn(
+                          "px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer",
+                          !n.read_at && "bg-white/[0.03]",
+                        )}
+                      >
+                        <div className="flex items-start gap-2.5">
+                          <span
+                            className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0"
+                            style={{ background: !n.read_at ? "var(--neon,#64dc64)" : "transparent" }}
+                          />
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium leading-snug">{n.title}</p>
+                            <p className="text-xs font-medium leading-snug">{n.title}</p>
                             {n.body ? (
-                              <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{n.body}</p>
+                              <p className="mt-0.5 text-[11px] text-muted-foreground line-clamp-2">{n.body}</p>
                             ) : null}
-                            <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
-                              {n.kind} · {timeAgo(n.created_at)}
+                            <p className="mt-1 font-mono text-[9px] text-muted-foreground">
+                              {timeAgo(n.created_at)}
                             </p>
                           </div>
                         </div>
@@ -90,7 +123,11 @@ export function NotificationBell({ compact = false }: { compact?: boolean }) {
                       <li key={n.id} onClick={() => markRead(n.id)}>
                         {n.link ? (
                           <button
-                            onClick={() => { markRead(n.id); setOpen(false); void navigate({ to: n.link as string }); }}
+                            onClick={() => {
+                              markRead(n.id);
+                              setOpen(false);
+                              void navigate({ to: n.link as string });
+                            }}
                             className="block w-full text-left"
                           >
                             {content}
