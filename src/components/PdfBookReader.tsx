@@ -70,13 +70,16 @@ export function PdfBookReader({ url, title, onClose }: Props) {
       if (!ctx) return;
 
       const availW = window.innerWidth - 140;
+      const availH = window.innerHeight - 110;
       const baseVp = pg.getViewport({ scale: 1 });
 
-      // Ajusta largura à tela, altura livre para o scroll
-      const scaleByWidth = (availW / baseVp.width) * sc;
-      const viewport = pg.getViewport({ scale: scaleByWidth });
+      // Scale padrão: cabe na tela inteira (como Kindle)
+      // sc é multiplicador do usuário — começa em 1.0 = tamanho perfeito
+      const baseScale = Math.min(availW / baseVp.width, availH / baseVp.height);
+      const finalScale = baseScale * sc;
+      const viewport = pg.getViewport({ scale: finalScale });
 
-      // Canvas cresce livremente em altura — scroll cuida do resto
+      // Canvas no tamanho da página renderizada
       canvas.width = Math.floor(viewport.width);
       canvas.height = Math.floor(viewport.height);
 
