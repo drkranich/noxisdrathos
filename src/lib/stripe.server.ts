@@ -7,10 +7,8 @@ function getSecretKey(env: StripeEnv): string {
     const key = process.env.STRIPE_SANDBOX_API_KEY || process.env.STRIPE_TEST_SECRET_KEY;
     if (key) return key;
   }
-  const liveKey =
-    process.env.STRIPE_SECRET_KEY ||
-    process.env.STRIPE_LIVE_API_KEY;
-  if (!liveKey) throw new Error("Stripe secret key not configured.");
+  const liveKey = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_LIVE_API_KEY;
+  if (!liveKey) throw new Error("STRIPE_SECRET_KEY não configurado.");
   return liveKey;
 }
 
@@ -31,8 +29,7 @@ export async function verifyWebhook(req: Request, env: StripeEnv) {
     if (key === "v1") v1Signatures.push(value);
   }
   if (!timestamp || v1Signatures.length === 0) throw new Error("Invalid signature format");
-  const age = Math.abs(Date.now() / 1000 - Number(timestamp));
-  if (age > 300) throw new Error("Webhook timestamp too old");
+  if (Math.abs(Date.now() / 1000 - Number(timestamp)) > 300) throw new Error("Timestamp too old");
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const signed = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${timestamp}.${body}`));
   const expected = Buffer.from(new Uint8Array(signed)).toString("hex");
