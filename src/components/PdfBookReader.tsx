@@ -25,7 +25,7 @@ export function PdfBookReader({ url, title, onClose }: Props) {
 
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [scale, setScale] = useState(1.0);
+  const [scale, setScale] = useState(0.75);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [animDir, setAnimDir] = useState<"left" | "right" | null>(null);
@@ -75,7 +75,8 @@ export function PdfBookReader({ url, title, onClose }: Props) {
 
       // Scale padrão: cabe na tela inteira (como Kindle)
       // sc é multiplicador do usuário — começa em 1.0 = tamanho perfeito
-      const baseScale = Math.min(availW / baseVp.width, availH / baseVp.height);
+      // Margens generosas — 80% da tela disponível como base
+      const baseScale = Math.min((availW * 0.85) / baseVp.width, (availH * 0.85) / baseVp.height);
       const finalScale = baseScale * sc;
       const viewport = pg.getViewport({ scale: finalScale });
 
