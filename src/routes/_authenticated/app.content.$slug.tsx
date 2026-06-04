@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Download, Lock, FileText, Headphones, Heart, Bookmark } from "lucide-react";
+import { ArrowLeft, Download, Lock, FileText, Headphones, Heart, Bookmark, ChevronLeft, ChevronRight, Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { getSignedUrl } from "@/lib/storage";
@@ -122,7 +122,7 @@ function MemberContentDetail() {
         </div>
       </section>
 
-      <main className="px-8 lg:px-14 pt-10 grid lg:grid-cols-[minmax(0,1fr)_340px] gap-10">
+      <main className={`pt-6 ${c.type === "pdf" ? "px-4 lg:px-6" : "px-8 lg:px-14 grid lg:grid-cols-[minmax(0,1fr)_340px] gap-10"}`}>
         <div className="space-y-8">
           <div
             style={{
@@ -323,39 +323,88 @@ function MediaBlock({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { tick } = useWatchProgress(locked ? null : contentId, type as "video" | "audio" | "pdf" | "article");
+  const [fullscreen, setFullscreen] = useState(false);
+  const [zoom, setZoom] = useState(100);
 
   if (locked) {
     return (
-      <div className="aspect-video border border-border bg-card grid place-items-center text-center p-8">
-        <Lock className="w-7 h-7 text-muted-foreground mb-3" />
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">conteúdo bloqueado pelo plano</p>
+      <div
+        style={{
+          background: "linear-gradient(135deg, rgba(226,75,74,0.06) 0%, rgba(0,0,0,0.3) 100%)",
+          backdropFilter: "blur(20px)",
+          border: "1px solid rgba(226,75,74,0.15)",
+        }}
+        className="rounded-2xl aspect-video grid place-items-center text-center p-8"
+      >
+        <div style={{ background: "rgba(226,75,74,0.1)", border: "1px solid rgba(226,75,74,0.2)" }}
+          className="w-16 h-16 rounded-full flex items-center justify-center mb-4">
+          <Lock className="w-6 h-6" style={{ color: "rgba(226,75,74,0.8)" }} />
+        </div>
+        <p className="font-display text-xl mb-2">Conteúdo restrito</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">protegido pelo plano</p>
       </div>
     );
   }
+
   if (!url) return null;
+
+  // ── Vídeo ───────────────────────────────────────────────────────────────
   if (type === "video") {
     return (
-      <video
-        ref={videoRef}
-        src={url}
-        controls
-        playsInline
-        className="w-full bg-card border border-border"
-        onTimeUpdate={(e) => {
-          const v = e.currentTarget;
-          tick(v.currentTime, v.duration || undefined);
+      <div
+        style={{
+          background: "rgba(0,0,0,0.6)",
+          backdropFilter: "blur(24px)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
         }}
-      />
+        className="rounded-2xl overflow-hidden"
+      >
+        <video
+          ref={videoRef}
+          src={url}
+          controls
+          playsInline
+          className="w-full"
+          style={{ maxHeight: "70vh" }}
+          onTimeUpdate={(e) => {
+            const v = e.currentTarget;
+            tick(v.currentTime, v.duration || undefined);
+          }}
+        />
+      </div>
     );
   }
+
+  // ── Áudio ───────────────────────────────────────────────────────────────
   if (type === "audio") {
     return (
-      <div className="border border-border bg-card p-8">
-        <Headphones className="w-6 h-6 mb-5 text-muted-foreground" />
+      <div
+        style={{
+          background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)",
+          backdropFilter: "blur(20px)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
+        }}
+        className="rounded-2xl p-8"
+      >
+        <div className="flex items-center gap-4 mb-8">
+          <div
+            style={{ background: "rgba(var(--neon-rgb,100,220,100),0.1)", border: "1px solid rgba(var(--neon-rgb,100,220,100),0.2)" }}
+            className="w-14 h-14 rounded-full flex items-center justify-center"
+          >
+            <Headphones className="w-6 h-6" style={{ color: "var(--neon,#64dc64)" }} />
+          </div>
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">áudio</p>
+            <p className="text-sm mt-0.5 truncate max-w-xs">{title}</p>
+          </div>
+        </div>
         <audio
           src={url}
           controls
           className="w-full"
+          style={{ colorScheme: "dark" }}
           onTimeUpdate={(e) => {
             const a = e.currentTarget;
             tick(a.currentTime, a.duration || undefined);
@@ -364,9 +413,131 @@ function MediaBlock({
       </div>
     );
   }
-  if (type === "pdf") return <iframe src={url} title={title} className="w-full min-h-[76vh] border border-border bg-card" />;
+
+  // ── PDF — experiência de leitura imersiva ───────────────────────────────
+  if (type === "pdf") {
+    return (
+      <div
+        className={fullscreen ? "fixed inset-0 z-50 flex flex-col" : "relative flex flex-col rounded-2xl overflow-hidden"}
+        style={fullscreen ? {
+          background: "rgba(8,8,10,0.97)",
+          backdropFilter: "blur(40px)",
+        } : {
+          background: "rgba(0,0,0,0.5)",
+          backdropFilter: "blur(24px)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          boxShadow: "0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
+        }}
+      >
+        {/* Toolbar fluida */}
+        <div
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+          }}
+          className="flex items-center gap-2 px-4 py-2.5"
+        >
+          {/* Zoom controls */}
+          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 8 }} className="flex items-center">
+            <button
+              onClick={() => setZoom(z => Math.max(50, z - 10))}
+              className="p-2 text-muted-foreground hover:text-foreground transition"
+            >
+              <ZoomOut className="w-3.5 h-3.5" />
+            </button>
+            <span className="font-mono text-[10px] px-2 text-muted-foreground">{zoom}%</span>
+            <button
+              onClick={() => setZoom(z => Math.min(200, z + 10))}
+              className="p-2 text-muted-foreground hover:text-foreground transition"
+            >
+              <ZoomIn className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <button
+            onClick={() => setZoom(100)}
+            style={{ background: "rgba(255,255,255,0.06)", borderRadius: 8 }}
+            className="p-2 text-muted-foreground hover:text-foreground transition"
+            title="Resetar zoom"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
+
+          <div className="flex-1" />
+
+          {/* Abrir em nova aba */}
+          <a
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            style={{ background: "rgba(255,255,255,0.06)", borderRadius: 8 }}
+            className="p-2 text-muted-foreground hover:text-foreground transition"
+            title="Abrir em nova aba"
+          >
+            <Download className="w-3.5 h-3.5" />
+          </a>
+
+          {/* Fullscreen */}
+          <button
+            onClick={() => setFullscreen(f => !f)}
+            style={{ background: "rgba(255,255,255,0.06)", borderRadius: 8 }}
+            className="p-2 text-muted-foreground hover:text-foreground transition"
+            title={fullscreen ? "Sair do fullscreen" : "Leitura imersiva"}
+          >
+            {fullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+          </button>
+        </div>
+
+        {/* Viewer */}
+        <div
+          className="flex-1 overflow-auto"
+          style={{
+            height: fullscreen ? "calc(100vh - 44px)" : "82vh",
+            background: fullscreen ? "rgba(12,12,14,0.98)" : "transparent",
+          }}
+        >
+          <iframe
+            src={`${url}#zoom=${zoom}&toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
+            title={title}
+            className="w-full h-full border-0"
+            style={{
+              transform: zoom !== 100 ? `scale(${zoom/100})` : undefined,
+              transformOrigin: "top center",
+              minHeight: "100%",
+            }}
+          />
+        </div>
+
+        {/* Fechar fullscreen com Escape */}
+        {fullscreen && (
+          <button
+            onClick={() => setFullscreen(false)}
+            style={{
+              position: "fixed", top: 16, right: 16,
+              background: "rgba(255,255,255,0.1)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.15)",
+              borderRadius: 8,
+              zIndex: 60,
+            }}
+            className="p-2.5 text-foreground hover:bg-white/20 transition"
+          >
+            <Minimize2 className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="border border-border bg-card p-8 flex items-center gap-3 text-muted-foreground">
+    <div
+      style={{
+        background: "rgba(255,255,255,0.03)",
+        border: "1px solid rgba(255,255,255,0.07)",
+        borderRadius: 16,
+      }}
+      className="p-8 flex items-center gap-3 text-muted-foreground"
+    >
       <FileText className="w-5 h-5" /> artigo editorial
     </div>
   );
