@@ -414,61 +414,143 @@ function MediaBlock({
     );
   }
 
-  // ── PDF — leitura inline + botão nova aba ───────────────────────────────
+  // ── PDF — leitor imersivo fullscreen com navegação por página ───────────
   if (type === "pdf") {
+    // Abre o leitor imersivo — tela cheia com página única + setas
+    function openReader() {
+      setFullscreen(true);
+      // Bloqueia scroll do body
+      document.body.style.overflow = "hidden";
+    }
+    function closeReader() {
+      setFullscreen(false);
+      document.body.style.overflow = "";
+    }
+
     return (
-      <div className="space-y-3">
-        {/* Barra de ações */}
-        <div style={{
-          background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: 12,
-        }} className="flex items-center justify-between px-4 py-3">
+      <>
+        {/* Botão de entrada — minimalista */}
+        <div
+          style={{
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 14,
+          }}
+          className="flex items-center justify-between px-5 py-4"
+        >
           <div className="flex items-center gap-3">
             <FileText className="w-4 h-4 text-muted-foreground" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground truncate max-w-[200px]">{title}</span>
+            <div>
+              <p className="text-sm">{title}</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-0.5">documento pdf</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setZoom(z => Math.max(60, z - 10))}
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8 }}
-              className="p-2 text-muted-foreground hover:text-foreground transition">
-              <ZoomOut className="w-3.5 h-3.5" />
-            </button>
-            <span className="font-mono text-[10px] text-muted-foreground w-10 text-center">{zoom}%</span>
-            <button onClick={() => setZoom(z => Math.min(200, z + 10))}
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8 }}
-              className="p-2 text-muted-foreground hover:text-foreground transition">
-              <ZoomIn className="w-3.5 h-3.5" />
-            </button>
-            <a href={url} target="_blank" rel="noreferrer"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8 }}
-              className="p-2 text-muted-foreground hover:text-foreground transition ml-1">
-              <Maximize2 className="w-3.5 h-3.5" />
-            </a>
-            <a href={url} download
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8 }}
-              className="p-2 text-muted-foreground hover:text-foreground transition">
-              <Download className="w-3.5 h-3.5" />
-            </a>
-          </div>
+          <button
+            onClick={openReader}
+            style={{
+              background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
+              border: "1px solid rgba(255,255,255,0.15)",
+              borderRadius: 10,
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.1)",
+            }}
+            className="flex items-center gap-2.5 px-6 py-2.5 font-mono text-[11px] uppercase tracking-[0.25em] hover:brightness-125 transition-all"
+          >
+            <Maximize2 className="w-3.5 h-3.5" />
+            iniciar leitura
+          </button>
         </div>
 
-        {/* Viewer inline — sem dependência de modal */}
-        <div style={{
-          background: "rgba(0,0,0,0.3)",
-          border: "1px solid rgba(255,255,255,0.07)",
-          borderRadius: 16,
-          overflow: "hidden",
-          height: "80vh",
-        }}>
-          <iframe
-            src={`${url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
-            title={title}
-            className="w-full h-full border-0"
-            style={{ background: "#fff" }}
-          />
-        </div>
-      </div>
+        {/* Leitor fullscreen imersivo */}
+        {fullscreen && (
+          <div
+            style={{
+              position: "fixed", inset: 0, zIndex: 9999,
+              background: "rgba(6,6,8,0.97)",
+              backdropFilter: "blur(40px)",
+              WebkitBackdropFilter: "blur(40px)",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* HUD superior — aparece e some */}
+            <div
+              style={{
+                position: "absolute", top: 0, left: 0, right: 0,
+                background: "linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%)",
+                padding: "16px 24px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                zIndex: 10,
+              }}
+            >
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.3em", color: "rgba(255,255,255,0.4)" }}>
+                {title}
+              </span>
+              <div style={{ display: "flex", gap: 8 }}>
+                <a
+                  href={url}
+                  download
+                  style={{
+                    padding: "6px 10px",
+                    background: "rgba(255,255,255,0.08)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 8,
+                    color: "rgba(255,255,255,0.5)",
+                    display: "flex", alignItems: "center", gap: 6,
+                    fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.2em",
+                    textDecoration: "none",
+                  }}
+                >
+                  <Download className="w-3 h-3" /> baixar
+                </a>
+                <button
+                  onClick={closeReader}
+                  style={{
+                    padding: "6px 12px",
+                    background: "rgba(255,255,255,0.08)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 8,
+                    color: "rgba(255,255,255,0.5)",
+                    fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.2em",
+                    cursor: "pointer",
+                  }}
+                >
+                  fechar ×
+                </button>
+              </div>
+            </div>
+
+            {/* PDF ocupa TODA a tela */}
+            <iframe
+              src={`${url}#toolbar=0&navpanes=0&scrollbar=0&view=Fit&pagemode=none`}
+              title={title}
+              style={{
+                flex: 1,
+                width: "100%",
+                height: "100%",
+                border: "none",
+                background: "transparent",
+              }}
+            />
+
+            {/* Toque nas bordas para fechar (mobile) */}
+            <div
+              onClick={closeReader}
+              style={{
+                position: "absolute", bottom: 0, left: 0, right: 0, height: 60,
+                background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)",
+                display: "flex", alignItems: "flex-end", justifyContent: "center",
+                paddingBottom: 16,
+              }}
+            >
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, textTransform: "uppercase", letterSpacing: "0.3em", color: "rgba(255,255,255,0.25)" }}>
+                toque para fechar
+              </span>
+            </div>
+          </div>
+        )}
+      </>
     );
   }
 
