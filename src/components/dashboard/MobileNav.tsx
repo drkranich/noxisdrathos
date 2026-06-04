@@ -243,7 +243,10 @@ export function MobileNav() {
             <div className="min-w-0 flex-1">
               <p className="text-xs truncate">{user?.user_metadata?.display_name || user?.email}</p>
               <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground">
-                {rolesLoading ? "hidratando" : primaryRole === "none" ? "sem papel" : primaryRole}
+                {rolesLoading ? "···" :
+                primaryRole === "none" || primaryRole === "member" ? "membro" :
+                primaryRole === "super_admin" ? "super admin" :
+                primaryRole === "admin" ? "admin" : primaryRole}
               </p>
             </div>
             <button

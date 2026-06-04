@@ -27,6 +27,8 @@ import {
   Sparkles,
   Stethoscope,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { NotificationBell } from "@/components/NotificationBell";
 
@@ -81,6 +83,12 @@ const {
   primaryRole,
   signOut,
 } = useAuth();
+  const [avatarUrl, setAvatarUrl] = useState("");
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.from("profiles").select("avatar_url").eq("id", user.id).maybeSingle()
+      .then(({ data }) => { if (data?.avatar_url) setAvatarUrl(data.avatar_url); });
+  }, [user?.id]);
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
 
@@ -194,13 +202,24 @@ const {
 
       <div className="border-t border-border p-4 space-y-3">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center font-mono text-[10px] tracking-wider">
-            {initials}
+          <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center font-mono text-[10px] tracking-wider overflow-hidden shrink-0">
+            {avatarUrl || user?.user_metadata?.avatar_url ? (
+              <img
+                src={avatarUrl || user?.user_metadata?.avatar_url}
+                alt={initials}
+                className="w-full h-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }}
+              />
+            ) : initials}
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs truncate">{user?.user_metadata?.display_name || user?.email}</p>
             <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground">
-              {rolesLoading ? "hidratando" : primaryRole === "none" ? "sem papel" : primaryRole}
+              {rolesLoading ? "···" : 
+                primaryRole === "none" ? "membro" : 
+                primaryRole === "member" ? "membro" :
+                primaryRole === "super_admin" ? "super admin" :
+                primaryRole === "admin" ? "admin" : primaryRole}
             </p>
           </div>
           <NotificationBell compact />
