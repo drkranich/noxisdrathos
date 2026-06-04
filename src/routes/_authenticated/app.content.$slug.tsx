@@ -53,6 +53,12 @@ function MemberContentDetail() {
             .maybeSingle();
 
           const planRank: Record<string, number> = { free: 0, circle: 1, vault: 2, council: 3 };
+          const planLabel: Record<string, string> = {
+            free: "Livre",
+            circle: "Círculo",
+            vault: "Cofre",
+            council: "Conselho",
+          };
           const userRank = planRank[membership?.plan ?? "free"] ?? 0;
           const requiredRank = planRank[c.required_plan_id] ?? 1;
           const hasAccess =
@@ -61,7 +67,8 @@ function MemberContentDetail() {
 
           if (!hasAccess) {
             next.locked = true;
-            next.error = `Conteúdo exclusivo do plano ${c.required_plan_id}.`;
+            const planName = planLabel[c.required_plan_id] ?? c.required_plan_id;
+            next.error = `Disponível apenas para assinantes do plano ${planName}.`;
             if (!cancelled) setAssets(next);
             return;
           }
@@ -229,9 +236,17 @@ function MemberContentDetail() {
           >
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">estado de acesso</p>
             <p className="mt-3 text-sm" style={{color: assets.locked ? "rgba(226,75,74,0.9)" : "var(--neon,#64dc64)"}}>
-              {assets.locked ? "Arquivo protegido pelo plano." : "Acesso autenticado validado."}
+              {assets.locked ? "Acesso restrito" : "Acesso liberado"}
             </p>
-            {assets.error ? <p className="mt-2 text-xs text-muted-foreground">{assets.error}</p> : null}
+            {assets.error
+              ? <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{assets.error}</p>
+              : null}
+            {assets.locked && (
+              <a href="/app/subscription"
+                className="mt-3 inline-block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground underline-offset-4 hover:underline transition">
+                ver planos →
+              </a>
+            )}
           </div>
 
           {assets.primary && !assets.locked ? (
@@ -362,11 +377,23 @@ function MediaBlock({
         className="rounded-2xl aspect-video grid place-items-center text-center p-8"
       >
         <div style={{ background: "rgba(226,75,74,0.1)", border: "1px solid rgba(226,75,74,0.2)" }}
-          className="w-16 h-16 rounded-full flex items-center justify-center mb-4">
+          className="w-16 h-16 rounded-full flex items-center justify-center mb-5">
           <Lock className="w-6 h-6" style={{ color: "rgba(226,75,74,0.8)" }} />
         </div>
-        <p className="font-display text-xl mb-2">Conteúdo restrito</p>
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">protegido pelo plano</p>
+        <p className="font-display text-2xl mb-2">Conteúdo restrito</p>
+        <p className="text-sm text-muted-foreground mb-5 max-w-xs leading-relaxed">
+          Este conteúdo está disponível apenas para assinantes.<br />Faça upgrade para ter acesso.
+        </p>
+        <a href="/app/subscription"
+          style={{
+            background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            borderRadius: 10,
+          }}
+          className="flex items-center gap-2 px-6 py-2.5 font-mono text-[11px] uppercase tracking-[0.25em] hover:brightness-125 transition"
+        >
+          ver planos →
+        </a>
       </div>
     );
   }
