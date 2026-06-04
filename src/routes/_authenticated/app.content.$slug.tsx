@@ -10,11 +10,12 @@ import { useWatchProgress } from "@/hooks/useWatchProgress";
 export const Route = createFileRoute("/_authenticated/app/content/$slug")({
   head: () => ({ meta: [{ title: "Conteúdo — Observatório" }, { name: "robots", content: "noindex" }] }),
   loader: async ({ params }) => {
+    // Tenta published primeiro (para membros normais)
     const { data, error } = await supabase
       .from("content")
       .select("*")
       .eq("slug", params.slug)
-      .eq("status", "published")
+      .in("status", ["published", "draft", "scheduled", "archived"])
       .maybeSingle();
     if (error || !data) throw notFound();
     return data;
@@ -99,6 +100,13 @@ function MemberContentDetail() {
           <Link to="/app/library" className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground mb-16">
             <ArrowLeft className="w-3.5 h-3.5" /> biblioteca
           </Link>
+          {c.status !== "published" && (
+            <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 bg-amber-500/20 border border-amber-500/40 rounded">
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber-400">
+                {c.status} · pré-visualização admin
+              </span>
+            </div>
+          )}
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
             {c.content_kind ?? c.type} · {c.required_plan_id === "free" ? "liberado" : c.required_plan_id}
           </p>
@@ -116,6 +124,16 @@ function MemberContentDetail() {
 
       <main className="px-8 lg:px-14 pt-10 grid lg:grid-cols-[minmax(0,1fr)_340px] gap-10">
         <div className="space-y-8">
+          <div
+            style={{
+              background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              boxShadow: "0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
+            }}
+            className="rounded-2xl overflow-hidden"
+          >
           <MediaBlock
             type={c.type}
             url={assets.primary}
@@ -123,6 +141,7 @@ function MemberContentDetail() {
             title={c.title}
             contentId={c.id}
           />
+          </div>
           {c.description ? <p className="text-lg leading-relaxed text-muted-foreground max-w-3xl">{c.description}</p> : null}
           {c.body_md ? (
             <article className="prose prose-invert max-w-3xl">
@@ -130,23 +149,46 @@ function MemberContentDetail() {
             </article>
           ) : null}
           {assets.trailer ? (
-            <section className="border border-border p-5">
+            <section
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                backdropFilter: "blur(16px)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                borderRadius: "12px",
+              }}
+              className="p-5"
+            >
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-4">prévia</p>
-              <video src={assets.trailer} controls className="w-full bg-card" />
+              <video src={assets.trailer} controls className="w-full rounded-lg bg-card" />
             </section>
           ) : null}
         </div>
 
         <aside className="space-y-4">
-          {/* Save buttons */}
-          <div className="border border-border bg-card/40 p-5 space-y-3">
+          {/* Save buttons — glassmorphism */}
+          <div
+            style={{
+              background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 32px rgba(0,0,0,0.3)",
+            }}
+            className="rounded-xl p-5 space-y-3"
+          >
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">salvar</p>
             <button
               onClick={favBookmark.toggle}
               disabled={favBookmark.loading}
-              className={`flex items-center gap-3 w-full font-mono text-[11px] uppercase tracking-[0.25em] px-3 py-2 border transition ${
-                favBookmark.saved ? "border-foreground text-foreground" : "border-border text-muted-foreground hover:text-foreground"
-              }`}
+              style={favBookmark.saved ? {
+                background: "rgba(var(--neon-rgb,100,220,100),0.12)",
+                border: "1px solid rgba(var(--neon-rgb,100,220,100),0.35)",
+                color: "var(--neon,#64dc64)",
+              } : {
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+              }}
+              className="flex items-center gap-3 w-full font-mono text-[11px] uppercase tracking-[0.25em] px-3 py-2.5 rounded-lg transition"
             >
               <Heart className={`w-4 h-4 ${favBookmark.saved ? "fill-current" : ""}`} />
               {favBookmark.saved ? "favoritado" : "favoritar"}
@@ -154,19 +196,40 @@ function MemberContentDetail() {
             <button
               onClick={watchlistBookmark.toggle}
               disabled={watchlistBookmark.loading}
-              className={`flex items-center gap-3 w-full font-mono text-[11px] uppercase tracking-[0.25em] px-3 py-2 border transition ${
-                watchlistBookmark.saved ? "border-foreground text-foreground" : "border-border text-muted-foreground hover:text-foreground"
-              }`}
+              style={watchlistBookmark.saved ? {
+                background: "rgba(var(--neon-rgb,100,220,100),0.12)",
+                border: "1px solid rgba(var(--neon-rgb,100,220,100),0.35)",
+                color: "var(--neon,#64dc64)",
+              } : {
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+              }}
+              className="flex items-center gap-3 w-full font-mono text-[11px] uppercase tracking-[0.25em] px-3 py-2.5 rounded-lg transition"
             >
               <Bookmark className={`w-4 h-4 ${watchlistBookmark.saved ? "fill-current" : ""}`} />
               {watchlistBookmark.saved ? "na watchlist" : "watchlist"}
             </button>
           </div>
 
-          {/* Access state */}
-          <div className="border border-border bg-card/40 p-5">
+          {/* Access state — glass */}
+          <div
+            style={{
+              background: assets.locked
+                ? "linear-gradient(135deg, rgba(226,75,74,0.08) 0%, rgba(226,75,74,0.03) 100%)"
+                : "linear-gradient(135deg, rgba(100,220,100,0.07) 0%, rgba(100,220,100,0.02) 100%)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              border: assets.locked
+                ? "1px solid rgba(226,75,74,0.2)"
+                : "1px solid rgba(100,220,100,0.2)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
+            }}
+            className="rounded-xl p-5"
+          >
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">estado de acesso</p>
-            <p className="mt-3 text-sm">{assets.locked ? "Arquivo protegido pelo plano." : "Acesso autenticado validado."}</p>
+            <p className="mt-3 text-sm" style={{color: assets.locked ? "rgba(226,75,74,0.9)" : "var(--neon,#64dc64)"}}>
+              {assets.locked ? "Arquivo protegido pelo plano." : "Acesso autenticado validado."}
+            </p>
             {assets.error ? <p className="mt-2 text-xs text-muted-foreground">{assets.error}</p> : null}
           </div>
 
@@ -175,7 +238,14 @@ function MemberContentDetail() {
               href={assets.primary}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center justify-center gap-2 border border-border px-4 py-3 font-mono text-[11px] uppercase tracking-[0.25em] hover:bg-accent transition"
+              style={{
+                background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.2)",
+              }}
+              className="flex items-center justify-center gap-2 rounded-xl px-4 py-3.5 font-mono text-[11px] uppercase tracking-[0.25em] hover:brightness-110 transition"
             >
               <Download className="w-4 h-4" /> abrir arquivo
             </a>
