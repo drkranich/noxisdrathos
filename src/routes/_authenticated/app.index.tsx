@@ -12,7 +12,7 @@ import {
   type RecContent,
 } from "@/lib/recommendations.functions";
 
-export const Route = createFileRoute("/_authenticated/app")({
+export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({ meta: [{ title: "Home — Observatório" }, { name: "robots", content: "noindex" }] }),
   component: HomePage,
 });
