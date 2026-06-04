@@ -38,7 +38,8 @@ function SubscriptionPage() {
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { openCheckout, checkoutElement, closeCheckout, isOpen } = useStripeCheckout();
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  // checkout via redirect — sem embedded
 
   useEffect(() => {
     if (!user) return;
@@ -104,13 +105,27 @@ function SubscriptionPage() {
     };
   }, [user]);
 
-  function startCheckout(plan: Plan) {
+  async function startCheckout(plan: Plan) {
     if (!user || !plan.stripePriceId) return;
     setError(null);
-    openCheckout({
-      priceId: plan.stripePriceId,
-      returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
-    });
+    setCheckoutLoading(plan.id);
+    try {
+      const { createCheckoutSession } = await import("@/utils/payments.functions");
+      const { getStripeEnvironment } = await import("@/lib/stripe");
+      const url = await createCheckoutSession({
+        data: {
+          priceId: plan.stripePriceId,
+          returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
+          environment: getStripeEnvironment(),
+        },
+      });
+      if (url) window.location.href = url as string;
+      else setError("Não foi possível iniciar o checkout.");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Erro ao iniciar checkout.");
+    } finally {
+      setCheckoutLoading(null);
+    }
   }
 
   async function openPortal() {
@@ -154,7 +169,7 @@ function SubscriptionPage() {
         >
           ← voltar
         </button>
-        {checkoutElement}
+
       </div>
     );
   }
@@ -218,35 +233,63 @@ function SubscriptionPage() {
           <Sparkles className="inline w-5 h-5 mr-2 text-[var(--neon)]" />
           {isActive ? "Mudar de plano" : "Planos disponíveis"}
         </h2>
-        <div className="grid md:grid-cols-3 gap-px bg-border border border-border">
+        <div className="grid md:grid-cols-3 gap-4 mt-2">
           {PLANS.map((p) => {
             const isCurrent = isActive && currentPlan?.id === p.id;
             return (
-              <div key={p.id} className={"bg-background p-8 " + (p.featured ? "ring-1 ring-[var(--neon)]/40" : "")}>
+              <div
+                key={p.id}
+                style={{
+                  background: p.featured
+                    ? "linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%)"
+                    : "rgba(255,255,255,0.03)",
+                  backdropFilter: "blur(20px)",
+                  WebkitBackdropFilter: "blur(20px)",
+                  border: p.featured
+                    ? "1px solid rgba(var(--neon-rgb,100,220,100),0.35)"
+                    : "1px solid rgba(255,255,255,0.08)",
+                  boxShadow: p.featured
+                    ? "0 0 40px rgba(var(--neon-rgb,100,220,100),0.08), inset 0 1px 0 rgba(255,255,255,0.1)"
+                    : "inset 0 1px 0 rgba(255,255,255,0.05)",
+                }}
+                className={"relative rounded-xl p-8 flex flex-col " + (isCurrent ? "ring-2 ring-[var(--neon)]/60" : "")}
+              >
+                {p.featured && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full font-mono text-[10px] uppercase tracking-[0.25em]"
+                    style={{background:"rgba(var(--neon-rgb,100,220,100),0.15)", border:"1px solid rgba(var(--neon-rgb,100,220,100),0.4)", color:"var(--neon,#64dc64)"}}>
+                    recomendado
+                  </div>
+                )}
+                {isCurrent && (
+                  <div className="absolute -top-3 right-4 px-3 py-1 rounded-full font-mono text-[10px] uppercase tracking-[0.25em] bg-[var(--neon)]/20 border border-[var(--neon)]/40 text-[var(--neon)]">
+                    ativo
+                  </div>
+                )}
                 <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{p.tag}</p>
                 <h3 className="font-display text-3xl mt-3">{p.name}</h3>
                 <p className="mt-4 font-display text-4xl">
-                  {p.price}<span className="text-muted-foreground text-base">{p.period}</span>
+                  {p.price}<span className="text-muted-foreground text-base ml-1">{p.period}</span>
                 </p>
-                <p className="mt-3 text-sm text-muted-foreground">{p.description}</p>
-                <ul className="mt-6 space-y-2">
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{p.description}</p>
+                <ul className="mt-6 space-y-2.5 flex-1">
                   {p.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
+                    <li key={f} className="flex items-start gap-2.5 text-sm">
                       <Check className="w-4 h-4 mt-0.5 shrink-0 text-[var(--neon)]" /> {f}
                     </li>
                   ))}
                 </ul>
                 <button
-                  disabled={isCurrent || !p.stripePriceId}
+                  disabled={isCurrent || !p.stripePriceId || checkoutLoading !== null}
                   onClick={() => startCheckout(p)}
-                  className={
-                    "mt-8 w-full px-4 py-3 font-mono text-[11px] uppercase tracking-[0.25em] transition " +
-                    (isCurrent
-                      ? "bg-muted text-muted-foreground cursor-default"
-                      : "bg-foreground text-background hover:opacity-90")
+                  className="mt-8 w-full px-4 py-3.5 font-mono text-[11px] uppercase tracking-[0.25em] transition rounded-lg"
+                  style={isCurrent
+                    ? {background:"rgba(255,255,255,0.06)", color:"var(--muted-foreground)", cursor:"default"}
+                    : p.featured
+                    ? {background:"rgba(var(--neon-rgb,100,220,100),0.15)", border:"1px solid rgba(var(--neon-rgb,100,220,100),0.4)", color:"var(--neon,#64dc64)"}
+                    : {background:"rgba(255,255,255,0.08)", border:"1px solid rgba(255,255,255,0.12)", color:"var(--foreground)"}
                   }
                 >
-                  {isCurrent ? "plano atual" : p.cta}
+                  {isCurrent ? "plano atual" : checkoutLoading === p.id ? "aguarde…" : p.cta}
                 </button>
               </div>
             );
