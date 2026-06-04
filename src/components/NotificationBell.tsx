@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Bell } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useNotifications } from "@/hooks/useNotifications";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,7 @@ function timeAgo(iso: string) {
 export function NotificationBell({ compact = false }: { compact?: boolean }) {
   const { items, unread, markRead, markAllRead } = useNotifications(30);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="relative">
@@ -43,7 +44,7 @@ export function NotificationBell({ compact = false }: { compact?: boolean }) {
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-40"
           />
-          <div className="absolute right-0 bottom-full mb-2 w-[360px] max-w-[92vw] max-h-[min(70vh,560px)] flex flex-col bg-card border border-border shadow-2xl z-50 backdrop-blur-xl">
+          <div className="fixed left-1/2 -translate-x-1/2 bottom-20 md:absolute md:left-auto md:translate-x-0 md:right-0 md:bottom-full md:mb-2 w-[calc(100vw-2rem)] max-w-[400px] md:w-[380px] max-h-[min(75vh,560px)] flex flex-col bg-card border border-border shadow-2xl z-50 backdrop-blur-xl rounded-xl">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
                 inbox · {unread} não lidas
@@ -88,9 +89,12 @@ export function NotificationBell({ compact = false }: { compact?: boolean }) {
                     return (
                       <li key={n.id} onClick={() => markRead(n.id)}>
                         {n.link ? (
-                          <Link to={n.link} onClick={() => setOpen(false)}>
+                          <button
+                            onClick={() => { markRead(n.id); setOpen(false); void navigate({ to: n.link as string }); }}
+                            className="block w-full text-left"
+                          >
                             {content}
-                          </Link>
+                          </button>
                         ) : (
                           content
                         )}
