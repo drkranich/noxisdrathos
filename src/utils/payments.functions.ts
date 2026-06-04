@@ -71,14 +71,14 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     const session = await stripe.checkout.sessions.create({
       line_items: [{ price: stripePrice.id, quantity: data.quantity || 1 }],
       mode: isRecurring ? "subscription" : "payment",
-      ui_mode: "embedded_page",
-      return_url: data.returnUrl,
+      success_url: data.returnUrl,
+      cancel_url: data.returnUrl.replace("{CHECKOUT_SESSION_ID}", "cancelled"),
       customer: customerId,
       metadata: { userId },
       ...(isRecurring && { subscription_data: { metadata: { userId } } }),
     });
 
-    return session.client_secret;
+    return session.url;
   });
 
 export const createPortalSession = createServerFn({ method: "POST" })
@@ -88,7 +88,7 @@ export const createPortalSession = createServerFn({ method: "POST" })
       if (typeof data.returnUrl !== "string") throw new Error("Invalid returnUrl");
       try {
         const u = new URL(data.returnUrl);
-        const allowedOrigin = typeof window !== "undefined" ? window.location.origin : process.env.VITE_SUPABASE_URL?.replace(/\/storage.*/, "") ?? "";
+        const allowedOrigin = typeof window !== "undefined" ? window.location.origin : "https://cipher-scribe-labs.lovable.app";
         if (u.protocol !== "https:" && u.protocol !== "http:") throw new Error("bad protocol");
         // Only allow same-origin return URLs
         const originOk = allowedOrigin ? u.origin === allowedOrigin : true;
