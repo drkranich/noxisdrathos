@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { getSignedUrl } from "@/lib/storage";
 import { useBookmark } from "@/hooks/useBookmark";
 import { useWatchProgress } from "@/hooks/useWatchProgress";
+import { PdfBookReader } from "@/components/PdfBookReader";
 
 export const Route = createFileRoute("/_authenticated/app/content/$slug")({
   head: () => ({ meta: [{ title: "Conteúdo — Observatório" }, { name: "robots", content: "noindex" }] }),
@@ -438,11 +439,11 @@ function MediaBlock({
     );
   }
 
-  // ── PDF — leitor imersivo via Fullscreen API ────────────────────────────
+  // ── PDF — leitor de livro com paginação horizontal ──────────────────────
   if (type === "pdf") {
     return (
       <>
-        {/* Card entrada */}
+        {/* Card de entrada */}
         <div
           style={{
             background: "rgba(255,255,255,0.03)",
@@ -459,7 +460,7 @@ function MediaBlock({
             </div>
           </div>
           <button
-            onClick={openReader}
+            onClick={() => setFullscreen(true)}
             style={{
               background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
               border: "1px solid rgba(255,255,255,0.15)",
@@ -473,79 +474,14 @@ function MediaBlock({
           </button>
         </div>
 
-        {/* Container fullscreen — invisível até ativar */}
-        <div
-          ref={containerRef}
-          style={{
-            position: fullscreen ? "fixed" : "absolute",
-            inset: 0,
-            zIndex: fullscreen ? 9999 : -1,
-            opacity: fullscreen ? 1 : 0,
-            pointerEvents: fullscreen ? "all" : "none",
-            background: "#0a0a0c",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          {/* HUD superior */}
-          {fullscreen && (
-            <div
-              style={{
-                position: "absolute", top: 0, left: 0, right: 0,
-                background: "linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, transparent 100%)",
-                padding: "16px 24px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                zIndex: 10,
-                pointerEvents: "none",
-              }}
-            >
-              <span style={{
-                fontFamily: "var(--font-mono)", fontSize: 10,
-                textTransform: "uppercase", letterSpacing: "0.3em",
-                color: "rgba(255,255,255,0.35)",
-              }}>
-                {title}
-              </span>
-              <div style={{ display: "flex", gap: 8, pointerEvents: "all" }}>
-                <a href={url} download style={{
-                  padding: "6px 12px",
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  borderRadius: 8, color: "rgba(255,255,255,0.5)",
-                  fontFamily: "var(--font-mono)", fontSize: 10,
-                  textTransform: "uppercase", letterSpacing: "0.2em",
-                  textDecoration: "none", display: "flex", alignItems: "center", gap: 6,
-                }}>
-                  <Download className="w-3 h-3" /> baixar
-                </a>
-                <button onClick={closeReader} style={{
-                  padding: "6px 14px",
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  borderRadius: 8, color: "rgba(255,255,255,0.5)",
-                  fontFamily: "var(--font-mono)", fontSize: 10,
-                  textTransform: "uppercase", letterSpacing: "0.2em", cursor: "pointer",
-                }}>
-                  fechar ×
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* PDF — página única, navegação horizontal nativa */}
-          <iframe
-            ref={iframeRef}
-            src={`${url}#toolbar=0&navpanes=0&scrollbar=0&view=Fit&pagemode=none`}
+        {/* Leitor de livro — página por página */}
+        {fullscreen && url && (
+          <PdfBookReader
+            url={url}
             title={title}
-            style={{
-              flex: 1, width: "100%", height: "100%",
-              border: "none", background: "#0a0a0c",
-            }}
-            allowFullScreen
+            onClose={() => setFullscreen(false)}
           />
-        </div>
+        )}
       </>
     );
   }
