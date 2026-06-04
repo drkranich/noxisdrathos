@@ -102,8 +102,24 @@ function SettingsPage() {
 
   // ── Assinatura ──────────────────────────────────────────────────────────
   const openBillingPortal = async () => {
+    // Verifica se há customer_id antes de tentar abrir o portal
+    if (!user) return;
     setCancelingPortal(true);
     try {
+      // Busca customer_id diretamente do banco
+      const { data: sub } = await supabase
+        .from("subscriptions")
+        .select("stripe_customer_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!sub?.stripe_customer_id) {
+        // Sem assinatura ativa — redireciona para a página de planos
+        toast.info("Nenhuma assinatura encontrada. Escolha um plano.");
+        window.location.href = "/app/subscription";
+        return;
+      }
+
       const { createPortalSession } = await import("@/utils/payments.functions");
       const { getStripeEnvironment } = await import("@/lib/stripe");
       const url = await createPortalSession({
@@ -111,8 +127,14 @@ function SettingsPage() {
       });
       if (url) window.location.href = url as string;
       else toast.error("Portal não retornou URL.");
-    } catch {
-      toast.error("Erro ao abrir portal de assinatura.");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "";
+      if (msg.includes("No subscription")) {
+        toast.info("Nenhuma assinatura ativa. Escolha um plano.");
+        window.location.href = "/app/subscription";
+      } else {
+        toast.error("Erro ao abrir portal. Tente novamente.");
+      }
     } finally {
       setCancelingPortal(false);
     }
