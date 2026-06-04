@@ -19,6 +19,7 @@ type Props = {
 export function PdfBookReader({ url, title, onClose }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const pdfRef = useRef<any>(null);
   const renderingRef = useRef(false);
 
@@ -69,53 +70,19 @@ export function PdfBookReader({ url, title, onClose }: Props) {
       if (!ctx) return;
 
       const availW = window.innerWidth - 140;
-      const availH = window.innerHeight - 110;
-
       const baseVp = pg.getViewport({ scale: 1 });
 
-      // Scale base para caber na tela, multiplicado pelo zoom do usuário
-      const baseScale = Math.min(availW / baseVp.width, availH / baseVp.height);
-      const finalScale = baseScale * sc;
-      const viewport = pg.getViewport({ scale: finalScale });
+      // Ajusta largura à tela, altura livre para o scroll
+      const scaleByWidth = (availW / baseVp.width) * sc;
+      const viewport = pg.getViewport({ scale: scaleByWidth });
 
-      // Canvas sempre do tamanho disponível — nunca muda independente do zoom
-      // O zoom apenas aumenta a resolução dentro do mesmo canvas
-      const canvasW = Math.min(viewport.width, availW);
-      const canvasH = Math.min(viewport.height, availH);
-
-      // Guarda dimensão da primeira página como referência imutável
-      if (!fixedSize.current) {
-        fixedSize.current = { w: canvasW, h: canvasH };
-      }
-
-      // Canvas sempre usa o tamanho fixo da primeira página
-      canvas.width = fixedSize.current.w;
-      canvas.height = fixedSize.current.h;
+      // Canvas cresce livremente em altura — scroll cuida do resto
+      canvas.width = Math.floor(viewport.width);
+      canvas.height = Math.floor(viewport.height);
 
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Centraliza a página renderizada no canvas fixo
-      const offsetX = Math.max(0, (canvas.width - viewport.width) / 2);
-      const offsetY = Math.max(0, (canvas.height - viewport.height) / 2);
-
-      // Se a página ficou maior que o canvas (zoom alto), corta centralizado
-      const clipX = viewport.width > canvas.width ? (viewport.width - canvas.width) / 2 : 0;
-      const clipY = viewport.height > canvas.height ? (viewport.height - canvas.height) / 2 : 0;
-
-      ctx.save();
-      if (clipX > 0 || clipY > 0) {
-        ctx.rect(0, 0, canvas.width, canvas.height);
-        ctx.clip();
-      }
-
-      await pg.render({
-        canvasContext: ctx,
-        viewport,
-        transform: [1, 0, 0, 1, offsetX - clipX, offsetY - clipY],
-      }).promise;
-
-      ctx.restore();
+      await pg.render({ canvasContext: ctx, viewport }).promise;
     } finally {
       renderingRef.current = false;
     }
@@ -148,13 +115,21 @@ export function PdfBookReader({ url, title, onClose }: Props) {
   function goNext() {
     if (page >= total) return;
     setAnimDir("left");
-    setTimeout(() => { setPage(p => p + 1); setAnimDir(null); }, 180);
+    setTimeout(() => {
+      setPage(p => p + 1);
+      setAnimDir(null);
+      if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    }, 180);
   }
 
   function goPrev() {
     if (page <= 1) return;
     setAnimDir("right");
-    setTimeout(() => { setPage(p => p - 1); setAnimDir(null); }, 180);
+    setTimeout(() => {
+      setPage(p => p - 1);
+      setAnimDir(null);
+      if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    }, 180);
   }
 
   const reader = (
@@ -250,6 +225,7 @@ export function PdfBookReader({ url, title, onClose }: Props) {
           `}</style>
 
           <div
+            ref={scrollRef}
             className="pdf-scroll-area"
             style={{
               transition: "opacity 0.22s ease, transform 0.22s ease",
