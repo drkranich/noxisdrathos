@@ -1,26 +1,50 @@
+// Stripe server utility — conecta diretamente à API do Stripe
+// sem depender do Lovable Connector Gateway (que requer créditos ativos)
 import Stripe from "stripe";
 
 export type StripeEnv = "sandbox" | "live";
 
 function getSecretKey(env: StripeEnv): string {
+  // Tenta primeiro a chave específica do ambiente
+  // depois o STRIPE_SECRET_KEY genérico (configurado nos secrets do Lovable)
   if (env === "sandbox") {
     const key = process.env.STRIPE_SANDBOX_API_KEY || process.env.STRIPE_TEST_SECRET_KEY;
     if (key) return key;
   }
-  const liveKey = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_LIVE_API_KEY;
-  if (!liveKey) throw new Error("STRIPE_SECRET_KEY não configurado.");
+  // Live: usa STRIPE_SECRET_KEY ou STRIPE_LIVE_API_KEY
+  const liveKey =
+    process.env.STRIPE_SECRET_KEY ||
+    process.env.STRIPE_LIVE_API_KEY ||
+    process.env.EXTERNAL_STRIPE_SECRET_KEY;
+
+  if (!liveKey) {
+    throw new Error(
+      "Stripe secret key not configured. Add STRIPE_SECRET_KEY to Lovable secrets."
+    );
+  }
   return liveKey;
 }
 
 export function createStripeClient(env: StripeEnv): Stripe {
-  return new Stripe(getSecretKey(env), { apiVersion: "2023-10-16" });
+  const secretKey = getSecretKey(env);
+  return new Stripe(secretKey, {
+    apiVersion: "2023-10-16",
+  });
 }
 
-export async function verifyWebhook(req: Request, env: StripeEnv) {
+export async function verifyWebhook(
+  req: Request,
+  env: StripeEnv,
+): Promise<{ type: string; data: { object: unknown } }> {
   const signature = req.headers.get("stripe-signature");
   const body = await req.text();
-  const secret = process.env.STRIPE_WEBHOOK_SECRET || "";
+  const secret =
+    env === "sandbox"
+      ? (process.env.PAYMENTS_SANDBOX_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK_SECRET || "")
+      : (process.env.PAYMENTS_LIVE_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK_SECRET || "");
+
   if (!signature || !body) throw new Error("Missing signature or body");
+
   let timestamp: string | undefined;
   const v1Signatures: string[] = [];
   for (const part of signature.split(",")) {
@@ -28,11 +52,27 @@ export async function verifyWebhook(req: Request, env: StripeEnv) {
     if (key === "t") timestamp = value;
     if (key === "v1") v1Signatures.push(value);
   }
+
   if (!timestamp || v1Signatures.length === 0) throw new Error("Invalid signature format");
-  if (Math.abs(Date.now() / 1000 - Number(timestamp)) > 300) throw new Error("Timestamp too old");
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const signed = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${timestamp}.${body}`));
+
+  const age = Math.abs(Date.now() / 1000 - Number(timestamp));
+  if (age > 300) throw new Error("Webhook timestamp too old");
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signed = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(`${timestamp}.${body}`),
+  );
   const expected = Buffer.from(new Uint8Array(signed)).toString("hex");
+
   if (!v1Signatures.includes(expected)) throw new Error("Invalid webhook signature");
+
   return JSON.parse(body);
 }
