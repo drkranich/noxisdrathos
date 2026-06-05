@@ -17,7 +17,7 @@ const ULTIMA_ATUALIZACAO = "5 de junho de 2026";
 const SECOES = [
   {
     titulo: "1. Quem somos",
-    corpo: `O Observatório é uma plataforma editorial privada operada por Noxis Drathos. Somos o controlador dos seus dados pessoais para os fins descritos nesta Política. Para contato relacionado a privacidade e proteção de dados, utilize: privado@observatorio.`,
+    corpo: `O Observatório é uma plataforma editorial privada operada por Noxis Drathos. Somos o controlador dos seus dados pessoais para os fins descritos nesta Política. Para contato relacionado a privacidade e proteção de dados, utilize: genialidadefilosofica@gmail.com.`,
   },
   {
     titulo: "2. Dados que coletamos",
@@ -80,7 +80,7 @@ Nenhum sistema é 100% seguro. Em caso de incidente que possa afetar seus direit
   },
   {
     titulo: "8. Seus direitos (art. 18 LGPD)",
-    corpo: `Como titular de dados pessoais, você tem os seguintes direitos, exercíveis a qualquer momento via e-mail para privado@observatorio:
+    corpo: `Como titular de dados pessoais, você tem os seguintes direitos, exercíveis a qualquer momento via e-mail para genialidadefilosofica@gmail.com:
 
 I. Confirmação de que seus dados são tratados.
 II. Acesso aos seus dados pessoais.
@@ -108,7 +108,7 @@ Responderemos às solicitações em até 15 dias úteis.`,
   },
   {
     titulo: "12. Contato e DPO",
-    corpo: `Para exercer seus direitos, esclarecer dúvidas ou registrar reclamações sobre o tratamento dos seus dados, entre em contato pelo e-mail: privado@observatorio.
+    corpo: `Para exercer seus direitos, esclarecer dúvidas ou registrar reclamações sobre o tratamento dos seus dados, entre em contato pelo e-mail: genialidadefilosofica@gmail.com.
 
 Caso não receba resposta satisfatória em 15 dias úteis, você tem o direito de apresentar reclamação à Autoridade Nacional de Proteção de Dados (ANPD) através do portal gov.br/anpd.`,
   },
