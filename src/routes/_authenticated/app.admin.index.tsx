@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
-export const Route = createFileRoute("/_authenticated/app/admin/")({
+export const Route = createFileRoute("/_authenticated/app/admin")({
   component: AdminDashboard,
 });
 
