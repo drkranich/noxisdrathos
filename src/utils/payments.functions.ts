@@ -63,6 +63,9 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     const stripePrice = prices.data[0];
     const isRecurring = stripePrice.type === "recurring";
 
+    // PIX só está disponível em BRL — verificamos a moeda do price
+    const isBrl = stripePrice.currency === "brl";
+
     const customerId = await resolveOrCreateCustomer(stripe, {
       email: customerEmail,
       userId,
@@ -71,6 +74,19 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     const session = await stripe.checkout.sessions.create({
       line_items: [{ price: stripePrice.id, quantity: data.quantity || 1 }],
       mode: isRecurring ? "subscription" : "payment",
+
+      // Aceita cartão + PIX quando a moeda for BRL.
+      // Para planos mensais, Stripe gera um novo código PIX a cada fatura
+      // e notifica o assinante por e-mail — padrão no mercado brasileiro.
+      payment_method_types: isBrl ? ["card", "pix"] : ["card"],
+
+      // PIX expira em 24h — padrão máximo permitido pelo Banco Central
+      ...(isBrl && {
+        payment_method_options: {
+          pix: { expires_after_seconds: 86400 },
+        },
+      }),
+
       success_url: data.returnUrl,
       cancel_url: data.returnUrl.replace("{CHECKOUT_SESSION_ID}", "cancelled"),
       customer: customerId,
@@ -90,7 +106,6 @@ export const createPortalSession = createServerFn({ method: "POST" })
         const u = new URL(data.returnUrl);
         const allowedOrigin = typeof window !== "undefined" ? window.location.origin : "https://cipher-scribe-labs.lovable.app";
         if (u.protocol !== "https:" && u.protocol !== "http:") throw new Error("bad protocol");
-        // Only allow same-origin return URLs
         const originOk = allowedOrigin ? u.origin === allowedOrigin : true;
         if (!originOk) throw new Error("returnUrl must point to the same origin");
       } catch (e: unknown) {
