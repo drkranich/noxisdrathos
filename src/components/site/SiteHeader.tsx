@@ -87,9 +87,23 @@ export function SiteFooter() {
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
             edição 014 · volume privado
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            © {new Date().getFullYear()} observatório
-          </p>
+          <div className="flex items-center gap-6">
+            <Link
+              to="/privacidade"
+              className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              privacidade
+            </Link>
+            <Link
+              to="/termos"
+              className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              termos
+            </Link>
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+              © {new Date().getFullYear()} observatório
+            </p>
+          </div>
         </div>
       </div>
     </footer>
