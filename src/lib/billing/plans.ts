@@ -11,9 +11,7 @@ export type Plan = {
   features: string[];
   cta: string;
   featured?: boolean;
-  // populated when provider is connected
   stripePriceId?: string;
-  pixEnabled?: boolean;
 };
 
 export const PLANS: Plan[] = [
