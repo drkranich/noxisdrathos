@@ -37,9 +37,9 @@ function AnnouncementsPage() {
 
   async function loadData() {
     const [{ data: broadcasts }, { count: members }, { count: telegram }] = await Promise.all([
-      supabase.from("broadcasts").select("*").order("created_at", { ascending: false }).limit(30),
+      (supabase as any).from("broadcasts").select("*").order("created_at", { ascending: false }).limit(30),
       supabase.from("profiles").select("*", { count: "exact", head: true }),
-      supabase.from("profiles").select("*", { count: "exact", head: true }).not("telegram_chat_id", "is", null),
+      (supabase as any).from("profiles").select("*", { count: "exact", head: true }).not("telegram_chat_id", "is", null),
     ]);
     setHistory((broadcasts ?? []) as Broadcast[]);
     setMemberCount(members ?? 0);

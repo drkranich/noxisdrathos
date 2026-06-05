@@ -9,9 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TurnstileSignupRouteImport } from './routes/turnstile-signup'
+import { Route as TurnstileLoginRouteImport } from './routes/turnstile-login'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ResearchRouteImport } from './routes/research'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ManifestoRouteImport } from './routes/manifesto'
 import { Route as LoginRouteImport } from './routes/login'
@@ -57,6 +61,21 @@ import { Route as AuthenticatedAppAdminContentNewRouteImport } from './routes/_a
 import { Route as AuthenticatedAppAdminContentIdRouteImport } from './routes/_authenticated/app.admin.content.$id'
 import { Route as AuthenticatedAppAdminContentEditIdRouteImport } from './routes/_authenticated/app.admin.content.edit.$id'
 
+const TurnstileSignupRoute = TurnstileSignupRouteImport.update({
+  id: '/turnstile-signup',
+  path: '/turnstile-signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TurnstileLoginRoute = TurnstileLoginRouteImport.update({
+  id: '/turnstile-login',
+  path: '/turnstile-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -70,6 +89,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const ResearchRoute = ResearchRouteImport.update({
   id: '/research',
   path: '/research',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -325,9 +349,13 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/manifesto': typeof ManifestoRoute
   '/pricing': typeof PricingRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/research': typeof ResearchRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/termos': typeof TermosRoute
+  '/turnstile-login': typeof TurnstileLoginRoute
+  '/turnstile-signup': typeof TurnstileSignupRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/checkout/return': typeof CheckoutReturnRoute
   '/explore/$slug': typeof ExploreSlugRoute
@@ -373,9 +401,13 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/manifesto': typeof ManifestoRoute
   '/pricing': typeof PricingRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/research': typeof ResearchRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/termos': typeof TermosRoute
+  '/turnstile-login': typeof TurnstileLoginRoute
+  '/turnstile-signup': typeof TurnstileSignupRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/explore/$slug': typeof ExploreSlugRoute
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
@@ -421,9 +453,13 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/manifesto': typeof ManifestoRoute
   '/pricing': typeof PricingRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/research': typeof ResearchRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/termos': typeof TermosRoute
+  '/turnstile-login': typeof TurnstileLoginRoute
+  '/turnstile-signup': typeof TurnstileSignupRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/checkout/return': typeof CheckoutReturnRoute
   '/explore/$slug': typeof ExploreSlugRoute
@@ -471,9 +507,13 @@ export interface FileRouteTypes {
     | '/login'
     | '/manifesto'
     | '/pricing'
+    | '/privacidade'
     | '/research'
     | '/reset-password'
     | '/signup'
+    | '/termos'
+    | '/turnstile-login'
+    | '/turnstile-signup'
     | '/app'
     | '/checkout/return'
     | '/explore/$slug'
@@ -519,9 +559,13 @@ export interface FileRouteTypes {
     | '/login'
     | '/manifesto'
     | '/pricing'
+    | '/privacidade'
     | '/research'
     | '/reset-password'
     | '/signup'
+    | '/termos'
+    | '/turnstile-login'
+    | '/turnstile-signup'
     | '/checkout/return'
     | '/explore/$slug'
     | '/app/agenda'
@@ -566,9 +610,13 @@ export interface FileRouteTypes {
     | '/login'
     | '/manifesto'
     | '/pricing'
+    | '/privacidade'
     | '/research'
     | '/reset-password'
     | '/signup'
+    | '/termos'
+    | '/turnstile-login'
+    | '/turnstile-signup'
     | '/_authenticated/app'
     | '/checkout/return'
     | '/explore/$slug'
@@ -616,15 +664,40 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ManifestoRoute: typeof ManifestoRoute
   PricingRoute: typeof PricingRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
   ResearchRoute: typeof ResearchRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  TermosRoute: typeof TermosRoute
+  TurnstileLoginRoute: typeof TurnstileLoginRoute
+  TurnstileSignupRoute: typeof TurnstileSignupRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/turnstile-signup': {
+      id: '/turnstile-signup'
+      path: '/turnstile-signup'
+      fullPath: '/turnstile-signup'
+      preLoaderRoute: typeof TurnstileSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/turnstile-login': {
+      id: '/turnstile-login'
+      path: '/turnstile-login'
+      fullPath: '/turnstile-login'
+      preLoaderRoute: typeof TurnstileLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -644,6 +717,13 @@ declare module '@tanstack/react-router' {
       path: '/research'
       fullPath: '/research'
       preLoaderRoute: typeof ResearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -1077,12 +1157,26 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ManifestoRoute: ManifestoRoute,
   PricingRoute: PricingRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
   ResearchRoute: ResearchRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  TermosRoute: TermosRoute,
+  TurnstileLoginRoute: TurnstileLoginRoute,
+  TurnstileSignupRoute: TurnstileSignupRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

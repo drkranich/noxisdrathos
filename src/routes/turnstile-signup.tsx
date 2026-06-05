@@ -2,12 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthLayout } from "@/components/auth/AuthLayout";
-import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 
-export const Route = createFileRoute("/signup")({
+export const Route = createFileRoute("/turnstile-signup")({
   head: () => ({
     meta: [
       { title: "Solicitar acesso — Observatório" },
@@ -65,7 +65,7 @@ function SignupPage() {
 
     // Salva preferência de canal no profile (criado pelo trigger)
     if (channel !== "none" && data?.user?.id) {
-      await supabase.from("profiles").update({
+      await (supabase as any).from("profiles").update({
         contact_channel: channel,
         contact_opt_in: true,
       }).eq("id", data.user.id);

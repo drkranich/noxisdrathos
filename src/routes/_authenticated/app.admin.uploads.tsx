@@ -26,7 +26,7 @@ function UploadsPage() {
 
   async function loadAssets() {
     setLoadingAssets(true);
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("media_assets")
       .select("id,name,storage_path,bucket,created_at,size_bytes")
       .order("created_at", { ascending: false })
@@ -72,7 +72,7 @@ function UploadsPage() {
           onProgress: (progress) => setUploads((u) => u.map((x) => x.name === file.name ? { ...x, progress } : x))
         });
         // Registra em media_assets
-        await supabase.from("media_assets").insert({
+        await (supabase as any).from("media_assets").insert({
           name: file.name,
           storage_path: asset.path,
           bucket,

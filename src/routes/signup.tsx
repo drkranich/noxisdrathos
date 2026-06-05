@@ -36,7 +36,7 @@ function SignupPage() {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -50,7 +50,7 @@ function SignupPage() {
     } else {
       // Salva preferência de canal no profile (criado pelo trigger)
       if (channel !== "none" && data?.user?.id) {
-        await supabase.from("profiles").update({
+        await (supabase as any).from("profiles").update({
           contact_channel: channel,
           contact_opt_in: true,
         }).eq("id", data.user.id);

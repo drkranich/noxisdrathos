@@ -28,7 +28,7 @@ function getSecretKey(env: StripeEnv): string {
 export function createStripeClient(env: StripeEnv): Stripe {
   const secretKey = getSecretKey(env);
   return new Stripe(secretKey, {
-    apiVersion: "2023-10-16",
+    apiVersion: "2026-03-25.dahlia",
   });
 }
 
