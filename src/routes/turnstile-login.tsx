@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 
-export const Route = createFileRoute("/login")({
+export const Route = createFileRoute("/turnstile-login")({
   head: () => ({
     meta: [
       { title: "Entrar — Observatório" },
