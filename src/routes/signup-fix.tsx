@@ -51,7 +51,7 @@ function useTurnstile(onToken: (t: string) => void, onExpire: () => void) {
   return ref;
 }
 
-export const Route = createFileRoute("/signup")({
+export const Route = createFileRoute("/signup-fix")({
   head: () => ({
     meta: [
       { title: "Solicitar acesso — Observatório" },
