@@ -42,7 +42,7 @@ function CommunityPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   async function fetchComments(cancelled: { v: boolean }) {
-    const { data: cm } = await supabase
+    const { data: cm } = await (supabase as any)
       .from("comments")
       .select("id,body,created_at,user_id,content_id,hidden,is_hidden,scheduled_at")
       .eq("is_hidden", false)
@@ -102,7 +102,7 @@ function CommunityPage() {
     };
     if (scheduledAt) payload.scheduled_at = new Date(scheduledAt).toISOString();
 
-    const { error } = await supabase.from("comments").insert(payload);
+    const { error } = await (supabase as any).from("comments").insert(payload);
     setSending(false);
     if (error) {
       setSendError(error.message);

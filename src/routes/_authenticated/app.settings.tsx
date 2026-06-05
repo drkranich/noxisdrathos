@@ -43,7 +43,7 @@ function SettingsPage() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles")
+    (supabase as any).from("profiles")
       .select("display_name,bio,avatar_url,signal_phone,contact_channel,telegram_chat_id")
       .eq("id", user.id).maybeSingle()
       .then(({ data }) => {
@@ -143,7 +143,7 @@ function SettingsPage() {
   // ── Canais ──────────────────────────────────────────────────────────────
   const generateTelegramToken = async () => {
     if (!user) return;
-    const { data } = await supabase.from("telegram_link_tokens")
+    const { data } = await (supabase as any).from("telegram_link_tokens")
       .insert({ user_id: user.id }).select("token").single();
     if (data?.token) setTelegramToken(data.token);
   };
@@ -151,7 +151,7 @@ function SettingsPage() {
   const disconnectTelegram = async () => {
     if (!user) return;
     setDisconnectingTelegram(true);
-    await supabase.from("profiles").update({ telegram_chat_id: null, telegram_username: null }).eq("id", user.id);
+    await (supabase as any).from("profiles").update({ telegram_chat_id: null, telegram_username: null }).eq("id", user.id);
     setTelegramConnected(false); setTelegramToken(null);
     setDisconnectingTelegram(false);
     toast.success("Telegram desconectado.");
@@ -160,7 +160,7 @@ function SettingsPage() {
   const saveContactPrefs = async () => {
     if (!user) return;
     setSavingContact(true);
-    await supabase.from("profiles").update({
+    await (supabase as any).from("profiles").update({
       signal_phone: signalPhone || null,
       contact_channel: contactChannel,
       contact_opt_in: contactChannel !== "none",

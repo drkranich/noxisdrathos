@@ -43,7 +43,7 @@ function AdminMembers() {
   async function load() {
     setLoading(true);
     const [{ data: profiles }, { data: roles }, { data: memberships }] = await Promise.all([
-      supabase.from("profiles_with_email").select("id,display_name,bio,created_at,suspended_at,telegram_chat_id,telegram_username,signal_phone,contact_channel,contact_opt_in,email").order("created_at", { ascending: false }),
+      (supabase as any).from("profiles_with_email").select("id,display_name,bio,created_at,suspended_at,telegram_chat_id,telegram_username,signal_phone,contact_channel,contact_opt_in,email").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id,role"),
       supabase.from("memberships").select("user_id,plan,status"),
     ]);
