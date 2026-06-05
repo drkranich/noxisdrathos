@@ -46,7 +46,7 @@ function SettingsPage() {
     (supabase as any).from("profiles")
       .select("display_name,bio,avatar_url,signal_phone,contact_channel,telegram_chat_id")
       .eq("id", user.id).maybeSingle()
-      .then(({ data }) => {
+      .then(({ data }: { data: any }) => {
         if (data?.display_name) setDisplayName(data.display_name);
         if (data?.bio) setBio(data.bio);
         if (data?.avatar_url) setAvatarUrl(data.avatar_url);
