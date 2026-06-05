@@ -91,7 +91,7 @@ export const createPortalSession = createServerFn({ method: "POST" })
         const allowedOrigin =
           typeof window !== "undefined"
             ? window.location.origin
-            : "https://cipher-scribe-labs.lovable.app";
+            : "https://noxisdrathos.com";
         if (u.protocol !== "https:" && u.protocol !== "http:") throw new Error("bad protocol");
         const originOk = allowedOrigin ? u.origin === allowedOrigin : true;
         if (!originOk) throw new Error("returnUrl must point to the same origin");
