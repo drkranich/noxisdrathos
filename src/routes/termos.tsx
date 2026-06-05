@@ -46,7 +46,7 @@ O cadastro por menores de 18 anos é expressamente proibido. Contas identificada
 
 • Manter a confidencialidade de suas credenciais de acesso.
 • Todas as atividades realizadas com sua conta.
-• Notificar imediatamente o Observatório em caso de uso não autorizado da sua conta via privado@observatorio.
+• Notificar imediatamente o Observatório em caso de uso não autorizado da sua conta via genialidadefilosofica@gmail.com.
 
 É proibido compartilhar suas credenciais de acesso com terceiros. A plataforma possui sistemas de detecção de acesso simultâneo de múltiplos dispositivos. O compartilhamento indevido pode resultar em suspensão ou encerramento da conta sem reembolso.`,
   },
@@ -64,7 +64,7 @@ Os preços podem ser ajustados com aviso prévio de 30 dias por e-mail. Assinant
   },
   {
     titulo: "6. Cancelamento e reembolso",
-    corpo: `Você pode cancelar sua assinatura a qualquer momento através da área do assinante ou por e-mail em privado@observatorio.
+    corpo: `Você pode cancelar sua assinatura a qualquer momento através da área do assinante ou por e-mail em genialidadefilosofica@gmail.com.
 
 Janela de cancelamento com reembolso integral: 30 dias corridos a partir da data da contratação ou renovação, sem necessidade de justificativa ("janela silenciosa"). Após esse prazo, não há reembolso proporcional por período não utilizado.
 
@@ -126,7 +126,7 @@ Antes de qualquer medida judicial, as partes comprometem-se a buscar solução a
   },
   {
     titulo: "13. Contato",
-    corpo: `Para dúvidas, reclamações ou exercício de direitos relacionados a estes Termos, entre em contato via: privado@observatorio.
+    corpo: `Para dúvidas, reclamações ou exercício de direitos relacionados a estes Termos, entre em contato via: genialidadefilosofica@gmail.com.
 
 Para questões de proteção de dados, consulte nossa Política de Privacidade.`,
   },
