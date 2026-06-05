@@ -60,7 +60,7 @@ function PricingPage() {
           ))}
         </div>
         <p className="mt-10 max-w-2xl font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-          pagamento processado em ambiente seguro · cartão internacional · pix em breve · 30 dias de janela silenciosa para cancelamento
+          pagamento processado em ambiente seguro · cartão internacional · pix · 30 dias de janela silenciosa para cancelamento
         </p>
       </section>
     </PublicShell>
