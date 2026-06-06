@@ -368,7 +368,7 @@ function Footer() {
           <div className="col-span-6 md:col-span-2">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">contato</p>
             <ul className="mt-6 space-y-3 font-mono text-[11px] uppercase tracking-[0.28em]">
-              <li>privado@observatorio</li>
+              <li>genialidadefilosofica@gmail.com</li>
               <li>somente convidados</li>
             </ul>
           </div>
